@@ -1,0 +1,1393 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
+}
+
+/* Logo Hover Effects */
+.hover\:rotate-360:hover {
+  transform: rotate(360deg);
+}
+
+/* Disco Mode Effects */
+.disco-mode {
+  animation: discoBackground 2s infinite;
+}
+
+.disco-mode * {
+  animation: discoShake 0.5s infinite alternate;
+}
+
+.disco-mode button {
+  animation: discoButton 1s infinite alternate !important;
+}
+
+.disco-mode .bg-indigo-900,
+.disco-mode .bg-purple-900,
+.disco-mode .bg-blue-900,
+.disco-mode .bg-yellow-900,
+.disco-mode .bg-green-900,
+.disco-mode .bg-pink-900,
+.disco-mode .bg-fuchsia-900,
+.disco-mode .bg-cyan-900,
+.disco-mode .bg-emerald-900,
+.disco-mode .bg-gray-900 {
+  animation: discoCard 3s infinite !important;
+}
+
+/* Enhanced Cat-Themed Pookie Mode Effects */
+.pookie-mode {
+  background: linear-gradient(135deg, #ffe6f2, #ffd6e7, #e6f3ff, #ffe6f2, #ffd6e7, #e6f3ff) !important;
+  background-size: 300% 300% !important;
+  animation: pookieBackground 20s ease-in-out infinite !important;
+  position: relative;
+  overflow-x: hidden;
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="%23ff69b4"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>') 12 12, auto;
+}
+
+/* Enhanced background glow effect */
+.pookie-mode::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    radial-gradient(circle at 20% 80%, rgba(255, 182, 193, 0.2) 0%, transparent 40%),
+    radial-gradient(circle at 80% 20%, rgba(255, 105, 180, 0.2) 0%, transparent 40%),
+    radial-gradient(circle at 40% 40%, rgba(255, 182, 193, 0.15) 0%, transparent 40%);
+  pointer-events: none;
+  z-index: 1;
+  animation: pookieGlow 15s ease-in-out infinite;
+}
+
+/* Cat mascots - using diverse cat emojis */
+.pookie-mode::after {
+  content: '😺';
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  font-size: 3rem;
+  animation: pookieCat 3s ease-in-out infinite;
+  z-index: 1000;
+  pointer-events: none;
+  filter: drop-shadow(0 0 10px rgba(255, 105, 180, 0.5));
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.pookie-mode::after:hover {
+  transform: scale(1.2) rotate(5deg);
+  filter: drop-shadow(0 0 15px rgba(255, 105, 180, 0.8));
+}
+
+/* Interactive paw prints */
+.pookie-mode .paw-prints {
+  content: '🐾';
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  font-size: 2rem;
+  animation: pookiePaw 2s ease-in-out infinite;
+  z-index: 1000;
+  pointer-events: none;
+  filter: drop-shadow(0 0 8px rgba(255, 105, 180, 0.4));
+}
+
+/* New interactive elements */
+.pookie-mode .music-notes {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 4rem;
+  z-index: 999;
+  pointer-events: none;
+  animation: musicFloat 4s ease-in-out infinite;
+  opacity: 0.3;
+}
+
+.pookie-mode .heart-rain {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 997;
+  font-size: 1rem;
+  animation: heartRain 10s linear infinite;
+  opacity: 0.4;
+}
+
+/* Floating Sparkles */
+.pookie-mode .sparkles {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 999;
+  font-size: 1.2rem;
+  animation: sparkles 8s linear infinite;
+  opacity: 0.6;
+}
+
+.pookie-mode .sparkles::before {
+  content: '✨ ⭐ 🌟 💫 ✨';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  animation: sparkles 8s linear infinite;
+}
+
+/* Cat-themed floating elements with diverse emojis */
+.pookie-mode .cat-hearts {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 998;
+  font-size: 1.5rem;
+  opacity: 0.7;
+}
+
+/* Multiple floating emoji elements with different positions and timings */
+.pookie-mode .cat-hearts::before {
+  content: '😻';
+  position: absolute;
+  top: 10%;
+  left: 15%;
+  animation: floatingHearts1 12s linear infinite;
+}
+
+.pookie-mode .cat-hearts::after {
+  content: '🐱';
+  position: absolute;
+  top: 25%;
+  right: 20%;
+  animation: floatingHearts2 15s linear infinite;
+}
+
+/* Additional floating elements using pseudo-elements on body */
+.pookie-mode .floating-emoji-1 {
+  content: '🐈';
+  position: fixed;
+  top: 40%;
+  left: 10%;
+  font-size: 1.5rem;
+  pointer-events: none;
+  z-index: 998;
+  animation: floatingHearts3 18s linear infinite;
+  opacity: 0.7;
+}
+
+.pookie-mode .floating-emoji-2 {
+  content: '🐈‍⬛';
+  position: fixed;
+  top: 60%;
+  right: 15%;
+  font-size: 1.5rem;
+  pointer-events: none;
+  z-index: 998;
+  animation: floatingHearts4 14s linear infinite;
+  opacity: 0.7;
+}
+
+.pookie-mode .floating-emoji-3 {
+  content: '😸';
+  position: fixed;
+  top: 80%;
+  left: 25%;
+  font-size: 1.5rem;
+  pointer-events: none;
+  z-index: 998;
+  animation: floatingHearts5 16s linear infinite;
+  opacity: 0.7;
+}
+
+.pookie-mode .floating-emoji-4 {
+  content: '🎀';
+  position: fixed;
+  top: 15%;
+  left: 60%;
+  font-size: 1.5rem;
+  pointer-events: none;
+  z-index: 998;
+  animation: floatingHearts6 13s linear infinite;
+  opacity: 0.7;
+}
+
+.pookie-mode .floating-emoji-5 {
+  content: '🧶';
+  position: fixed;
+  top: 70%;
+  left: 70%;
+  font-size: 1.5rem;
+  pointer-events: none;
+  z-index: 998;
+  animation: floatingHearts7 17s linear infinite;
+  opacity: 0.7;
+}
+
+.pookie-mode .floating-emoji-6 {
+  content: '🐟';
+  position: fixed;
+  top: 30%;
+  left: 80%;
+  font-size: 1.5rem;
+  pointer-events: none;
+  z-index: 998;
+  animation: floatingHearts8 19s linear infinite;
+  opacity: 0.7;
+}
+
+.pookie-mode .floating-emoji-7 {
+  content: '🐠';
+  position: fixed;
+  top: 85%;
+  right: 30%;
+  font-size: 1.5rem;
+  pointer-events: none;
+  z-index: 998;
+  animation: floatingHearts9 11s linear infinite;
+  opacity: 0.7;
+}
+
+.pookie-mode .floating-emoji-8 {
+  content: '🐡';
+  position: fixed;
+  top: 45%;
+  right: 5%;
+  font-size: 1.5rem;
+  pointer-events: none;
+  z-index: 998;
+  animation: floatingHearts10 20s linear infinite;
+  opacity: 0.7;
+}
+
+.pookie-mode .floating-emoji-9 {
+  content: '🪺';
+  position: fixed;
+  top: 5%;
+  right: 60%;
+  font-size: 1.5rem;
+  pointer-events: none;
+  z-index: 998;
+  animation: floatingHearts11 22s linear infinite;
+  opacity: 0.7;
+}
+
+.pookie-mode .floating-emoji-10 {
+  content: '💕';
+  position: fixed;
+  top: 55%;
+  left: 45%;
+  font-size: 1.5rem;
+  pointer-events: none;
+  z-index: 998;
+  animation: floatingHearts12 21s linear infinite;
+  opacity: 0.7;
+}
+
+.pookie-mode .floating-emoji-11 {
+  content: '💖';
+  position: fixed;
+  top: 20%;
+  left: 85%;
+  font-size: 1.5rem;
+  pointer-events: none;
+  z-index: 998;
+  animation: floatingHearts13 23s linear infinite;
+  opacity: 0.7;
+}
+
+.pookie-mode .floating-emoji-12 {
+  content: '💝';
+  position: fixed;
+  top: 75%;
+  right: 5%;
+  font-size: 1.5rem;
+  pointer-events: none;
+  z-index: 998;
+  animation: floatingHearts14 25s linear infinite;
+  opacity: 0.7;
+}
+
+.pookie-mode .floating-emoji-13 {
+  content: '✨';
+  position: fixed;
+  top: 80%;
+  right: 15%;
+  font-size: 1.5rem;
+  pointer-events: none;
+  z-index: 998;
+  animation: floatingHearts15 26s linear infinite;
+  opacity: 0.7;
+}
+
+.pookie-mode .floating-emoji-14 {
+  content: '🌟';
+  position: fixed;
+  top: 70%;
+  right: 25%;
+  font-size: 1.5rem;
+  pointer-events: none;
+  z-index: 998;
+  animation: floatingHearts16 27s linear infinite;
+  opacity: 0.7;
+}
+
+.pookie-mode .floating-emoji-15 {
+  content: '💫';
+  position: fixed;
+  top: 85%;
+  right: 35%;
+  font-size: 1.5rem;
+  pointer-events: none;
+  z-index: 998;
+  animation: floatingHearts17 28s linear infinite;
+  opacity: 0.7;
+}
+
+.pookie-mode .floating-emoji-16 {
+  content: '🌸';
+  position: fixed;
+  top: 65%;
+  right: 45%;
+  font-size: 1.5rem;
+  pointer-events: none;
+  z-index: 998;
+  animation: floatingHearts18 29s linear infinite;
+  opacity: 0.7;
+}
+
+.pookie-mode .floating-emoji-17 {
+  content: '🌺';
+  position: fixed;
+  top: 90%;
+  right: 55%;
+  font-size: 1.5rem;
+  pointer-events: none;
+  z-index: 998;
+  animation: floatingHearts19 30s linear infinite;
+  opacity: 0.7;
+}
+
+.pookie-mode .floating-emoji-18 {
+  content: '🌷';
+  position: fixed;
+  top: 60%;
+  right: 65%;
+  font-size: 1.5rem;
+  pointer-events: none;
+  z-index: 998;
+  animation: floatingHearts20 31s linear infinite;
+  opacity: 0.7;
+}
+
+/* Diverse floating animations with different paths */
+@keyframes floatingHearts1 {
+  0% { transform: translateY(100vh) translateX(0) rotate(0deg); opacity: 0; }
+  10% { opacity: 0.7; }
+  90% { opacity: 0.7; }
+  100% { transform: translateY(-100px) translateX(50px) rotate(360deg); opacity: 0; }
+}
+
+@keyframes floatingHearts2 {
+  0% { transform: translateY(100vh) translateX(0) rotate(0deg); opacity: 0; }
+  15% { opacity: 0.7; }
+  85% { opacity: 0.7; }
+  100% { transform: translateY(-100px) translateX(-30px) rotate(-360deg); opacity: 0; }
+}
+
+@keyframes floatingHearts3 {
+  0% { transform: translateY(100vh) translateX(0) rotate(0deg); opacity: 0; }
+  20% { opacity: 0.7; }
+  80% { opacity: 0.7; }
+  100% { transform: translateY(-100px) translateX(80px) rotate(180deg); opacity: 0; }
+}
+
+@keyframes floatingHearts4 {
+  0% { transform: translateY(100vh) translateX(0) rotate(0deg); opacity: 0; }
+  12% { opacity: 0.7; }
+  88% { opacity: 0.7; }
+  100% { transform: translateY(-100px) translateX(-60px) rotate(-180deg); opacity: 0; }
+}
+
+@keyframes floatingHearts5 {
+  0% { transform: translateY(100vh) translateX(0) rotate(0deg); opacity: 0; }
+  18% { opacity: 0.7; }
+  82% { opacity: 0.7; }
+  100% { transform: translateY(-100px) translateX(40px) rotate(270deg); opacity: 0; }
+}
+
+@keyframes floatingHearts6 {
+  0% { transform: translateY(100vh) translateX(0) rotate(0deg); opacity: 0; }
+  14% { opacity: 0.7; }
+  86% { opacity: 0.7; }
+  100% { transform: translateY(-100px) translateX(-40px) rotate(-270deg); opacity: 0; }
+}
+
+@keyframes floatingHearts7 {
+  0% { transform: translateY(100vh) translateX(0) rotate(0deg); opacity: 0; }
+  16% { opacity: 0.7; }
+  84% { opacity: 0.7; }
+  100% { transform: translateY(-100px) translateX(70px) rotate(90deg); opacity: 0; }
+}
+
+@keyframes floatingHearts8 {
+  0% { transform: translateY(100vh) translateX(0) rotate(0deg); opacity: 0; }
+  22% { opacity: 0.7; }
+  78% { opacity: 0.7; }
+  100% { transform: translateY(-100px) translateX(-70px) rotate(-90deg); opacity: 0; }
+}
+
+@keyframes floatingHearts9 {
+  0% { transform: translateY(100vh) translateX(0) rotate(0deg); opacity: 0; }
+  11% { opacity: 0.7; }
+  89% { opacity: 0.7; }
+  100% { transform: translateY(-100px) translateX(60px) rotate(450deg); opacity: 0; }
+}
+
+@keyframes floatingHearts10 {
+  0% { transform: translateY(100vh) translateX(0) rotate(0deg); opacity: 0; }
+  25% { opacity: 0.7; }
+  75% { opacity: 0.7; }
+  100% { transform: translateY(-100px) translateX(-50px) rotate(-450deg); opacity: 0; }
+}
+
+@keyframes floatingHearts11 {
+  0% { transform: translateY(100vh) translateX(0) rotate(0deg); opacity: 0; }
+  8% { opacity: 0.7; }
+  92% { opacity: 0.7; }
+  100% { transform: translateY(-100px) translateX(30px) rotate(540deg); opacity: 0; }
+}
+
+@keyframes floatingHearts12 {
+  0% { transform: translateY(100vh) translateX(0) rotate(0deg); opacity: 0; }
+  19% { opacity: 0.7; }
+  81% { opacity: 0.7; }
+  100% { transform: translateY(-100px) translateX(-80px) rotate(-540deg); opacity: 0; }
+}
+
+@keyframes floatingHearts13 {
+  0% { transform: translateY(100vh) translateX(0) rotate(0deg); opacity: 0; }
+  13% { opacity: 0.7; }
+  87% { opacity: 0.7; }
+  100% { transform: translateY(-100px) translateX(90px) rotate(630deg); opacity: 0; }
+}
+
+@keyframes floatingHearts14 {
+  0% { transform: translateY(100vh) translateX(0) rotate(0deg); opacity: 0; }
+  17% { opacity: 0.7; }
+  83% { opacity: 0.7; }
+  100% { transform: translateY(-100px) translateX(-90px) rotate(-630deg); opacity: 0; }
+}
+
+@keyframes floatingHearts15 {
+  0% { transform: translateY(100vh) translateX(0) rotate(0deg); opacity: 0; }
+  21% { opacity: 0.7; }
+  79% { opacity: 0.7; }
+  100% { transform: translateY(-100px) translateX(100px) rotate(720deg); opacity: 0; }
+}
+
+@keyframes floatingHearts16 {
+  0% { transform: translateY(100vh) translateX(0) rotate(0deg); opacity: 0; }
+  24% { opacity: 0.7; }
+  76% { opacity: 0.7; }
+  100% { transform: translateY(-100px) translateX(-100px) rotate(-720deg); opacity: 0; }
+}
+
+@keyframes floatingHearts17 {
+  0% { transform: translateY(100vh) translateX(0) rotate(0deg); opacity: 0; }
+  26% { opacity: 0.7; }
+  74% { opacity: 0.7; }
+  100% { transform: translateY(-100px) translateX(110px) rotate(810deg); opacity: 0; }
+}
+
+@keyframes floatingHearts18 {
+  0% { transform: translateY(100vh) translateX(0) rotate(0deg); opacity: 0; }
+  29% { opacity: 0.7; }
+  71% { opacity: 0.7; }
+  100% { transform: translateY(-100px) translateX(-110px) rotate(-810deg); opacity: 0; }
+}
+
+@keyframes floatingHearts19 {
+  0% { transform: translateY(100vh) translateX(0) rotate(0deg); opacity: 0; }
+  32% { opacity: 0.7; }
+  68% { opacity: 0.7; }
+  100% { transform: translateY(-100px) translateX(120px) rotate(900deg); opacity: 0; }
+}
+
+@keyframes floatingHearts20 {
+  0% { transform: translateY(100vh) translateX(0) rotate(0deg); opacity: 0; }
+  35% { opacity: 0.7; }
+  65% { opacity: 0.7; }
+  100% { transform: translateY(-100px) translateX(-120px) rotate(-900deg); opacity: 0; }
+}
+
+.pookie-mode * {
+  font-family: 'Comic Sans MS', 'Chalkboard SE', 'Marker Felt', cursive, sans-serif !important;
+}
+
+/* Only buttons and specific images get floating animation */
+.pookie-mode button {
+  animation: pookieBounce 2s ease-in-out infinite !important;
+  background: linear-gradient(45deg, #ff69b4, #ff1493, #ff69b4, #ffb6c1) !important;
+  background-size: 200% 200% !important;
+  border: 3px solid #ff1493 !important;
+  box-shadow: 0 0 20px #ff69b4, 0 0 40px rgba(255, 105, 180, 0.3) !important;
+  animation: pookieBounce 2s ease-in-out infinite, pookieGradient 3s ease-in-out infinite !important;
+  transform-origin: center !important;
+}
+
+.pookie-mode button:hover {
+  animation: pookieBounce 1s ease-in-out infinite, pookieGradient 2s ease-in-out infinite, pookieGlow 1s ease-in-out infinite !important;
+  box-shadow: 0 0 30px #ff69b4, 0 0 60px rgba(255, 105, 180, 0.5) !important;
+}
+
+/* Only SonicMirror logo and specific images get floating */
+.pookie-mode img[src*="1.jpeg"],
+.pookie-mode img[src*="2.jpeg"],
+.pookie-mode .sonicmirror-logo {
+  animation: pookieFloat 4s ease-in-out infinite !important;
+  border: 3px solid #ff69b4 !important;
+  border-radius: 15px !important;
+  box-shadow: 0 0 15px rgba(255, 105, 180, 0.3) !important;
+}
+
+/* Cat-themed cards with diverse cat emojis */
+.pookie-mode .bg-indigo-900,
+.pookie-mode .bg-purple-900,
+.pookie-mode .bg-blue-900,
+.pookie-mode .bg-yellow-900,
+.pookie-mode .bg-green-900,
+.pookie-mode .bg-pink-900,
+.pookie-mode .bg-fuchsia-900,
+.pookie-mode .bg-cyan-900,
+.pookie-mode .bg-emerald-900,
+.pookie-mode .bg-gray-900,
+.pookie-mode .bg-red-900,
+.pookie-mode .bg-orange-900,
+.pookie-mode .bg-teal-900,
+.pookie-mode .bg-lime-900,
+.pookie-mode .bg-amber-900,
+.pookie-mode .bg-rose-900,
+.pookie-mode .bg-sky-900,
+.pookie-mode .bg-violet-900,
+.pookie-mode .bg-slate-900,
+.pookie-mode .bg-zinc-900,
+.pookie-mode .bg-neutral-900,
+.pookie-mode .bg-stone-900 {
+  background: linear-gradient(45deg, #ffb3d9, #ffd6e7, #e6f3ff, #ffe6f2) !important;
+  background-size: 200% 200% !important;
+  border: 3px solid #ff69b4 !important;
+  box-shadow: 0 0 15px rgba(255, 105, 180, 0.3) !important;
+  animation: pookieCardGradient 6s ease-in-out infinite !important;
+  position: relative;
+}
+
+/* Add diverse cat emojis to cards */
+.pookie-mode .bg-indigo-900::before { content: '😺'; }
+.pookie-mode .bg-purple-900::before { content: '😸'; }
+.pookie-mode .bg-blue-900::before { content: '😹'; }
+.pookie-mode .bg-yellow-900::before { content: '😻'; }
+.pookie-mode .bg-green-900::before { content: '😼'; }
+.pookie-mode .bg-pink-900::before { content: '😽'; }
+.pookie-mode .bg-fuchsia-900::before { content: '🙀'; }
+.pookie-mode .bg-cyan-900::before { content: '😿'; }
+.pookie-mode .bg-emerald-900::before { content: '😾'; }
+.pookie-mode .bg-gray-900::before { content: '🐱'; }
+.pookie-mode .bg-red-900::before { content: '🐈'; }
+.pookie-mode .bg-orange-900::before { content: '🐈‍⬛'; }
+.pookie-mode .bg-teal-900::before { content: '🎀'; }
+.pookie-mode .bg-lime-900::before { content: '🧶'; }
+.pookie-mode .bg-amber-900::before { content: '🐟'; }
+.pookie-mode .bg-rose-900::before { content: '🐠'; }
+.pookie-mode .bg-sky-900::before { content: '🐡'; }
+.pookie-mode .bg-violet-900::before { content: '🪺'; }
+.pookie-mode .bg-slate-900::before { content: '💕'; }
+.pookie-mode .bg-zinc-900::before { content: '💖'; }
+.pookie-mode .bg-neutral-900::before { content: '💝'; }
+.pookie-mode .bg-stone-900::before { content: '😺'; }
+
+/* Common styles for all card cat emojis */
+.pookie-mode .bg-indigo-900::before,
+.pookie-mode .bg-purple-900::before,
+.pookie-mode .bg-blue-900::before,
+.pookie-mode .bg-yellow-900::before,
+.pookie-mode .bg-green-900::before,
+.pookie-mode .bg-pink-900::before,
+.pookie-mode .bg-fuchsia-900::before,
+.pookie-mode .bg-cyan-900::before,
+.pookie-mode .bg-emerald-900::before,
+.pookie-mode .bg-gray-900::before,
+.pookie-mode .bg-red-900::before,
+.pookie-mode .bg-orange-900::before,
+.pookie-mode .bg-teal-900::before,
+.pookie-mode .bg-lime-900::before,
+.pookie-mode .bg-amber-900::before,
+.pookie-mode .bg-rose-900::before,
+.pookie-mode .bg-sky-900::before,
+.pookie-mode .bg-violet-900::before,
+.pookie-mode .bg-slate-900::before,
+.pookie-mode .bg-zinc-900::before,
+.pookie-mode .bg-neutral-900::before,
+.pookie-mode .bg-stone-900::before {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 1.5rem;
+  animation: pookieCatSmall 2s ease-in-out infinite;
+  z-index: 1;
+}
+
+/* Rounded divs get cat theme */
+.pookie-mode div[class*="rounded"] {
+  background: linear-gradient(45deg, #ffb3d9, #ffd6e7, #e6f3ff, #ffe6f2) !important;
+  background-size: 200% 200% !important;
+  border: 2px solid #ff69b4 !important;
+  box-shadow: 0 0 10px rgba(255, 105, 180, 0.2) !important;
+  animation: pookieCardGradient 6s ease-in-out infinite !important;
+  position: relative;
+}
+
+.pookie-mode div[class*="rounded"]::before {
+  content: '🐱';
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 1.2rem;
+  animation: pookieCatSmall 2s ease-in-out infinite;
+  z-index: 1;
+}
+
+/* Specific sections with diverse emojis */
+.pookie-mode .mb-8,
+.pookie-mode .shadow-lg,
+.pookie-mode .rounded-xl,
+.pookie-mode .rounded-2xl {
+  background: linear-gradient(45deg, #ffb3d9, #ffd6e7, #e6f3ff, #ffe6f2) !important;
+  background-size: 200% 200% !important;
+  border: 2px solid #ff69b4 !important;
+  box-shadow: 0 0 12px rgba(255, 105, 180, 0.25) !important;
+  animation: pookieCardGradient 6s ease-in-out infinite !important;
+  position: relative;
+}
+
+.pookie-mode .mb-8::before { content: '😸'; }
+.pookie-mode .shadow-lg::before { content: '😹'; }
+.pookie-mode .rounded-xl::before { content: '😻'; }
+.pookie-mode .rounded-2xl::before { content: '😼'; }
+
+.pookie-mode .mb-8::before,
+.pookie-mode .shadow-lg::before,
+.pookie-mode .rounded-xl::before,
+.pookie-mode .rounded-2xl::before {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 1.2rem;
+  animation: pookieCatSmall 2s ease-in-out infinite;
+  z-index: 1;
+}
+
+.pookie-mode h1,
+.pookie-mode h2,
+.pookie-mode h3 {
+  color: #ff1493 !important;
+  text-shadow: 2px 2px 4px rgba(255, 20, 147, 0.3), 0 0 10px rgba(255, 105, 180, 0.5) !important;
+  animation: pookieTextGlow 3s ease-in-out infinite !important;
+  font-weight: bold !important;
+}
+
+.pookie-mode p {
+  color: #ff69b4 !important;
+  text-shadow: 1px 1px 2px rgba(255, 105, 180, 0.2) !important;
+}
+
+.pookie-mode a {
+  color: #ff1493 !important;
+  text-decoration: none !important;
+  animation: pookieLinkGlow 3s ease-in-out infinite !important;
+}
+
+.pookie-mode a:hover {
+  color: #ff69b4 !important;
+  text-shadow: 0 0 8px rgba(255, 105, 180, 0.6) !important;
+  animation: pookieLinkGlow 1s ease-in-out infinite !important;
+}
+
+/* Input fields */
+.pookie-mode input,
+.pookie-mode textarea,
+.pookie-mode select {
+  background: linear-gradient(45deg, #ffe6f2, #f0f8ff) !important;
+  border: 2px solid #ff69b4 !important;
+  border-radius: 15px !important;
+  box-shadow: 0 0 10px rgba(255, 105, 180, 0.2) !important;
+  animation: pookieInputGlow 3s ease-in-out infinite !important;
+}
+
+.pookie-mode input:focus,
+.pookie-mode textarea:focus,
+.pookie-mode select:focus {
+  box-shadow: 0 0 20px rgba(255, 105, 180, 0.4) !important;
+  animation: pookieInputGlow 1s ease-in-out infinite !important;
+}
+
+/* Scrollbar */
+.pookie-mode::-webkit-scrollbar {
+  width: 12px;
+}
+
+.pookie-mode::-webkit-scrollbar-track {
+  background: linear-gradient(45deg, #ffe6f2, #f0f8ff);
+  border-radius: 10px;
+}
+
+.pookie-mode::-webkit-scrollbar-thumb {
+  background: linear-gradient(45deg, #ff69b4, #ff1493);
+  border-radius: 10px;
+  animation: pookieScrollbarGlow 3s ease-in-out infinite;
+}
+
+/* Enhanced Animations - Slower and more graceful */
+@keyframes pookieBackground {
+  0%, 100% { 
+    background-position: 0% 50%; 
+  }
+  50% { 
+    background-position: 100% 50%; 
+  }
+}
+
+@keyframes pookieBounce {
+  0% { 
+    transform: translateY(0px) scale(1); 
+  }
+  50% { 
+    transform: translateY(-5px) scale(1.02); 
+  }
+  100% { 
+    transform: translateY(0px) scale(1); 
+  }
+}
+
+@keyframes pookieFloat {
+  0%, 100% { 
+    transform: translateY(0px) rotate(0deg) scale(1); 
+  }
+  25% { 
+    transform: translateY(-4px) rotate(1deg) scale(1.01); 
+  }
+  50% { 
+    transform: translateY(-8px) rotate(2deg) scale(1.02); 
+  }
+  75% { 
+    transform: translateY(-4px) rotate(1deg) scale(1.01); 
+  }
+}
+
+@keyframes pookieCat {
+  0% { 
+    transform: scale(1) rotate(0deg); 
+    filter: drop-shadow(0 0 10px rgba(255, 105, 180, 0.5));
+  }
+  50% { 
+    transform: scale(1.1) rotate(5deg); 
+    filter: drop-shadow(0 0 15px rgba(255, 105, 180, 0.7));
+  }
+  100% { 
+    transform: scale(1) rotate(0deg); 
+    filter: drop-shadow(0 0 10px rgba(255, 105, 180, 0.5));
+  }
+}
+
+@keyframes pookieCatSmall {
+  0% { 
+    transform: scale(1) rotate(0deg); 
+  }
+  50% { 
+    transform: scale(1.1) rotate(5deg); 
+  }
+  100% { 
+    transform: scale(1) rotate(0deg); 
+  }
+}
+
+@keyframes pookiePaw {
+  0% { 
+    transform: scale(1) rotate(0deg); 
+    filter: drop-shadow(0 0 8px rgba(255, 105, 180, 0.4));
+  }
+  50% { 
+    transform: scale(1.05) rotate(2deg); 
+    filter: drop-shadow(0 0 12px rgba(255, 105, 180, 0.6));
+  }
+  100% { 
+    transform: scale(1) rotate(0deg); 
+    filter: drop-shadow(0 0 8px rgba(255, 105, 180, 0.4));
+  }
+}
+
+@keyframes sparkles {
+  0% {
+    transform: translateY(100vh) translateX(100px);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.6;
+  }
+  90% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateY(-100px) translateX(0);
+    opacity: 0;
+  }
+}
+
+@keyframes pookieGradient {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes pookieGlow {
+  0%, 100% { 
+    opacity: 0.8;
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 1;
+    transform: scale(1.02);
+  }
+}
+
+@keyframes pookieCardGradient {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes pookieTextGlow {
+  0%, 100% { text-shadow: 2px 2px 4px rgba(255, 20, 147, 0.3), 0 0 10px rgba(255, 105, 180, 0.5); }
+  50% { text-shadow: 2px 2px 4px rgba(255, 20, 147, 0.5), 0 0 15px rgba(255, 105, 180, 0.7); }
+}
+
+@keyframes pookieLinkGlow {
+  0%, 100% { text-shadow: 0 0 5px rgba(255, 105, 180, 0.3); }
+  50% { text-shadow: 0 0 10px rgba(255, 105, 180, 0.6); }
+}
+
+@keyframes pookieInputGlow {
+  0%, 100% { box-shadow: 0 0 10px rgba(255, 105, 180, 0.2); }
+  50% { box-shadow: 0 0 15px rgba(255, 105, 180, 0.4); }
+}
+
+@keyframes pookieScrollbarGlow {
+  0%, 100% { box-shadow: 0 0 5px rgba(255, 105, 180, 0.3); }
+  50% { box-shadow: 0 0 10px rgba(255, 105, 180, 0.6); }
+}
+
+@keyframes discoBackground {
+  0% { background: linear-gradient(45deg, #ff0000, #ff8000, #ffff00, #80ff00, #00ff00, #00ff80, #00ffff, #0080ff, #0000ff, #8000ff, #ff00ff, #ff0080); }
+  100% { background: linear-gradient(45deg, #ff0080, #ff0000, #ff8000, #ffff00, #80ff00, #00ff00, #00ff80, #00ffff, #0080ff, #0000ff, #8000ff, #ff00ff); }
+}
+
+@keyframes discoShake {
+  0% { transform: translateX(0px); }
+  100% { transform: translateX(2px); }
+}
+
+@keyframes discoButton {
+  0% { 
+    background: linear-gradient(45deg, #ff0000, #ff8000, #ffff00, #80ff00, #00ff00, #00ff80, #00ffff, #0080ff, #0000ff, #8000ff, #ff00ff, #ff0080);
+    box-shadow: 0 0 20px #ff0000;
+  }
+  100% { 
+    background: linear-gradient(45deg, #ff0080, #ff0000, #ff8000, #ffff00, #80ff00, #00ff00, #00ff80, #00ffff, #0080ff, #0000ff, #8000ff, #ff00ff);
+    box-shadow: 0 0 30px #ff00ff;
+  }
+}
+
+@keyframes discoCard {
+  0% { background: linear-gradient(45deg, #ff0000, #ff8000, #ffff00, #80ff00, #00ff00, #00ff80, #00ffff, #0080ff, #0000ff, #8000ff, #ff00ff, #ff0080) !important; }
+  25% { background: linear-gradient(45deg, #ff0080, #ff0000, #ff8000, #ffff00, #80ff00, #00ff00, #00ff80, #00ffff, #0080ff, #0000ff, #8000ff, #ff00ff) !important; }
+  50% { background: linear-gradient(45deg, #ff00ff, #ff0080, #ff0000, #ff8000, #ffff00, #80ff00, #00ff00, #00ff80, #00ffff, #0080ff, #0000ff, #8000ff) !important; }
+  75% { background: linear-gradient(45deg, #8000ff, #ff00ff, #ff0080, #ff0000, #ff8000, #ffff00, #80ff00, #00ff00, #00ff80, #00ffff, #0080ff, #0000ff) !important; }
+  100% { background: linear-gradient(45deg, #ff0000, #ff8000, #ffff00, #80ff00, #00ff00, #00ff80, #00ffff, #0080ff, #0000ff, #8000ff, #ff00ff, #ff0080) !important; }
+}
+
+/* Cat Petting Easter Egg */
+.pookie-mode .cat-petting {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+.pookie-mode .purr-heart {
+  position: absolute;
+  font-size: 2rem;
+  animation: purrHeart 2s ease-out forwards;
+  pointer-events: none;
+  z-index: 10000;
+}
+
+.pookie-mode .purr-text {
+  position: absolute;
+  font-size: 1.2rem;
+  color: #ff69b4;
+  font-weight: bold;
+  text-shadow: 2px 2px 4px rgba(255, 105, 180, 0.5);
+  animation: purrText 2s ease-out forwards;
+  pointer-events: none;
+  z-index: 10000;
+  font-family: 'Comic Sans MS', 'Chalkboard SE', 'Marker Felt', cursive, sans-serif;
+}
+
+/* Cat petting animations */
+@keyframes purrHeart {
+  0% {
+    transform: scale(0) rotate(0deg);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2) rotate(180deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(360deg) translateY(-50px);
+    opacity: 0;
+  }
+}
+
+@keyframes purrText {
+  0% {
+    transform: scale(0) translateY(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1) translateY(-10px);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) translateY(-30px);
+    opacity: 0;
+  }
+}
+
+/* Cat purring sound effect (visual feedback) */
+.pookie-mode .purr-effect {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 105, 180, 0.3) 0%, transparent 70%);
+  animation: purrWave 1s ease-out forwards;
+  pointer-events: none;
+  z-index: 9998;
+}
+
+@keyframes purrWave {
+  0% {
+    transform: translate(-50%, -50%) scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(3);
+    opacity: 0;
+  }
+}
+
+/* Enhanced cat mascot with petting interaction */
+.pookie-mode .cat-mascot {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  font-size: 3rem;
+  cursor: pointer;
+  z-index: 1000;
+  transition: all 0.3s ease;
+  filter: drop-shadow(0 0 10px rgba(255, 105, 180, 0.5));
+  user-select: none;
+}
+
+.pookie-mode .cat-mascot:hover {
+  transform: scale(1.1);
+  filter: drop-shadow(0 0 15px rgba(255, 105, 180, 0.8));
+}
+
+.pookie-mode .cat-mascot:active {
+  transform: scale(0.95);
+}
+
+.pookie-mode .cat-mascot.purring {
+  animation: catPurr 0.5s ease-in-out;
+}
+
+@keyframes catPurr {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  25% { transform: scale(1.05) rotate(-2deg); }
+  50% { transform: scale(1.1) rotate(0deg); }
+  75% { transform: scale(1.05) rotate(2deg); }
+}
+
+/* Paw print cursor for cat petting */
+.pookie-mode .cat-mascot:hover {
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="%23ff69b4"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>') 12 12, pointer;
+}
+
+/* Enhanced pookie mode animations */
+@keyframes musicFloat {
+  0%, 100% { 
+    transform: translate(-50%, -50%) scale(1) rotate(0deg); 
+    opacity: 0.3;
+  }
+  25% { 
+    transform: translate(-50%, -50%) scale(1.1) rotate(90deg); 
+    opacity: 0.5;
+  }
+  50% { 
+    transform: translate(-50%, -50%) scale(1.2) rotate(180deg); 
+    opacity: 0.7;
+  }
+  75% { 
+    transform: translate(-50%, -50%) scale(1.1) rotate(270deg); 
+    opacity: 0.5;
+  }
+}
+
+@keyframes heartRain {
+  0% { 
+    transform: translateY(-100vh) translateX(0) rotate(0deg); 
+    opacity: 0;
+  }
+  10% { 
+    opacity: 0.4;
+  }
+  90% { 
+    opacity: 0.4;
+  }
+  100% { 
+    transform: translateY(100vh) translateX(100px) rotate(360deg); 
+    opacity: 0;
+  }
+}
+
+/* Enhanced glow animation */
+@keyframes pookieGlow {
+  0%, 100% { 
+    opacity: 0.3; 
+    transform: scale(1) rotate(0deg); 
+  }
+  25% { 
+    opacity: 0.5; 
+    transform: scale(1.05) rotate(90deg); 
+  }
+  50% { 
+    opacity: 0.6; 
+    transform: scale(1.1) rotate(180deg); 
+  }
+  75% { 
+    opacity: 0.5; 
+    transform: scale(1.05) rotate(270deg); 
+  }
+}
+
+/* New pookie mode features */
+@keyframes rainbowText {
+  0% { color: #ff69b4; }
+  16% { color: #ff8c00; }
+  33% { color: #ffff00; }
+  50% { color: #00ff00; }
+  66% { color: #00bfff; }
+  83% { color: #9932cc; }
+  100% { color: #ff69b4; }
+}
+
+@keyframes sparkleTwinkle {
+  0%, 100% { 
+    transform: scale(1) rotate(0deg); 
+    opacity: 0.7;
+  }
+  50% { 
+    transform: scale(1.3) rotate(180deg); 
+    opacity: 1;
+  }
+}
+
+@keyframes bounceGently {
+  0%, 100% { 
+    transform: translateY(0px); 
+  }
+  50% { 
+    transform: translateY(-10px); 
+  }
+}
+
+@keyframes rainbowBorder {
+  0% { border-color: #ff69b4; }
+  16% { border-color: #ff8c00; }
+  33% { border-color: #ffff00; }
+  50% { border-color: #00ff00; }
+  66% { border-color: #00bfff; }
+  83% { border-color: #9932cc; }
+  100% { border-color: #ff69b4; }
+}
+
+@keyframes catPurr {
+  0%, 100% { 
+    transform: scale(1) rotate(0deg); 
+  }
+  25% { 
+    transform: scale(1.05) rotate(2deg); 
+  }
+  50% { 
+    transform: scale(1.1) rotate(-2deg); 
+  }
+  75% { 
+    transform: scale(1.05) rotate(1deg); 
+  }
+}
+
+/* New pookie mode interactive elements */
+.pookie-mode .rainbow-text {
+  animation: rainbowText 3s linear infinite;
+  font-weight: bold;
+  text-shadow: 2px 2px 4px rgba(255, 105, 180, 0.3);
+}
+
+.pookie-mode .sparkle-element {
+  animation: sparkleTwinkle 2s ease-in-out infinite;
+  filter: drop-shadow(0 0 8px rgba(255, 105, 180, 0.6));
+}
+
+.pookie-mode .bounce-element {
+  animation: bounceGently 1.5s ease-in-out infinite;
+}
+
+.pookie-mode .rainbow-border {
+  animation: rainbowBorder 4s linear infinite;
+  border-width: 3px;
+  border-style: solid;
+}
+
+/* Pookie mode button enhancements */
+.pookie-mode button {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.pookie-mode button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.5s ease;
+}
+
+.pookie-mode button:hover::before {
+  left: 100%;
+}
+
+.pookie-mode button:hover {
+  transform: scale(1.05) rotate(2deg);
+  box-shadow: 0 8px 25px rgba(255, 105, 180, 0.4);
+}
+
+/* Pookie mode card enhancements */
+.pookie-mode .card {
+  position: relative;
+  overflow: hidden;
+}
+
+.pookie-mode .card::after {
+  content: '✨';
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 1.5rem;
+  animation: sparkleTwinkle 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* Pookie mode text enhancements */
+.pookie-mode h1, .pookie-mode h2, .pookie-mode h3 {
+  position: relative;
+}
+
+.pookie-mode h1::after, .pookie-mode h2::after, .pookie-mode h3::after {
+  content: '🌸';
+  position: absolute;
+  right: -30px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.2rem;
+  animation: bounceGently 2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* Pookie mode link enhancements */
+.pookie-mode a {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.pookie-mode a::before {
+  content: '💕';
+  position: absolute;
+  left: -25px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.8rem;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.pookie-mode a:hover::before {
+  opacity: 1;
+  animation: bounceGently 1s ease-in-out infinite;
+}
+
+/* Pookie mode input enhancements */
+.pookie-mode input, .pookie-mode textarea {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.pookie-mode input:focus, .pookie-mode textarea:focus {
+  transform: scale(1.02);
+  box-shadow: 0 0 20px rgba(255, 105, 180, 0.3);
+}
+
+.pookie-mode input::placeholder, .pookie-mode textarea::placeholder {
+  animation: rainbowText 4s linear infinite;
+}
+
+/* Pookie mode image enhancements */
+.pookie-mode img {
+  transition: all 0.3s ease;
+  border-radius: 15px;
+}
+
+.pookie-mode img:hover {
+  transform: scale(1.05) rotate(2deg);
+  box-shadow: 0 10px 30px rgba(255, 105, 180, 0.4);
+}
+
+/* Pookie mode scrollbar enhancements */
+.pookie-mode::-webkit-scrollbar-thumb {
+  background: linear-gradient(45deg, #ff69b4, #ff8c00, #ffff00, #00ff00, #00bfff, #9932cc);
+  background-size: 200% 200%;
+  animation: rainbowBorder 3s linear infinite;
+}
+
+/* Pookie mode selection enhancements */
+.pookie-mode ::selection {
+  background: rgba(255, 105, 180, 0.3);
+  color: #fff;
+}
+
+/* Pookie mode focus enhancements */
+.pookie-mode *:focus {
+  outline: 3px solid #ff69b4;
+  outline-offset: 2px;
+  border-radius: 5px;
+}
+
+/* Pookie mode loading animation */
+.pookie-mode .loading {
+  position: relative;
+  overflow: hidden;
+}
+
+.pookie-mode .loading::after {
+  content: '🎵';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 2rem;
+  animation: bounceGently 1s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* Pookie mode success animation */
+.pookie-mode .success {
+  animation: sparkleTwinkle 0.5s ease-in-out;
+}
+
+/* Pookie mode error animation */
+.pookie-mode .error {
+  animation: bounceGently 0.3s ease-in-out 3;
+}
+
+/* Pookie mode special effects */
+.pookie-mode .magic-sparkle {
+  position: fixed;
+  pointer-events: none;
+  z-index: 10000;
+  animation: sparkleTwinkle 1s ease-out forwards;
+}
+
+.pookie-mode .floating-heart {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  animation: heartRain 3s linear infinite;
+  font-size: 1.5rem;
+  opacity: 0.6;
+}
