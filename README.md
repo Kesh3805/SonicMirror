@@ -33,7 +33,7 @@ Push both `backend` and `frontend` folders to your GitHub repo.
 - Use your client ID and secret in the backend environment variables.
 
 ### 5. Environment Variables
-See `backend/env.example` for all required variables. Copy to `.env` and fill in your secrets.
+See `backend/.env` for all required variables. 
 
 ### 6. Usage
 - Visit your frontend Render URL.
