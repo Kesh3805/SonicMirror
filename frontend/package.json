@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "export": "next export",
+    "export": "next export"
   },
   "dependencies": {
     "dom-to-image-more": "^3.6.0",
