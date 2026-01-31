@@ -1,17 +1,21 @@
 {
-  "name": "backend",
+  "name": "sonicmirror-backend",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js",
-    "dev": "node index.js",
-    "setup-gemini": "node setup-gemini.js"
+    "dev": "node --watch index.js",
+    "setup-gemini": "node setup-gemini.js",
+    "lint": "echo 'Add eslint for linting'",
+    "test": "echo 'Add tests'"
   },
-  "keywords": [],
+  "keywords": ["spotify", "ai", "music", "analytics"],
   "author": "",
-  "license": "ISC",
-  "description": "",
+  "license": "MIT",
+  "description": "SonicMirror Backend - AI-powered Spotify analyzer",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
     "axios": "^1.10.0",

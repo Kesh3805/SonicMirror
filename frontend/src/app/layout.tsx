@@ -1,5 +1,4 @@
 "use client";
-import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { useEffect, useState, useRef } from 'react';
@@ -29,7 +28,7 @@ export default function RootLayout({
   }, [customName]);
 
   // Cat petting easter egg functionality
-  function handleCatClick(e: React.MouseEvent) {
+  function handleCatClick(e: MouseEvent | React.MouseEvent) {
     if (!pookieMode) return;
     
     const now = Date.now();
@@ -39,7 +38,8 @@ export default function RootLayout({
     catClicks.current = catClicks.current.filter(time => now - time < 2000);
     
     // Get click position
-    const rect = e.currentTarget.getBoundingClientRect();
+    const target = e.currentTarget as HTMLElement;
+    const rect = target?.getBoundingClientRect() || { left: 0, top: 0 };
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     
@@ -122,7 +122,7 @@ export default function RootLayout({
       const catMascot = document.createElement('div');
       catMascot.className = 'cat-mascot';
       catMascot.textContent = '😺';
-      catMascot.onclick = (e) => handleCatClick(e as any);
+      catMascot.onclick = (e: MouseEvent) => handleCatClick(e);
       document.body.appendChild(catMascot);
       
       // Create cat petting container for effects

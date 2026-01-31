@@ -1,191 +1,353 @@
 "use client";
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
+import { motion, useScroll, useTransform, useInView } from 'framer-motion';
+import { Navbar, Footer } from '@/components/layout';
 
-export default function Home() {
-  const [showEasterEgg, setShowEasterEgg] = useState(false);
+// Feature card data
+const aiFeatures = [
+  { icon: '🔥', title: 'AI Roast', desc: 'Get brutally roasted about your music taste', color: 'from-red-500 to-orange-500' },
+  { icon: '🎭', title: 'Personality Analysis', desc: 'Deep psychological profile through music', color: 'from-purple-500 to-pink-500' },
+  { icon: '💭', title: 'Mood Analysis', desc: 'Emotional patterns in your listening', color: 'from-blue-500 to-cyan-500' },
+  { icon: '🌟', title: 'Smart Recommendations', desc: 'AI-curated suggestions for your taste', color: 'from-green-500 to-emerald-500' },
+  { icon: '🎵', title: 'Genre Deep Dive', desc: 'What your genre choices reveal about you', color: 'from-yellow-500 to-amber-500' },
+  { icon: '📖', title: 'Wrapped Story', desc: 'Narrative of your musical journey', color: 'from-pink-500 to-rose-500' },
+];
+
+const analyticsFeatures = [
+  { icon: '🎵', title: 'Top Artists & Tracks', desc: 'Your most listened to music' },
+  { icon: '📈', title: 'Detailed Stats', desc: 'Deep dive into listening patterns' },
+  { icon: '🎯', title: 'Mainstream Meter', desc: 'How popular your taste is' },
+  { icon: '🕐', title: 'Listening Time', desc: 'When you listen most' },
+  { icon: '🎪', title: 'Genre Hopping', desc: 'Your musical diversity' },
+  { icon: '🔁', title: 'Repeat Offenders', desc: 'Songs you can\'t stop playing' },
+  { icon: '💎', title: 'Hidden Gems', desc: 'Your unique music finds' },
+  { icon: '🎨', title: 'Audio Features', desc: 'Danceability, energy, and more' },
+];
+
+// Animated stat counter
+function AnimatedStat({ value, label, suffix = '' }: { value: number; label: string; suffix?: string }) {
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true });
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    if (isInView) {
+      let start = 0;
+      const end = value;
+      const duration = 2000;
+      const increment = end / (duration / 16);
+      
+      const timer = setInterval(() => {
+        start += increment;
+        if (start >= end) {
+          setCount(end);
+          clearInterval(timer);
+        } else {
+          setCount(Math.floor(start));
+        }
+      }, 16);
+      
+      return () => clearInterval(timer);
+    }
+  }, [isInView, value]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-indigo-900 to-purple-700 text-white">
-      {/* Header */}
-      <header className="text-center py-12">
-        <h1 className="text-6xl font-bold mb-4">SonicMirror</h1>
-        <p className="text-xl text-gray-300 mb-8">AI-powered Spotify analyzer & music psychologist</p>
-      </header>
-
-      {/* Main Content */}
-      <main className="flex-1 flex flex-col items-center justify-center px-4">
-        {/* Hero Section */}
-        <div className="text-center mb-12">
-          <img 
-            src="/1.jpeg" 
-            alt="SonicMirror Hero" 
-            className="w-64 h-64 mx-auto mb-8 rounded-2xl shadow-2xl cursor-pointer transition-transform hover:scale-105 sonicmirror-logo"
-            onClick={() => setShowEasterEgg(true)}
-          />
-          <h2 className="text-3xl font-bold mb-4">Discover Your Music Personality</h2>
-          <p className="text-lg text-gray-300 mb-8 max-w-2xl">
-            Get brutally honest AI-powered insights into your Spotify listening habits. 
-            From savage roasts to deep psychological analysis, discover what your music taste really says about you.
-          </p>
-          <Link href="/login">
-            <button className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 px-8 rounded-full text-xl transition">
-              Get Roasted
-            </button>
-          </Link>
-        </div>
-
-        {/* AI Features Section */}
-        <div className="mb-12">
-          <h3 className="text-2xl font-bold text-center mb-8">🤖 AI-Powered Features</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl">
-            <div className="bg-red-900 bg-opacity-70 rounded-xl p-6 text-center border border-red-500">
-              <div className="text-4xl mb-4">🔥</div>
-              <h3 className="font-bold mb-2">AI Roast</h3>
-              <p className="text-sm text-gray-300">Get brutally roasted about your music taste</p>
-            </div>
-            <div className="bg-purple-900 bg-opacity-70 rounded-xl p-6 text-center border border-purple-500">
-              <div className="text-4xl mb-4">🎭</div>
-              <h3 className="font-bold mb-2">Personality Analysis</h3>
-              <p className="text-sm text-gray-300">Deep psychological profile through music</p>
-            </div>
-            <div className="bg-blue-900 bg-opacity-70 rounded-xl p-6 text-center border border-blue-500">
-              <div className="text-4xl mb-4">💭</div>
-              <h3 className="font-bold mb-2">Mood Analysis</h3>
-              <p className="text-sm text-gray-300">Emotional patterns in your listening</p>
-            </div>
-            <div className="bg-green-900 bg-opacity-70 rounded-xl p-6 text-center border border-green-500">
-              <div className="text-4xl mb-4">🌟</div>
-              <h3 className="font-bold mb-2">Music Recommendations</h3>
-              <p className="text-sm text-gray-300">AI-curated suggestions for your taste</p>
-            </div>
-            <div className="bg-yellow-900 bg-opacity-70 rounded-xl p-6 text-center border border-yellow-500">
-              <div className="text-4xl mb-4">🎵</div>
-              <h3 className="font-bold mb-2">Genre Analysis</h3>
-              <p className="text-sm text-gray-300">What your genre choices reveal about you</p>
-            </div>
-            <div className="bg-pink-900 bg-opacity-70 rounded-xl p-6 text-center border border-pink-500">
-              <div className="text-4xl mb-4">🎧</div>
-              <h3 className="font-bold mb-2">Listening Habits</h3>
-              <p className="text-sm text-gray-300">Your music consumption patterns</p>
-            </div>
-            <div className="bg-cyan-900 bg-opacity-70 rounded-xl p-6 text-center border border-cyan-500">
-              <div className="text-4xl mb-4">🧠</div>
-              <h3 className="font-bold mb-2">Music Therapy</h3>
-              <p className="text-sm text-gray-300">Therapeutic insights and recommendations</p>
-            </div>
-            <div className="bg-emerald-900 bg-opacity-70 rounded-xl p-6 text-center border border-emerald-500">
-              <div className="text-4xl mb-4">🎼</div>
-              <h3 className="font-bold mb-2">Playlist Generator</h3>
-              <p className="text-sm text-gray-300">AI-created playlists for any mood</p>
-            </div>
-            <div className="bg-fuchsia-900 bg-opacity-70 rounded-xl p-6 text-center border border-fuchsia-500">
-              <div className="text-4xl mb-4">📖</div>
-              <h3 className="font-bold mb-2">Wrapped Story</h3>
-              <p className="text-sm text-gray-300">Narrative of your musical journey</p>
-            </div>
-            <div className="bg-indigo-900 bg-opacity-70 rounded-xl p-6 text-center border border-indigo-500">
-              <div className="text-4xl mb-4">💕</div>
-              <h3 className="font-bold mb-2">Musical Compatibility</h3>
-              <p className="text-sm text-gray-300">Your relationship potential through music</p>
-            </div>
-            <div className="bg-orange-900 bg-opacity-70 rounded-xl p-6 text-center border border-orange-500">
-              <div className="text-4xl mb-4">📝</div>
-              <h3 className="font-bold mb-2">Lyrical Analysis</h3>
-              <p className="text-sm text-gray-300">What your lyrics preferences reveal</p>
-            </div>
-            <div className="bg-gray-900 bg-opacity-70 rounded-xl p-6 text-center border border-gray-500">
-              <div className="text-4xl mb-4">🎪</div>
-              <h3 className="font-bold mb-2">Spotify Wrapped</h3>
-              <p className="text-sm text-gray-300">Your year in music, AI-style</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Stats Features Grid */}
-        <div className="mb-12">
-          <h3 className="text-2xl font-bold text-center mb-8">📊 Music Analytics</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl">
-            <div className="bg-indigo-900 bg-opacity-70 rounded-xl p-6 text-center">
-              <div className="text-4xl mb-4">🎵</div>
-              <h3 className="font-bold mb-2">Top Artists & Tracks</h3>
-              <p className="text-sm text-gray-300">See your most listened to music</p>
-            </div>
-            <div className="bg-purple-900 bg-opacity-70 rounded-xl p-6 text-center">
-              <div className="text-4xl mb-4">📈</div>
-              <h3 className="font-bold mb-2">Detailed Stats</h3>
-              <p className="text-sm text-gray-300">Deep dive into your listening patterns</p>
-            </div>
-            <div className="bg-blue-900 bg-opacity-70 rounded-xl p-6 text-center">
-              <div className="text-4xl mb-4">🎯</div>
-              <h3 className="font-bold mb-2">Mainstream Meter</h3>
-              <p className="text-sm text-gray-300">How popular your taste is</p>
-            </div>
-            <div className="bg-green-900 bg-opacity-70 rounded-xl p-6 text-center">
-              <div className="text-4xl mb-4">🕐</div>
-              <h3 className="font-bold mb-2">Listening Time</h3>
-              <p className="text-sm text-gray-300">When you listen most</p>
-            </div>
-            <div className="bg-yellow-900 bg-opacity-70 rounded-xl p-6 text-center">
-              <div className="text-4xl mb-4">🎪</div>
-              <h3 className="font-bold mb-2">Genre Hopping</h3>
-              <p className="text-sm text-gray-300">Your musical diversity</p>
-            </div>
-            <div className="bg-pink-900 bg-opacity-70 rounded-xl p-6 text-center">
-              <div className="text-4xl mb-4">🔁</div>
-              <h3 className="font-bold mb-2">Repeat Offenders</h3>
-              <p className="text-sm text-gray-300">Songs you can't stop playing</p>
-            </div>
-            <div className="bg-cyan-900 bg-opacity-70 rounded-xl p-6 text-center">
-              <div className="text-4xl mb-4">💎</div>
-              <h3 className="font-bold mb-2">Hidden Gems</h3>
-              <p className="text-sm text-gray-300">Discover your unique music finds</p>
-            </div>
-            <div className="bg-emerald-900 bg-opacity-70 rounded-xl p-6 text-center">
-              <div className="text-4xl mb-4">🎨</div>
-              <h3 className="font-bold mb-2">Audio Features</h3>
-              <p className="text-sm text-gray-300">Danceability, energy, and more</p>
-            </div>
-          </div>
-        </div>
-
-
-
-        {/* CTA Section */}
-        <div className="text-center mb-12">
-          <h3 className="text-2xl font-bold mb-4">Ready to get brutally honest about your music?</h3>
-          <p className="text-lg text-gray-300 mb-6">Connect your Spotify account and prepare for some savage AI insights</p>
-          <Link href="/login">
-            <button className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-6 rounded-full text-lg transition">
-              Connect Spotify & Get Roasted
-            </button>
-          </Link>
-        </div>
-      </main>
-
-      {/* Footer */}
-      <footer className="text-center py-8 border-t border-indigo-500">
-        <div 
-          className="text-sm text-gray-400 cursor-pointer hover:text-white transition-colors"
-          title="Click 3 times quickly for a surprise!"
-        >
-          -- .- -. --- --- --- .-. .- -. .--- .. -. .. .. .. ..
-        </div>
-      </footer>
-
-      {/* Easter Egg Modal */}
-      {showEasterEgg && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80">
-          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full flex flex-col items-center relative">
-            <button className="absolute top-2 right-2 text-gray-500 hover:text-black text-2xl font-bold" onClick={() => setShowEasterEgg(false)}>&times;</button>
-            <h3 className="text-2xl font-bold mb-4 text-black">🎵 Secret Track Unlocked!</h3>
-            <p className="mb-4 text-lg text-gray-800 text-center">You found the hidden track:<br/><span className="font-bold">Candy Licker</span> by Marvin Sease<br/>A classic that's not for the faint of heart!</p>
-            <iframe src="https://open.spotify.com/embed/track/24nD7CG7Nu4EVLSBX4ZcFA" width="300" height="80" frameBorder="0" allow="encrypted-media" title="Candy Licker by Marvin Sease" className="rounded-lg"></iframe>
-            <a href="https://open.spotify.com/track/24nD7CG7Nu4EVLSBX4ZcFA" target="_blank" rel="noopener noreferrer" className="mt-4 text-green-600 font-bold underline">Play on Spotify</a>
-          </div>
-        </div>
-      )}
+    <div ref={ref} className="text-center">
+      <div className="text-4xl md:text-5xl font-bold text-white mb-2">
+        {count.toLocaleString()}{suffix}
+      </div>
+      <div className="text-gray-400">{label}</div>
     </div>
   );
 }
 
+// Feature card component
+function FeatureCard({ icon, title, desc, color, index }: { 
+  icon: string; 
+  title: string; 
+  desc: string; 
+  color: string;
+  index: number;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ delay: index * 0.1, duration: 0.5 }}
+      whileHover={{ y: -8, scale: 1.02 }}
+      className="group relative"
+    >
+      <div className={`absolute inset-0 bg-gradient-to-br ${color} rounded-2xl blur-xl opacity-0 group-hover:opacity-30 transition-opacity duration-300`} />
+      <div className="relative bg-gray-800/50 backdrop-blur-sm border border-gray-700 rounded-2xl p-6 h-full hover:border-gray-600 transition-colors">
+        <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${color} flex items-center justify-center text-2xl mb-4 shadow-lg`}>
+          {icon}
+        </div>
+        <h3 className="text-lg font-semibold text-white mb-2">{title}</h3>
+        <p className="text-gray-400 text-sm">{desc}</p>
+      </div>
+    </motion.div>
+  );
+}
+
+// Analytics card
+function AnalyticsCard({ icon, title, desc, index }: { 
+  icon: string; 
+  title: string; 
+  desc: string;
+  index: number;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9 }}
+      whileInView={{ opacity: 1, scale: 1 }}
+      viewport={{ once: true }}
+      transition={{ delay: index * 0.05, duration: 0.4 }}
+      whileHover={{ scale: 1.05 }}
+      className="bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur-sm border border-gray-700/50 rounded-xl p-5 text-center hover:border-purple-500/50 transition-all duration-300"
+    >
+      <div className="text-3xl mb-3">{icon}</div>
+      <h3 className="font-semibold text-white mb-1 text-sm">{title}</h3>
+      <p className="text-gray-500 text-xs">{desc}</p>
+    </motion.div>
+  );
+}
+
+export default function Home() {
+  const { scrollYProgress } = useScroll();
+  const heroOpacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
+  const heroScale = useTransform(scrollYProgress, [0, 0.2], [1, 0.95]);
+  
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePosition({
+        x: (e.clientX / window.innerWidth - 0.5) * 20,
+        y: (e.clientY / window.innerHeight - 0.5) * 20,
+      });
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
+  return (
+    <div className="min-h-screen bg-gray-950 text-white overflow-x-hidden">
+      <Navbar />
+      
+      {/* Hero Section */}
+      <motion.section 
+        style={{ opacity: heroOpacity, scale: heroScale }}
+        className="relative min-h-screen flex items-center justify-center px-4 overflow-hidden"
+      >
+        {/* Animated gradient background */}
+        <div className="absolute inset-0">
+          <div 
+            className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-600/30 rounded-full blur-3xl"
+            style={{ transform: `translate(${mousePosition.x}px, ${mousePosition.y}px)` }}
+          />
+          <div 
+            className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-pink-600/30 rounded-full blur-3xl"
+            style={{ transform: `translate(${-mousePosition.x}px, ${-mousePosition.y}px)` }}
+          />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-indigo-600/20 to-purple-600/20 rounded-full blur-3xl" />
+        </div>
+
+        {/* Grid pattern overlay */}
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:100px_100px]" />
+        
+        <div className="relative z-10 max-w-5xl mx-auto text-center pt-20">
+          {/* Badge */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-2 mb-8"
+          >
+            <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+            <span className="text-sm text-gray-300">Powered by AI</span>
+          </motion.div>
+
+          {/* Main headline */}
+          <motion.h1
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight"
+          >
+            Discover What Your{' '}
+            <span className="bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 bg-clip-text text-transparent">
+              Music
+            </span>{' '}
+            Says About You
+          </motion.h1>
+
+          {/* Subtitle */}
+          <motion.p
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="text-xl md:text-2xl text-gray-400 mb-10 max-w-2xl mx-auto"
+          >
+            Get AI-powered insights, savage roasts, and deep psychological analysis of your Spotify listening habits.
+          </motion.p>
+
+          {/* CTA Buttons */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="flex flex-col sm:flex-row gap-4 justify-center"
+          >
+            <Link href="/login">
+              <motion.button
+                whileHover={{ scale: 1.05, boxShadow: '0 0 40px rgba(168, 85, 247, 0.4)' }}
+                whileTap={{ scale: 0.95 }}
+                className="px-8 py-4 bg-gradient-to-r from-pink-500 to-purple-600 text-white font-semibold rounded-xl text-lg shadow-xl shadow-purple-500/25 flex items-center justify-center gap-3"
+              >
+                <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
+                </svg>
+                Get Roasted
+              </motion.button>
+            </Link>
+            <motion.a
+              href="#features"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="px-8 py-4 bg-white/10 backdrop-blur-sm border border-white/20 text-white font-semibold rounded-xl text-lg hover:bg-white/20 transition-colors"
+            >
+              See Features
+            </motion.a>
+          </motion.div>
+
+          {/* Scroll indicator */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1 }}
+            className="absolute bottom-10 left-1/2 -translate-x-1/2"
+          >
+            <motion.div
+              animate={{ y: [0, 10, 0] }}
+              transition={{ duration: 2, repeat: Infinity }}
+              className="w-6 h-10 border-2 border-white/30 rounded-full flex justify-center pt-2"
+            >
+              <div className="w-1.5 h-3 bg-white/50 rounded-full" />
+            </motion.div>
+          </motion.div>
+        </div>
+      </motion.section>
+
+      {/* Stats Section */}
+      <section className="py-20 px-4 bg-gradient-to-b from-gray-950 to-gray-900">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            <AnimatedStat value={10000} label="Users Roasted" suffix="+" />
+            <AnimatedStat value={50000} label="Playlists Analyzed" suffix="+" />
+            <AnimatedStat value={99} label="Accuracy Rate" suffix="%" />
+            <AnimatedStat value={12} label="AI Features" />
+          </div>
+        </div>
+      </section>
+
+      {/* AI Features Section */}
+      <section id="features" className="py-24 px-4 bg-gray-900">
+        <div className="max-w-6xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <span className="text-pink-500 font-semibold text-sm uppercase tracking-wider">Powered by AI</span>
+            <h2 className="text-4xl md:text-5xl font-bold mt-4 mb-6">
+              AI-Powered{' '}
+              <span className="bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent">
+                Music Analysis
+              </span>
+            </h2>
+            <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+              Our advanced AI analyzes your listening habits to reveal insights you never knew about yourself.
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {aiFeatures.map((feature, index) => (
+              <FeatureCard key={feature.title} {...feature} index={index} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Analytics Section */}
+      <section id="analytics" className="py-24 px-4 bg-gray-950">
+        <div className="max-w-6xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <span className="text-cyan-500 font-semibold text-sm uppercase tracking-wider">Deep Insights</span>
+            <h2 className="text-4xl md:text-5xl font-bold mt-4 mb-6">
+              Comprehensive{' '}
+              <span className="bg-gradient-to-r from-cyan-500 to-blue-500 bg-clip-text text-transparent">
+                Music Analytics
+              </span>
+            </h2>
+            <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+              Dive deep into your listening patterns with detailed statistics and visualizations.
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {analyticsFeatures.map((feature, index) => (
+              <AnalyticsCard key={feature.title} {...feature} index={index} />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-24 px-4 bg-gradient-to-b from-gray-900 to-gray-950 relative overflow-hidden">
+        <div className="absolute inset-0">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-gradient-to-r from-purple-600/20 to-pink-600/20 rounded-full blur-3xl" />
+        </div>
+        
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="max-w-4xl mx-auto text-center relative z-10"
+        >
+          <h2 className="text-4xl md:text-5xl font-bold mb-6">
+            Ready to Get{' '}
+            <span className="bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent">
+              Roasted
+            </span>
+            ?
+          </h2>
+          <p className="text-gray-400 text-lg mb-10 max-w-xl mx-auto">
+            Connect your Spotify account and discover what your music taste really says about you. No judgment... okay, maybe a little.
+          </p>
+          <Link href="/login">
+            <motion.button
+              whileHover={{ scale: 1.05, boxShadow: '0 0 60px rgba(168, 85, 247, 0.5)' }}
+              whileTap={{ scale: 0.95 }}
+              className="px-10 py-5 bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold rounded-2xl text-xl shadow-2xl shadow-purple-500/30 flex items-center justify-center gap-3 mx-auto"
+            >
+              <svg className="w-7 h-7" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
+              </svg>
+              Connect Spotify & Get Started
+            </motion.button>
+          </Link>
+        </motion.div>
+      </section>
+
+      <Footer />
+    </div>
+  );
+}
