@@ -32,6 +32,8 @@ pub struct StoredAnalysis {
     pub features: Vec<AudioFeature>,
     #[serde(skip)]
     pub waveform_path: Option<String>,
+    #[serde(skip)]
+    pub spectrogram_path: Option<String>,
 }
 
 fn status_str(status: FeatureStatus) -> &'static str {
@@ -225,15 +227,19 @@ impl Catalog {
             });
         }
 
-        let waveform_path = self
-            .conn
-            .query_row(
-                "SELECT relative_path FROM analysis_artifacts
-                 WHERE analysis_id = ?1 AND kind = 'waveform'",
-                [&analysis_id],
-                |r| r.get(0),
-            )
-            .optional()?;
+        let artifact_path = |kind: &str| -> Result<Option<String>> {
+            Ok(self
+                .conn
+                .query_row(
+                    "SELECT relative_path FROM analysis_artifacts
+                     WHERE analysis_id = ?1 AND kind = ?2",
+                    params![analysis_id, kind],
+                    |r| r.get(0),
+                )
+                .optional()?)
+        };
+        let waveform_path = artifact_path("waveform")?;
+        let spectrogram_path = artifact_path("spectrogram")?;
 
         Ok(Some(StoredAnalysis {
             analysis_id,
@@ -243,6 +249,7 @@ impl Catalog {
             completed_at_ms,
             features,
             waveform_path,
+            spectrogram_path,
         }))
     }
 }
@@ -329,6 +336,12 @@ mod tests {
             content_hash: ContentDigest::of_bytes(b"wf"),
             size_bytes: 2,
         };
+        let spectrogram = StoredArtifact {
+            kind: ArtifactKind::Spectrogram,
+            relative_path: format!("spectrogram/{}/{key}.smsg", &key[..2]),
+            content_hash: ContentDigest::of_bytes(b"sg"),
+            size_bytes: 2,
+        };
         let feats = features();
         c.save_analysis(&NewAnalysis {
             track_id: &track,
@@ -338,11 +351,12 @@ mod tests {
             feature_schema_version: "s",
             configuration_json: "{}",
             features: &feats,
-            artifacts: std::slice::from_ref(&artifact),
+            artifacts: &[artifact.clone(), spectrogram.clone()],
         })
         .unwrap();
 
         let stored = c.analysis_for_track(&track).unwrap().unwrap();
+        assert_eq!(stored.spectrogram_path, Some(spectrogram.relative_path));
         assert_eq!(stored.features, feats);
         assert_eq!(stored.status, "partial");
         assert_eq!(stored.waveform_path, Some(artifact.relative_path));

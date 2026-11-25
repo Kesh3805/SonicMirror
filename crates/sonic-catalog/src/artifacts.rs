@@ -14,18 +14,21 @@ use sonic_core::domain::ContentDigest;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ArtifactKind {
     Waveform,
+    Spectrogram,
 }
 
 impl ArtifactKind {
     pub fn as_str(self) -> &'static str {
         match self {
             Self::Waveform => "waveform",
+            Self::Spectrogram => "spectrogram",
         }
     }
 
     fn extension(self) -> &'static str {
         match self {
             Self::Waveform => "smwf",
+            Self::Spectrogram => "smsg",
         }
     }
 }
@@ -129,7 +132,7 @@ fn is_generated_path(path: &str) -> bool {
     let Some((stem, ext)) = file.split_once('.') else {
         return false;
     };
-    let kind_ok = [ArtifactKind::Waveform]
+    let kind_ok = [ArtifactKind::Waveform, ArtifactKind::Spectrogram]
         .iter()
         .any(|k| k.as_str() == *kind && k.extension() == ext);
     kind_ok && ContentDigest::parse(stem).is_some() && stem.starts_with(prefix) && prefix.len() == 2
