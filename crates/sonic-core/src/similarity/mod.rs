@@ -5,6 +5,8 @@
 //! nearest neighbours, and a deterministic PCA projection for display.
 //! Proximity on the 2D map is approximate; neighbours are not read from it.
 
+pub mod distance;
 pub mod vector;
 
+pub use distance::{Neighbour, contributions, distance, nearest};
 pub use vector::{DIMENSIONS, Group, Normalizer, VECTOR_VERSION, raw_vector};
