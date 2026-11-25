@@ -10,7 +10,8 @@ export type FeatureFormat =
   | "ratio"
   | "seconds"
   | "count"
-  | "bpm";
+  | "bpm"
+  | "sampleRate";
 
 export interface FeatureInfo {
   label: string;
@@ -115,7 +116,7 @@ export const FEATURE_CATALOG: Record<string, FeatureInfo> = {
   sample_rate: {
     label: "Sample rate",
     group: "Technical",
-    format: "frequency",
+    format: "sampleRate",
     explanation: "Samples per second in the source file.",
   },
   channel_count: {

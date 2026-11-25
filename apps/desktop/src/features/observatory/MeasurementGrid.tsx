@@ -10,6 +10,7 @@ import {
   formatDuration,
   formatFrequency,
   formatRatio,
+  formatSampleRate,
 } from "../../lib/format";
 import { FEATURE_CATALOG, GROUP_ORDER, UNAVAILABLE_REASONS, type FeatureInfo } from "./featureCatalog";
 import { ReferenceScale } from "./ReferenceScale";
@@ -33,6 +34,10 @@ function display(feature: AudioFeature, info: FeatureInfo): { value: string; uni
       return { value: formatChannels(v), unit: "" };
     case "bpm":
       return { value: formatBpm(v), unit: "BPM" };
+    case "sampleRate": {
+      const [rate = UNKNOWN, unit = ""] = formatSampleRate(v).split(THIN);
+      return { value: rate, unit };
+    }
   }
 }
 
