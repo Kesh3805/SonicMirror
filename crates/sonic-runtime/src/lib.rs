@@ -1,0 +1,2 @@
+//! Application runtime for SonicMirror: services that coordinate analysis,
+//! persistence and playback, plus the persistent background job scheduler.

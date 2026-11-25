@@ -1,0 +1,15 @@
+[package]
+name = "sonic-runtime"
+description = "Application services, job scheduling and playback for SonicMirror"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+sonic-core.workspace = true
+sonic-catalog.workspace = true
+
+[lints]
+workspace = true
