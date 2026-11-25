@@ -22,8 +22,10 @@ const SILENT_FRAME_POWER: f64 = 1e-12;
 /// Floor that keeps logarithms and divisions finite on empty bins.
 const FLOOR: f64 = 1e-20;
 
-/// Log compression constant for the onset envelope: `ln(1 + γ·|X|)`.
-const ONSET_COMPRESSION: f64 = 100.0;
+/// Onset envelope floor, in dB relative to the bin magnitude of a full-scale
+/// sine. Dither and quantization noise sit well below this and so contribute
+/// no spurious onset strength.
+const ONSET_FLOOR_DB: f64 = -90.0;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct SpectralConfig {
@@ -141,7 +143,7 @@ impl SpectralAnalyzer {
             scratch: vec![Complex32::default(); config.frame_size],
             magnitudes: vec![0.0; config.frame_size / 2 + 1],
             previous: None,
-            log_previous: vec![0.0; config.frame_size / 2 + 1],
+            log_previous: vec![ONSET_FLOOR_DB; config.frame_size / 2 + 1],
             onset: Vec::new(),
             frames: 0,
             centroid: Running::default(),
@@ -157,8 +159,9 @@ impl SpectralAnalyzer {
     }
 
     /// Onset strength per frame (one value per hop, silent frames included):
-    /// the half-wave rectified increase in log-compressed magnitude, summed
-    /// over bins. Rises sharply at note and percussion onsets.
+    /// the half-wave rectified increase in bin level (dB, floored at
+    /// [`ONSET_FLOOR_DB`]), summed over bins. Rises sharply at note and
+    /// percussion onsets and ignores the noise floor.
     pub fn onset_envelope(&self) -> &[f32] {
         &self.onset
     }
@@ -169,11 +172,13 @@ impl SpectralAnalyzer {
     }
 
     fn push_onset(&mut self) {
+        // A full-scale sine peaks at N/4 in a Hann-windowed FFT bin.
+        let reference = self.config.frame_size as f64 / 4.0;
         let mut rise = 0.0;
         for (m, prev) in self.magnitudes.iter().zip(self.log_previous.iter_mut()) {
-            let log = (ONSET_COMPRESSION * m).ln_1p();
-            rise += (log - *prev).max(0.0);
-            *prev = log;
+            let level = (20.0 * (m / reference).max(FLOOR).log10()).max(ONSET_FLOOR_DB);
+            rise += (level - *prev).max(0.0);
+            *prev = level;
         }
         #[allow(clippy::cast_possible_truncation)]
         self.onset.push(rise as f32);
@@ -474,5 +479,31 @@ mod tests {
             let nearest = p.round();
             assert!((p - nearest).abs() < 0.1, "onset frame at {p}s");
         }
+    }
+
+    #[test]
+    fn onset_envelope_ignores_quantization_noise() {
+        // Amplitude pulses (6 dB) on a sustained tone at 2 Hz, quantized to
+        // 16 bits like a real file: the pulse must dominate the envelope.
+        let tone = synth::sine(SR, 8.0, 330.0, 0.4);
+        let pulsed: Vec<f32> = tone
+            .iter()
+            .enumerate()
+            .map(|(i, s)| {
+                let t = i as f64 / f64::from(SR);
+                let phase = (t * 2.0).fract();
+                #[allow(clippy::cast_possible_truncation)]
+                let gain = if phase < 0.05 { 1.0 } else { 0.5 } as f32;
+                (s * gain * 32767.0).round() / 32767.0
+            })
+            .collect();
+        let mut a = SpectralAnalyzer::new(SpectralConfig::default());
+        a.push(&pulsed);
+        let env = a.onset_envelope();
+        let mut sorted: Vec<f32> = env.to_vec();
+        sorted.sort_by(f32::total_cmp);
+        let median = sorted[sorted.len() / 2];
+        let max = sorted[sorted.len() - 1];
+        assert!(max > 20.0 * median.max(1e-3), "max {max}, median {median}");
     }
 }
