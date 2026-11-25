@@ -6,7 +6,9 @@
 //! Proximity on the 2D map is approximate; neighbours are not read from it.
 
 pub mod distance;
+pub mod projection;
 pub mod vector;
 
 pub use distance::{Neighbour, contributions, distance, nearest};
+pub use projection::{Axis, MIN_POINTS, PROJECTION_VERSION, Projection, project};
 pub use vector::{DIMENSIONS, Group, Normalizer, VECTOR_VERSION, raw_vector};
