@@ -7,7 +7,7 @@ import { ipc } from "../../ipc/client";
 import type { TrackRecord } from "../../ipc/types";
 import { THIN, formatChannels, formatCodec, formatDuration, formatSampleRate } from "../../lib/format";
 import { WaveformCanvas } from "../../visualizations/waveform/WaveformCanvas";
-import { buildHeadline, headlineText } from "./headline";
+import { buildHeadline } from "./headline";
 import { MeasurementGrid } from "./MeasurementGrid";
 import { ProvenanceChain } from "./ProvenanceChain";
 import "./observatory.css";
@@ -92,7 +92,7 @@ export function ObservatoryPage() {
 
       <div className="sm-obs-lead">
         {headline && (
-          <p className="sm-headline" aria-label={headlineText(headline)}>
+          <p className="sm-headline">
             {headline.map((part, i) =>
               "text" in part ? (
                 <span key={i}>{part.text}</span>
