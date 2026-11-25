@@ -1,0 +1,88 @@
+.sm-settings {
+  max-width: 800px;
+  border-top: var(--sm-line) solid var(--sm-rule);
+}
+
+.sm-setting {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--sm-space-6);
+  min-height: 56px;
+  padding-block: var(--sm-space-4);
+  border-bottom: var(--sm-line) solid var(--sm-rule-quiet);
+}
+
+.sm-setting-text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sm-space-1);
+}
+
+.sm-setting-name {
+  font-size: var(--sm-type-small);
+  font-weight: var(--sm-weight-medium);
+}
+
+.sm-setting-help {
+  font-size: var(--sm-type-label);
+  color: var(--sm-muted);
+}
+
+/* A native checkbox drawn as a switch; role="switch" keeps it announced. */
+.sm-switch {
+  appearance: none;
+  position: relative;
+  width: 36px;
+  height: 20px;
+  margin: 0;
+  border: var(--sm-line) solid var(--sm-rule-strong);
+  border-radius: var(--sm-radius-round);
+  background: var(--sm-paper);
+  cursor: pointer;
+  transition: background-color var(--sm-duration-control) var(--sm-ease);
+}
+
+.sm-switch::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  border-radius: var(--sm-radius-round);
+  background: var(--sm-muted);
+  transition: transform var(--sm-duration-control) var(--sm-ease);
+}
+
+.sm-switch:checked {
+  background: var(--sm-ink);
+  border-color: var(--sm-ink);
+}
+
+.sm-switch:checked::after {
+  background: var(--sm-paper);
+  transform: translateX(16px);
+}
+
+.sm-about {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: var(--sm-space-1) var(--sm-space-4);
+  margin: 0;
+  font-size: var(--sm-type-num-sm);
+}
+
+.sm-about dt {
+  color: var(--sm-muted);
+}
+
+.sm-about dd {
+  margin: 0;
+}
+
+@media (max-width: 1099px) {
+  .sm-setting {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
