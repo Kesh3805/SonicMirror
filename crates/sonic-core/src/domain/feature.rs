@@ -64,6 +64,30 @@ impl AudioFeature {
         }
     }
 
+    /// A valid vector measurement. Any non-finite component demotes the whole
+    /// feature to [`FeatureStatus::Failed`].
+    pub fn vector(
+        key: impl Into<String>,
+        values: Vec<f64>,
+        unit: Option<&str>,
+        algorithm_version: impl Into<String>,
+    ) -> Self {
+        let key = key.into();
+        let algorithm_version = algorithm_version.into();
+        if values.is_empty() || values.iter().any(|v| !v.is_finite()) {
+            return Self::failed(key, unit, algorithm_version, "non_finite_value");
+        }
+        Self {
+            key,
+            value: Some(FeatureValue::Vector(values)),
+            unit: unit.map(str::to_owned),
+            status: FeatureStatus::Valid,
+            algorithm_version,
+            confidence: None,
+            diagnostic_code: None,
+        }
+    }
+
     /// A feature that is not meaningful for the analyzed signal.
     pub fn unavailable(
         key: impl Into<String>,
@@ -146,6 +170,16 @@ mod tests {
         assert_eq!(json["algorithmVersion"], "1.0.0");
         assert_eq!(json["value"], 2410.0);
         assert!(json.get("diagnosticCode").is_none());
+    }
+
+    #[test]
+    fn vector_with_non_finite_component_fails() {
+        let ok = AudioFeature::vector("mfcc_mean", vec![1.0, -2.5], None, "m/1");
+        assert!(ok.is_valid());
+        assert_eq!(serde_json::to_value(&ok).unwrap()["value"][1], -2.5);
+        let bad = AudioFeature::vector("mfcc_mean", vec![1.0, f64::INFINITY], None, "m/1");
+        assert_eq!(bad.status, FeatureStatus::Failed);
+        assert!(bad.value.is_none());
     }
 
     #[test]
