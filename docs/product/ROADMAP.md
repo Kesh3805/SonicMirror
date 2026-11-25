@@ -23,6 +23,7 @@ committed; each phase ends on its exit criteria, not on a deadline.
 - [x] Streaming spectral features (centroid, bandwidth, rolloff, flatness, flux)
 - [x] Design tokens, local fonts, light/dark themes
 - [x] Application shell and routes
+- [x] Interface redesign from the research survey (see `docs/design/REDESIGN_BRIEF.md`)
 - [x] Tauri 2 desktop shell with minimal capabilities
 - [x] CI quality gates
 - [ ] Remaining architecture decision records (007, 008, 011, 012, 014, 015)

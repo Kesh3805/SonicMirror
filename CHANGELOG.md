@@ -8,6 +8,17 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- Interface redesign from a 652-site research survey (`docs/design/REDESIGN_BRIEF.md`):
+  neutral surface and rule tokens, an oxide accent reserved for playhead, selection and
+  primary action, lightness-ordered data ramps, square geometry, a serif/sans/mono role
+  system with tabular numerals and thin-space units, and WCAG contrast tests for both themes.
+- Track Observatory as an instrument: mono file-fact kicker, display title, a headline
+  sentence built only from valid measurements, a provenance chain, the waveform as a
+  labelled lane with a crosshair readout, hero measurements per group with a neutral
+  loudness reference scale, and inline method disclosure.
+- Dense Library table, an Overview of collection counts and recent additions, typographic
+  empty states, a Settings page with appearance and reduce-motion preferences, and an honest
+  playback strip with no dead controls.
 - Product requirements document and product design specification.
 - Cargo workspace with `sonic-core`, `sonic-catalog` and `sonic-runtime` crates.
 - Versioned acoustic feature result contract with explicit unavailable and failed states.
