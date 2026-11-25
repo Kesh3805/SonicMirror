@@ -1,21 +1,56 @@
 import { useQuery } from "@tanstack/react-query";
-import { Music } from "lucide-react";
-import { Link, useParams } from "react-router";
+import { useParams } from "react-router";
 import { EmptyState } from "../../components/EmptyState";
 import { ErrorNotice } from "../../components/ErrorNotice";
+import { Skeleton } from "../../components/Skeleton";
 import { ipc } from "../../ipc/client";
-import { formatChannels, formatDuration, formatSampleRate } from "../../lib/format";
+import type { TrackRecord } from "../../ipc/types";
+import { THIN, formatChannels, formatCodec, formatDuration, formatSampleRate } from "../../lib/format";
 import { WaveformCanvas } from "../../visualizations/waveform/WaveformCanvas";
+import { buildHeadline, headlineText } from "./headline";
 import { MeasurementGrid } from "./MeasurementGrid";
+import { ProvenanceChain } from "./ProvenanceChain";
 import "./observatory.css";
 
 const WAVEFORM_BUCKETS = 1600;
 
-function formatTimestamp(ms: number): string {
-  return new Date(ms).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
+/** "TRACK · PCM · 44.1 kHz · Stereo · 0:30": null parts are omitted, not dashed. */
+function kickerFor(t: TrackRecord): string {
+  return [
+    "TRACK",
+    t.codec ? formatCodec(t.codec) : null,
+    t.sampleRateHz ? formatSampleRate(t.sampleRateHz) : null,
+    t.channelCount ? formatChannels(t.channelCount) : null,
+    t.durationMs !== null ? formatDuration(t.durationMs) : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
 }
 
-/** PDS §8 Track Observatory: header, provenance, waveform, measurements. */
+function Credits({ track }: { track: TrackRecord }) {
+  if (!track.artist && !track.album) {
+    return <p className="sm-obs-credits sm-muted">No artist or album in file tags</p>;
+  }
+  return (
+    <p className="sm-obs-credits">
+      {track.artist}
+      {track.artist && track.album && <span className="sm-muted"> · </span>}
+      {track.album && <span className="sm-muted">{track.album}</span>}
+    </p>
+  );
+}
+
+function HeaderSkeleton() {
+  return (
+    <div className="sm-obs-header" aria-busy="true">
+      <Skeleton width={260} height={12} />
+      <Skeleton width="60%" height={48} />
+      <Skeleton width={220} height={16} />
+    </div>
+  );
+}
+
+/** Track Observatory (Redesign brief §4.4). */
 export function ObservatoryPage() {
   const { trackId = "" } = useParams();
   const track = useQuery({ queryKey: ["track", trackId], queryFn: () => ipc.getTrack(trackId) });
@@ -31,8 +66,8 @@ export function ObservatoryPage() {
 
   if (track.isPending) {
     return (
-      <div className="sm-page" aria-busy="true">
-        <div className="sm-skeleton sm-obs-header-skeleton" />
+      <div className="sm-page">
+        <HeaderSkeleton />
       </div>
     );
   }
@@ -45,72 +80,64 @@ export function ObservatoryPage() {
   }
 
   const t = track.data;
-  const technical = [
-    t.codec?.toUpperCase(),
-    formatSampleRate(t.sampleRateHz),
-    formatChannels(t.channelCount),
-    formatDuration(t.durationMs),
-  ].filter(Boolean);
+  const headline = analysis.data ? buildHeadline(analysis.data.features) : null;
 
   return (
-    <div className="sm-page">
-      <nav className="sm-breadcrumb-nav" aria-label="Breadcrumb">
-        <Link to="/library/tracks">Library</Link> <span aria-hidden="true">/</span>{" "}
-        <span aria-current="page">{t.title}</span>
-      </nav>
-
+    <div className="sm-page sm-obs">
       <header className="sm-obs-header">
-        <div className="sm-obs-art" aria-hidden="true">
-          <Music size={24} />
-        </div>
-        <div className="sm-obs-heading">
-          <h1 className="sm-page-title">{t.title}</h1>
-          <p className="sm-obs-credits">
-            {t.artist ?? "Unknown artist"}
-            {t.album ? ` · ${t.album}` : ""}
-          </p>
-          <p className="sm-obs-technical sm-data">{technical.join(" · ")}</p>
-        </div>
+        <p className="sm-kicker-data">{kickerFor(t)}</p>
+        <h1 className="sm-obs-title">{t.title}</h1>
+        <Credits track={t} />
       </header>
 
-      {analysis.isError && (
-        <ErrorNotice error={analysis.error} onRetry={() => void analysis.refetch()} />
-      )}
+      <div className="sm-obs-lead">
+        {headline && (
+          <p className="sm-headline" aria-label={headlineText(headline)}>
+            {headline.map((part, i) =>
+              "text" in part ? (
+                <span key={i}>{part.text}</span>
+              ) : (
+                <span key={i} className="sm-data">
+                  {part.value}
+                  {THIN}
+                  {part.unit}
+                </span>
+              ),
+            )}
+          </p>
+        )}
+        {analysis.isError ? (
+          <ErrorNotice error={analysis.error} onRetry={() => void analysis.refetch()} />
+        ) : (
+          analysis.isSuccess && <ProvenanceChain analysis={analysis.data} />
+        )}
+      </div>
 
       {analysis.data === null && (
         <EmptyState title="Not analyzed yet." size="section">
-          This track is in the catalog but has no analysis.
+          This track is in the catalog, but no measurements exist. Nothing here is estimated.
         </EmptyState>
       )}
 
       {analysis.data && (
-        <>
-          <p className="sm-provenance sm-data">
-            <span>{analysis.data.status === "complete" ? "Analyzed" : "Partially analyzed"}</span>
-            <span>{formatTimestamp(analysis.data.completedAtMs)}</span>
-            <span>{analysis.data.engineVersion}</span>
-          </p>
-
-          <section className="sm-obs-section" aria-labelledby="waveform-heading">
-            <h2 id="waveform-heading" className="sm-section-heading">
-              Waveform
+        <div className="sm-obs-body">
+          <section className="sm-obs-lanes" aria-labelledby="signal-heading">
+            <h2 id="signal-heading" className="sm-section-title">
+              Signal
             </h2>
             {waveform.data ? (
               <WaveformCanvas view={waveform.data} />
             ) : waveform.isError ? (
               <ErrorNotice error={waveform.error} onRetry={() => void waveform.refetch()} />
             ) : (
-              <div className="sm-skeleton sm-waveform-skeleton" aria-busy="true" />
+              <Skeleton height={176} />
             )}
           </section>
 
-          <section className="sm-obs-section" aria-labelledby="measurements-heading">
-            <h2 id="measurements-heading" className="sm-section-heading">
-              Acoustic measurements
-            </h2>
+          <section className="sm-obs-measures" aria-label="Acoustic measurements">
             <MeasurementGrid features={analysis.data.features} />
           </section>
-        </>
+        </div>
       )}
     </div>
   );

@@ -1,81 +1,69 @@
-.sm-breadcrumb-nav {
-  font-size: var(--sm-type-small);
-  color: var(--sm-muted);
-}
-
-.sm-breadcrumb-nav a {
-  color: var(--sm-ink);
+.sm-obs {
+  container: obs / inline-size;
 }
 
 .sm-obs-header {
-  display: flex;
-  gap: var(--sm-space-6);
-  align-items: flex-start;
-}
-
-.sm-obs-art {
-  display: grid;
-  place-items: center;
-  width: 120px;
-  height: 120px;
-  flex-shrink: 0;
-  background: var(--sm-inset);
-  border-radius: var(--sm-radius-small);
-  color: var(--sm-muted);
-}
-
-.sm-obs-heading {
   display: flex;
   flex-direction: column;
   gap: var(--sm-space-2);
   min-width: 0;
 }
 
-.sm-obs-heading .sm-page-title {
+.sm-obs-title {
+  font-family: var(--sm-font-display);
+  font-size: var(--sm-type-page);
+  line-height: var(--sm-leading-tight);
+  letter-spacing: var(--sm-tracking-display);
+  font-weight: var(--sm-weight-regular);
+  max-width: 24ch;
   overflow-wrap: anywhere;
 }
 
+@container obs (min-width: 960px) {
+  .sm-obs-title {
+    font-size: var(--sm-type-display);
+    line-height: var(--sm-leading-display);
+  }
+}
+
 .sm-obs-credits {
-  font-size: 16px;
+  font-size: var(--sm-type-subhead);
 }
 
-.sm-obs-technical {
-  font-size: var(--sm-type-label);
-  color: var(--sm-muted);
-}
-
-.sm-provenance {
+.sm-obs-lead {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   gap: var(--sm-space-4);
-  padding-block: var(--sm-space-3);
-  border-block: var(--sm-line) solid var(--sm-border);
-  font-size: var(--sm-type-label);
-  color: var(--sm-muted);
 }
 
-.sm-provenance span:first-child {
-  color: var(--sm-success);
+/* Lanes left, measurements right when there is room; stacked otherwise. */
+.sm-obs-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--sm-space-10);
+  align-items: start;
 }
 
-.sm-obs-section {
+@container obs (min-width: 960px) {
+  .sm-obs-body {
+    grid-template-columns: minmax(0, 2fr) minmax(300px, 1fr);
+  }
+
+  .sm-obs-lanes {
+    position: sticky;
+    top: 0;
+  }
+}
+
+.sm-obs-lanes {
   display: flex;
   flex-direction: column;
   gap: var(--sm-space-3);
+  min-width: 0;
 }
 
-.sm-section-heading {
-  font-size: var(--sm-type-heading);
-  line-height: var(--sm-leading-heading);
-  font-weight: var(--sm-weight-medium);
-}
-
-.sm-obs-header-skeleton {
-  height: 120px;
-}
-
-.sm-waveform-skeleton {
-  height: 172px;
+.sm-obs-measures {
+  min-width: 0;
 }
 
 /* Provenance: hairline boxes joined by faint arrows. */
