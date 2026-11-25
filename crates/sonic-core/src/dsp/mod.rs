@@ -4,6 +4,7 @@
 //! and return explicit unavailable states instead of NaN or infinity.
 
 pub mod level;
+pub mod resample;
 pub mod spectral;
 pub mod synth;
 pub mod waveform;

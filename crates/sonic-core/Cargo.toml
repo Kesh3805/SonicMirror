@@ -8,6 +8,7 @@ repository.workspace = true
 rust-version.workspace = true
 
 [dependencies]
+rubato = "5.1.0"
 rustfft = "6"
 serde.workspace = true
 symphonia = { version = "0.6.1", default-features = false, features = ["mp3", "flac", "wav", "pcm", "vorbis", "ogg", "aac", "isomp4", "alac", "aiff"] }
