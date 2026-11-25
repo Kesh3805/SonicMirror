@@ -36,13 +36,13 @@
   letter-spacing: 0;
 }
 
-/* Secondary cells: a 1px-gap spec grid, no boxed cards. */
+/* Secondary cells: a 1px-gap spec grid, no boxed cards. Rules are drawn per
+   cell so an incomplete last row leaves paper, not a filled block. */
 .sm-metric-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--sm-line);
-  background: var(--sm-rule);
-  border-bottom: var(--sm-line) solid var(--sm-rule);
+  padding: var(--sm-line);
 }
 
 @container measure (min-width: 640px) {
@@ -54,6 +54,7 @@
 .sm-metric-grid .sm-metric {
   padding: var(--sm-space-4);
   background: var(--sm-canvas);
+  box-shadow: 0 0 0 var(--sm-line) var(--sm-rule);
 }
 
 .sm-metric {
