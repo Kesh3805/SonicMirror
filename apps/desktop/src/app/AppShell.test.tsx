@@ -27,10 +27,11 @@ describe("AppShell", () => {
     expect(screen.getByRole("link", { name: "Albums" })).toHaveAttribute("aria-current", "page");
   });
 
-  it("renders an honest empty player instead of fake playback", async () => {
+  it("renders an honest empty player with no dead controls", async () => {
     renderAt("/atlas");
-    expect(await screen.findByText("No track selected")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Play" })).toBeDisabled();
+    expect(await screen.findByText("Nothing playing")).toBeInTheDocument();
+    const player = screen.getByRole("contentinfo", { name: "Playback" });
+    expect(player.querySelectorAll("button, input")).toHaveLength(0);
   });
 
   it("shows the current location as a breadcrumb", async () => {
