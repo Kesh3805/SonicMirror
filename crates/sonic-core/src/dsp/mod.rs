@@ -9,5 +9,6 @@ pub mod loudness;
 pub mod resample;
 pub mod spectral;
 pub mod synth;
+pub mod tempo;
 pub mod waveform;
 pub mod window;
