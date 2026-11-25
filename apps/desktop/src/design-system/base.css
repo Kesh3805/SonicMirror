@@ -189,3 +189,9 @@ a:focus-visible {
   padding-inline: var(--sm-space-3);
   border-bottom: var(--sm-line) solid var(--sm-rule-quiet);
 }
+
+.sm-page-subtitle {
+  max-width: 60ch;
+  font-size: var(--sm-type-small);
+  color: var(--sm-muted);
+}

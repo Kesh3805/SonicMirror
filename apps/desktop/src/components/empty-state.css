@@ -39,3 +39,10 @@
 .sm-empty-action {
   margin-top: var(--sm-space-2);
 }
+
+.sm-empty-fact {
+  display: block;
+  margin-top: var(--sm-space-3);
+  font-size: var(--sm-type-num-sm);
+  color: var(--sm-muted);
+}
