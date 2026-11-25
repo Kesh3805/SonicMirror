@@ -616,7 +616,8 @@ Warp token scrape) are secondary sources.
   example strings. Group counts use `valid / unavailable / failed` of the features present; absent
   catalog keys are not counted.
 - A15. The layout split uses container queries (`@container obs (min-width: 960px)`), with a stacked
-  fallback. The waveform lane gutter is 48px.
+  fallback. The waveform lane gutter is 64px (amended from 48px during implementation: the
+  11px caps lane label beside right-aligned scale ticks needs about 52px plus padding).
 - A16. The top bar breadcrumb shows the track title by reading the cached track query; the in-page
   breadcrumb is removed. The rail foot is hidden in the compact rail.
 
