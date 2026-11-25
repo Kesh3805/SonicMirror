@@ -4,3 +4,4 @@
 
 pub mod domain;
 pub mod dsp;
+pub mod media;
