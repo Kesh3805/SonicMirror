@@ -45,7 +45,7 @@ export function AppShell() {
             <PanelsTopLeft size={18} aria-hidden="true" />
             <span className="sm-nav-label">Overview</span>
           </NavLink>
-          <NavLink className="sm-nav-link" to="/library/tracks" aria-current={inLibrary ? "page" : undefined}>
+          <NavLink className="sm-nav-link" to="/library">
             <Library size={18} aria-hidden="true" />
             <span className="sm-nav-label">Library</span>
           </NavLink>
