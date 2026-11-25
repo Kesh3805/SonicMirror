@@ -233,10 +233,25 @@ fn view(envelope: &WaveformEnvelope, target: usize) -> WaveformView {
 
 /// Canonical JSON of every analysis setting that affects results.
 fn canonical_config() -> String {
+    use sonic_core::dsp::{loudness, tempo};
     let s = SpectralConfig::default();
     format!(
-        "{{\"spectral\":{{\"frameSize\":{},\"hopSize\":{},\"rolloffFraction\":{},\"sampleRate\":{}}},\"waveform\":{{\"baseBucketMs\":{BASE_BUCKET_MS}}}}}",
-        s.frame_size, s.hop_size, s.rolloff_fraction, s.sample_rate
+        concat!(
+            "{{\"loudness\":{{\"version\":\"{}\"}},",
+            "\"spectral\":{{\"frameSize\":{},\"hopSize\":{},\"rolloffFraction\":{},\"sampleRate\":{}}},",
+            "\"tempo\":{{\"maxBpm\":{},\"minBpm\":{},\"minConfidence\":{},\"version\":\"{}\"}},",
+            "\"waveform\":{{\"baseBucketMs\":{}}}}}"
+        ),
+        loudness::ALGORITHM_VERSION,
+        s.frame_size,
+        s.hop_size,
+        s.rolloff_fraction,
+        s.sample_rate,
+        tempo::MAX_BPM,
+        tempo::MIN_BPM,
+        tempo::MIN_CONFIDENCE,
+        tempo::ALGORITHM_VERSION,
+        BASE_BUCKET_MS
     )
 }
 
@@ -292,6 +307,15 @@ mod tests {
 
         drop(service);
         let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn canonical_config_is_stable_json() {
+        let a = canonical_config();
+        assert_eq!(a, canonical_config());
+        let parsed: serde_json::Value = serde_json::from_str(&a).unwrap();
+        assert_eq!(parsed["tempo"]["minBpm"], 40.0);
+        assert_eq!(parsed["spectral"]["sampleRate"], 22_050);
     }
 
     #[test]
