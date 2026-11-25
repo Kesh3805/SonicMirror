@@ -44,6 +44,17 @@ export interface WaveformView {
   max: number[];
 }
 
+export interface SpectrogramView {
+  durationMs: number;
+  maxHz: number;
+  floorDb: number;
+  stepDb: number;
+  reference: string;
+  columns: number;
+  bands: number;
+  cells: number[];
+}
+
 export interface ApplicationError {
   code: string;
   message: string;

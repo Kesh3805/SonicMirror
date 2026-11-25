@@ -3,6 +3,7 @@ import type {
   AppInfo,
   ApplicationError,
   ImportOutcome,
+  SpectrogramView,
   StoredAnalysis,
   TrackRecord,
   WaveformView,
@@ -52,4 +53,6 @@ export const ipc = {
     call<StoredAnalysis | null>("analysis_get_features", { trackId }),
   getWaveform: (trackId: string, targetBuckets: number) =>
     call<WaveformView>("analysis_get_waveform", { trackId, targetBuckets }),
+  getSpectrogram: (trackId: string, columns: number, bands: number) =>
+    call<SpectrogramView>("analysis_get_spectrogram", { trackId, columns, bands }),
 };

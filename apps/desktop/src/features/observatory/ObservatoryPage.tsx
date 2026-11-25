@@ -6,6 +6,7 @@ import { Skeleton } from "../../components/Skeleton";
 import { ipc } from "../../ipc/client";
 import type { TrackRecord } from "../../ipc/types";
 import { THIN, formatChannels, formatCodec, formatDuration, formatSampleRate } from "../../lib/format";
+import { SpectrogramLane } from "../../visualizations/spectrogram/SpectrogramLane";
 import { WaveformCanvas } from "../../visualizations/waveform/WaveformCanvas";
 import { buildHeadline } from "./headline";
 import { MeasurementGrid } from "./MeasurementGrid";
@@ -13,6 +14,8 @@ import { ProvenanceChain } from "./ProvenanceChain";
 import "./observatory.css";
 
 const WAVEFORM_BUCKETS = 1600;
+const SPECTROGRAM_COLUMNS = 1024;
+const SPECTROGRAM_BANDS = 128;
 
 /** "TRACK · PCM · 44.1 kHz · Stereo · 0:30": null parts are omitted, not dashed. */
 function kickerFor(t: TrackRecord): string {
@@ -61,6 +64,11 @@ export function ObservatoryPage() {
   const waveform = useQuery({
     queryKey: ["waveform", trackId, WAVEFORM_BUCKETS],
     queryFn: () => ipc.getWaveform(trackId, WAVEFORM_BUCKETS),
+    enabled: analysis.data != null,
+  });
+  const spectrogram = useQuery({
+    queryKey: ["spectrogram", trackId, SPECTROGRAM_COLUMNS, SPECTROGRAM_BANDS],
+    queryFn: () => ipc.getSpectrogram(trackId, SPECTROGRAM_COLUMNS, SPECTROGRAM_BANDS),
     enabled: analysis.data != null,
   });
 
@@ -131,6 +139,13 @@ export function ObservatoryPage() {
               <ErrorNotice error={waveform.error} onRetry={() => void waveform.refetch()} />
             ) : (
               <Skeleton height={176} />
+            )}
+            {spectrogram.data ? (
+              <SpectrogramLane view={spectrogram.data} />
+            ) : spectrogram.isError ? (
+              <ErrorNotice error={spectrogram.error} onRetry={() => void spectrogram.refetch()} />
+            ) : (
+              <Skeleton height={232} />
             )}
           </section>
 

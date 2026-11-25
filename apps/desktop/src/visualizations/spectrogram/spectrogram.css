@@ -1,0 +1,31 @@
+.sm-spectrogram .sm-spectrogram-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+}
+
+.sm-freq-tick {
+  transform: translateY(50%);
+}
+
+.sm-freq-tick:first-of-type {
+  transform: none;
+}
+
+/* Colour ruler: the dB scale every colour in the image is read against. */
+.sm-colour-ruler {
+  display: flex;
+  align-items: center;
+  gap: var(--sm-space-2);
+  padding-left: var(--sm-lane-gutter);
+  font-size: var(--sm-type-num-sm);
+  color: var(--sm-muted);
+}
+
+.sm-colour-ruler-strip {
+  width: 200px;
+  height: 8px;
+  border: var(--sm-line) solid var(--sm-rule);
+  image-rendering: pixelated;
+}
