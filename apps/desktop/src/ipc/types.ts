@@ -55,3 +55,9 @@ export interface ImportOutcome {
   trackId: string | null;
   error: ApplicationError | null;
 }
+
+export interface AppInfo {
+  app: string;
+  engine: string;
+  featureSchema: string;
+}

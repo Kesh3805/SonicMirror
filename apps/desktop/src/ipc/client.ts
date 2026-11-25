@@ -1,5 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import type {
+  AppInfo,
   ApplicationError,
   ImportOutcome,
   StoredAnalysis,
@@ -43,6 +44,7 @@ async function call<T>(command: string, args?: Record<string, unknown>): Promise
 }
 
 export const ipc = {
+  appInfo: () => call<AppInfo>("app_info"),
   importFiles: () => call<ImportOutcome[]>("library_import_files"),
   listTracks: () => call<TrackRecord[]>("library_list_tracks"),
   getTrack: (trackId: string) => call<TrackRecord>("library_get_track", { trackId }),
