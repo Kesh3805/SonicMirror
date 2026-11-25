@@ -233,16 +233,21 @@ fn view(envelope: &WaveformEnvelope, target: usize) -> WaveformView {
 
 /// Canonical JSON of every analysis setting that affects results.
 fn canonical_config() -> String {
-    use sonic_core::dsp::{loudness, tempo};
+    use sonic_core::dsp::{loudness, mfcc, tempo};
     let s = SpectralConfig::default();
     format!(
         concat!(
             "{{\"loudness\":{{\"version\":\"{}\"}},",
+            "\"mfcc\":{{\"bands\":{},\"coefficients\":{},\"minHz\":{},\"version\":\"{}\"}},",
             "\"spectral\":{{\"frameSize\":{},\"hopSize\":{},\"rolloffFraction\":{},\"sampleRate\":{}}},",
             "\"tempo\":{{\"maxBpm\":{},\"minBpm\":{},\"minConfidence\":{},\"version\":\"{}\"}},",
             "\"waveform\":{{\"baseBucketMs\":{}}}}}"
         ),
         loudness::ALGORITHM_VERSION,
+        mfcc::BANDS,
+        mfcc::COEFFICIENTS,
+        mfcc::MIN_HZ,
+        mfcc::ALGORITHM_VERSION,
         s.frame_size,
         s.hop_size,
         s.rolloff_fraction,
@@ -316,6 +321,7 @@ mod tests {
         let parsed: serde_json::Value = serde_json::from_str(&a).unwrap();
         assert_eq!(parsed["tempo"]["minBpm"], 40.0);
         assert_eq!(parsed["spectral"]["sampleRate"], 22_050);
+        assert_eq!(parsed["mfcc"]["coefficients"], 13);
     }
 
     #[test]
