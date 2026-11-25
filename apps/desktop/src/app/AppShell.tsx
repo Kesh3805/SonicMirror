@@ -96,7 +96,11 @@ export function AppShell() {
             <PanelsTopLeft size={16} aria-hidden="true" />
             <span className="sm-nav-label">Overview</span>
           </NavLink>
-          <NavLink className="sm-nav-link" to="/library">
+          <NavLink
+            className={inLibrary ? "sm-nav-link sm-nav-ancestor" : "sm-nav-link"}
+            to="/library"
+            end
+          >
             <Library size={16} aria-hidden="true" />
             <span className="sm-nav-label">Library</span>
           </NavLink>

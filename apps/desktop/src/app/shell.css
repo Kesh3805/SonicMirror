@@ -107,6 +107,11 @@
   box-shadow: inset var(--sm-mark) 0 0 var(--sm-accent);
 }
 
+/* Parent of the current view: ink text, no fill and no accent rule. */
+.sm-nav-ancestor {
+  color: var(--sm-ink);
+}
+
 .sm-nav-sub {
   height: var(--sm-nav-child);
   padding-left: calc(var(--sm-space-2) + 16px + var(--sm-space-3));
@@ -154,9 +159,18 @@
     padding-inline: 0;
   }
 
+  .sm-nav-sub {
+    display: none;
+  }
+
+  /* With the views hidden, the parent shows where you are. */
+  .sm-nav-ancestor {
+    background: var(--sm-selected);
+    box-shadow: inset var(--sm-mark) 0 0 var(--sm-accent);
+  }
+
   .sm-brand-text,
   .sm-nav-label,
-  .sm-nav-sub,
   .sm-rail-foot {
     position: absolute;
     width: 1px;

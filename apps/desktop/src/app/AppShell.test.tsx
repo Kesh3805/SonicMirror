@@ -20,11 +20,13 @@ describe("AppShell", () => {
     expect(labels).toEqual(["Overview", "Library", "Atlas", "Settings"]);
   });
 
-  it("marks Library current and expands its views on library routes", async () => {
+  it("marks only the open library view as current", async () => {
     renderAt("/library/albums");
     const library = await screen.findByRole("link", { name: "Library" });
-    expect(library).toHaveAttribute("aria-current", "page");
+    expect(library).not.toHaveAttribute("aria-current");
     expect(screen.getByRole("link", { name: "Albums" })).toHaveAttribute("aria-current", "page");
+    const nav = screen.getByRole("navigation", { name: "Primary" });
+    expect(nav.querySelectorAll('[aria-current="page"]')).toHaveLength(1);
   });
 
   it("renders an honest empty player with no dead controls", async () => {
