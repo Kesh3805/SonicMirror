@@ -8,7 +8,12 @@ export function useImportMusic() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ipc.importFiles,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tracks"] }),
+    onSuccess: () =>
+      Promise.all(
+        ["tracks", "atlas", "atlas-neighbours"].map((key) =>
+          queryClient.invalidateQueries({ queryKey: [key] }),
+        ),
+      ),
   });
 }
 
