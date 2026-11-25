@@ -33,6 +33,7 @@ describe("other formatters", () => {
   it("formats decibels to one decimal with a typographic minus", () => {
     expect(formatDecibels(-9.031)).toBe("−9.0");
     expect(formatDecibels(0)).toBe("0.0");
+    expect(formatDecibels(-0.00026)).toBe("0.0");
   });
 
   it("formats sample rates and channels", () => {

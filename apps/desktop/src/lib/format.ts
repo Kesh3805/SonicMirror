@@ -36,7 +36,10 @@ export function formatSampleRate(hz: number | null | undefined): string {
 /** dB, dBFS and LUFS use one decimal; the minus sign is typographic. */
 export function formatDecibels(db: number | null | undefined): string {
   if (!finite(db)) return UNKNOWN;
-  return db.toFixed(1).replace("-", "−");
+  const text = db.toFixed(1);
+  // −0.0003 rounds to "-0.0"; a signed zero carries no meaning.
+  if (Number(text) === 0) return "0.0";
+  return text.replace("-", "−");
 }
 
 export function formatRatio(value: number | null | undefined, decimals = 3): string {
