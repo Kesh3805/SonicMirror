@@ -8,6 +8,7 @@ repository.workspace = true
 rust-version.workspace = true
 
 [dependencies]
+rustfft = "6"
 serde.workspace = true
 thiserror.workspace = true
 
