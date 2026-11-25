@@ -29,13 +29,26 @@ export function ImportButton({ importer }: { importer: Importer }) {
   );
 }
 
+/**
+ * A live region that is always mounted, so assistive technology announces the
+ * import result when it appears inside (a region mounted with its text often
+ * is not announced).
+ */
+export function ImportStatus({ importer }: { importer: Importer }) {
+  return (
+    <div role="status" className="sm-import-status">
+      {importer.data && <ImportSummary outcomes={importer.data} />}
+    </div>
+  );
+}
+
 /** Result of the last import, with failures named by file. */
 export function ImportSummary({ outcomes }: { outcomes: ImportOutcome[] }) {
   if (outcomes.length === 0) return null;
   const failed = outcomes.filter((o) => o.error);
   const imported = outcomes.length - failed.length;
   return (
-    <div className="sm-import-summary" role="status">
+    <div className="sm-import-summary">
       <p>
         <span className="sm-data">{formatCount(imported)}</span> imported
         {failed.length > 0 && (

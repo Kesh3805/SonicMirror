@@ -7,6 +7,12 @@
   font-family: var(--sm-font-ui);
 }
 
+/* Kept rendered (not display: none) so screen readers track the live region,
+   but taken out of the flex flow while empty so it adds no gap. */
+.sm-import-status:empty {
+  position: absolute;
+}
+
 .sm-import-summary {
   padding: var(--sm-space-3) var(--sm-space-4);
   border: var(--sm-line) solid var(--sm-rule);

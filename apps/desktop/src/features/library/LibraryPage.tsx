@@ -6,7 +6,7 @@ import { SkeletonRows } from "../../components/Skeleton";
 import { ipc } from "../../ipc/client";
 import type { TrackRecord } from "../../ipc/types";
 import { formatCount, formatTotalDuration } from "../../lib/format";
-import { ImportButton, ImportSummary, useImportMusic } from "./importer";
+import { ImportButton, ImportStatus, useImportMusic } from "./importer";
 import { TracksTable } from "./TracksTable";
 import "./library.css";
 
@@ -58,7 +58,7 @@ export function LibraryPage() {
         {view === "tracks" && <ImportButton importer={importer} />}
       </header>
 
-      {importer.data && <ImportSummary outcomes={importer.data} />}
+      <ImportStatus importer={importer} />
       {importer.isError && <ErrorNotice error={importer.error} />}
 
       {view !== "tracks" ? (

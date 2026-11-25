@@ -6,7 +6,7 @@ import { Skeleton } from "../../components/Skeleton";
 import { ipc } from "../../ipc/client";
 import type { TrackRecord } from "../../ipc/types";
 import { formatCount, formatDate, formatTotalDuration } from "../../lib/format";
-import { ImportButton, ImportSummary, useImportMusic } from "../library/importer";
+import { ImportButton, ImportStatus, useImportMusic } from "../library/importer";
 import "./overview.css";
 
 const RECENT = 8;
@@ -85,7 +85,7 @@ export function OverviewPage() {
         <ImportButton importer={importer} />
       </header>
 
-      {importer.data && <ImportSummary outcomes={importer.data} />}
+      <ImportStatus importer={importer} />
       {importer.isError && <ErrorNotice error={importer.error} />}
 
       {/* Data wins over a failed background refresh; the error shows only when nothing is known. */}

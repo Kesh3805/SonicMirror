@@ -1,17 +1,23 @@
 import { useQuery } from "@tanstack/react-query";
 import { EmptyState } from "../../components/EmptyState";
+import { ErrorNotice } from "../../components/ErrorNotice";
 import { ipc } from "../../ipc/client";
 import { formatCount } from "../../lib/format";
-import { ImportButton, ImportSummary, useImportMusic } from "../library/importer";
+import { ImportButton, ImportStatus, useImportMusic } from "../library/importer";
+
+/** The projection needs at least this many analyzed tracks (PRD §14). */
+const MIN_TRACKS = 3;
 
 /**
- * Sonic Atlas (Redesign brief §4.5). Until projections exist the page explains
- * what the map needs and how positions are computed. No fake map, no sample
- * dots, no empty axes.
+ * Sonic Atlas (Redesign brief §4.5). Until projections exist the page states
+ * the actual reason the map is not shown and how positions will be computed.
+ * No fake map, no sample dots, no empty axes.
  */
 export function AtlasPage() {
   const tracks = useQuery({ queryKey: ["tracks"], queryFn: ipc.listTracks });
   const importer = useImportMusic();
+  const count = tracks.data?.length;
+  const enough = count !== undefined && count >= MIN_TRACKS;
 
   return (
     <div className="sm-page">
@@ -23,20 +29,27 @@ export function AtlasPage() {
         </p>
       </header>
 
-      {importer.data && <ImportSummary outcomes={importer.data} />}
+      <ImportStatus importer={importer} />
+      {importer.isError && <ErrorNotice error={importer.error} />}
 
-      <EmptyState
-        title="The map needs at least three analyzed tracks."
-        action={<ImportButton importer={importer} />}
-      >
-        Positions come from principal components of the measurements made on this device. No
-        genres, tags or guesses are used.
-        {tracks.data !== undefined && (
-          <span className="sm-empty-fact sm-data">
-            tracks in catalog: {formatCount(tracks.data.length)}
-          </span>
-        )}
-      </EmptyState>
+      {enough ? (
+        <EmptyState title="The map is not available yet.">
+          Your catalog has enough tracks, but projecting them is part of the next engine release.
+          Nothing is drawn until real positions exist.
+          <span className="sm-empty-fact sm-data">tracks in catalog: {formatCount(count)}</span>
+        </EmptyState>
+      ) : (
+        <EmptyState
+          title="The map needs at least three analyzed tracks."
+          action={<ImportButton importer={importer} />}
+        >
+          Positions come from principal components of the measurements made on this device. No
+          genres, tags or guesses are used.
+          {count !== undefined && (
+            <span className="sm-empty-fact sm-data">tracks in catalog: {formatCount(count)}</span>
+          )}
+        </EmptyState>
+      )}
     </div>
   );
 }
