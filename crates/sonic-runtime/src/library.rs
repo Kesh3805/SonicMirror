@@ -37,6 +37,8 @@ pub enum RuntimeError {
     NotAnalyzed,
     #[error("the waveform artifact is missing or unreadable")]
     ArtifactUnavailable,
+    #[error("this track is not on the Atlas")]
+    NotOnMap,
 }
 
 impl RuntimeError {
@@ -49,6 +51,7 @@ impl RuntimeError {
             Self::Catalog(e) => e.code(),
             Self::NotAnalyzed => "analysis.not_analyzed",
             Self::ArtifactUnavailable => "analysis.artifact_unavailable",
+            Self::NotOnMap => "atlas.not_on_map",
         }
     }
 
@@ -279,6 +282,52 @@ impl LibraryService {
             bands: usize::from(s.bands),
             cells: s.cells,
         })
+    }
+}
+
+/// Most neighbours a single request may return.
+pub const MAX_NEIGHBOURS: usize = 50;
+
+impl LibraryService {
+    fn catalog_features(
+        &self,
+    ) -> Result<Vec<(TrackRecord, Option<Vec<sonic_core::domain::AudioFeature>>)>> {
+        let catalog = self.catalog();
+        catalog
+            .tracks()?
+            .into_iter()
+            .map(|t| {
+                let features = catalog.analysis_for_track(&t.id)?.map(|a| a.features);
+                Ok((t, features))
+            })
+            .collect()
+    }
+
+    /// The Sonic Atlas for the whole catalog.
+    ///
+    /// # Errors
+    ///
+    /// Fails on a catalog error.
+    pub fn atlas(&self) -> Result<crate::atlas::AtlasSnapshot> {
+        Ok(crate::atlas::snapshot(&self.catalog_features()?))
+    }
+
+    /// Nearest tracks to `track_id` in the original feature space.
+    ///
+    /// # Errors
+    ///
+    /// Fails on a catalog error, or if the track is not on the map.
+    pub fn atlas_neighbours(
+        &self,
+        track_id: &str,
+        k: usize,
+    ) -> Result<Vec<crate::atlas::AtlasNeighbour>> {
+        crate::atlas::neighbours(
+            &self.catalog_features()?,
+            track_id,
+            k.clamp(1, MAX_NEIGHBOURS),
+        )
+        .ok_or(RuntimeError::NotOnMap)
     }
 }
 
