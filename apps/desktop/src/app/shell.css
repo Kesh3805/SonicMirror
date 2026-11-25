@@ -3,40 +3,61 @@
   grid-template-rows: var(--sm-topbar) minmax(0, 1fr) var(--sm-player);
   height: 100%;
   min-height: 0;
+  background: var(--sm-paper);
 }
 
+/* Top bar: paper with a single quiet hairline. */
 .sm-topbar {
   display: flex;
   align-items: center;
-  gap: var(--sm-space-4);
-  padding-inline: var(--sm-space-4);
-  border-bottom: var(--sm-line) solid var(--sm-border);
-  background: var(--sm-canvas);
   min-width: 0;
+  border-bottom: var(--sm-line) solid var(--sm-rule-quiet);
 }
 
 .sm-brand {
   display: inline-flex;
   align-items: center;
   gap: var(--sm-space-2);
-  width: calc(var(--sm-sidebar) - var(--sm-space-4));
+  width: var(--sm-sidebar);
+  height: 100%;
+  padding-inline: var(--sm-space-4);
   flex-shrink: 0;
-  font-family: var(--sm-font-display);
-  font-size: var(--sm-type-heading);
-  line-height: 1;
+  color: var(--sm-ink);
 }
 
-.sm-brand svg {
-  color: var(--sm-accent);
+.sm-brand-text {
+  font-family: var(--sm-font-display);
+  font-size: 20px;
+  line-height: 1;
+  letter-spacing: -0.01em;
+}
+
+.sm-mark {
   flex-shrink: 0;
 }
 
 .sm-breadcrumb {
-  color: var(--sm-muted);
+  display: flex;
+  align-items: center;
+  gap: var(--sm-space-2);
+  min-width: 0;
+  padding-inline: var(--sm-space-6) var(--sm-space-4);
   font-size: var(--sm-type-small);
+  color: var(--sm-muted);
+  white-space: nowrap;
+}
+
+.sm-breadcrumb > span {
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+}
+
+.sm-breadcrumb [aria-current="page"] {
+  color: var(--sm-ink);
+}
+
+.sm-breadcrumb-sep {
+  color: var(--sm-faint);
 }
 
 .sm-middle {
@@ -45,13 +66,13 @@
   min-height: 0;
 }
 
+/* Rail: on paper, separated from content by one hairline (Linear). */
 .sm-rail {
   display: flex;
   flex-direction: column;
-  gap: var(--sm-space-1);
+  gap: 2px;
   padding: var(--sm-space-3) var(--sm-space-2);
-  border-right: var(--sm-line) solid var(--sm-border);
-  background: var(--sm-canvas);
+  border-right: var(--sm-line) solid var(--sm-rule-quiet);
   overflow-y: auto;
   min-height: 0;
 }
@@ -64,40 +85,38 @@
   display: flex;
   align-items: center;
   gap: var(--sm-space-3);
-  height: 40px;
+  height: var(--sm-nav-row);
   padding-inline: var(--sm-space-2);
   border-radius: var(--sm-radius-small);
-  border-left: 3px solid transparent;
-  color: var(--sm-ink);
+  color: var(--sm-muted);
   font-size: var(--sm-type-small);
-  font-weight: var(--sm-weight-medium);
-  transition: background-color var(--sm-duration-fast) var(--sm-ease);
+  transition:
+    background-color var(--sm-duration-fast) var(--sm-ease),
+    color var(--sm-duration-fast) var(--sm-ease);
 }
 
 .sm-nav-link:hover {
   background: var(--sm-hover);
+  color: var(--sm-ink);
   text-decoration: none;
 }
 
 .sm-nav-link[aria-current="page"] {
   background: var(--sm-selected);
-  border-left-color: var(--sm-accent);
-  color: var(--sm-accent);
+  color: var(--sm-ink);
+  box-shadow: inset var(--sm-mark) 0 0 var(--sm-accent);
 }
 
 .sm-nav-sub {
-  height: 32px;
-  padding-left: calc(var(--sm-space-2) + 30px);
-  font-weight: var(--sm-weight-regular);
+  height: var(--sm-nav-child);
+  padding-left: calc(var(--sm-space-2) + 16px + var(--sm-space-3));
 }
 
-.sm-rail-status {
+.sm-rail-foot {
   display: flex;
-  align-items: center;
-  gap: var(--sm-space-2);
-  padding: var(--sm-space-2);
-  color: var(--sm-muted);
-  font-size: var(--sm-type-label);
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--sm-space-3) var(--sm-space-2) var(--sm-space-1);
 }
 
 .sm-main {
@@ -108,11 +127,10 @@
 
 .sm-page {
   max-width: var(--sm-content-max);
-  margin-inline: auto;
   padding: var(--sm-content-padding);
   display: flex;
   flex-direction: column;
-  gap: var(--sm-space-6);
+  gap: var(--sm-space-8);
 }
 
 .sm-page-header {
@@ -121,11 +139,25 @@
   gap: var(--sm-space-2);
 }
 
+/* Header with a title block on the left and actions on the right. */
+.sm-page-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--sm-space-6);
+}
+
 @media (max-width: 1199px) {
+  .sm-brand {
+    width: var(--sm-sidebar-compact);
+    justify-content: center;
+    padding-inline: 0;
+  }
+
   .sm-brand-text,
   .sm-nav-label,
   .sm-nav-sub,
-  .sm-rail-status-text {
+  .sm-rail-foot {
     position: absolute;
     width: 1px;
     height: 1px;
@@ -137,9 +169,5 @@
   .sm-nav-link {
     justify-content: center;
     padding-inline: 0;
-  }
-
-  .sm-rail-status {
-    justify-content: center;
   }
 }

@@ -32,4 +32,16 @@ describe("AppShell", () => {
     expect(await screen.findByText("No track selected")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Play" })).toBeDisabled();
   });
+
+  it("shows the current location as a breadcrumb", async () => {
+    renderAt("/library/albums");
+    const crumbs = await screen.findByRole("navigation", { name: "Breadcrumb" });
+    expect(crumbs).toHaveTextContent("Library/Albums");
+  });
+
+  it("omits the track count when the catalog is unavailable", async () => {
+    renderAt("/overview");
+    expect(await screen.findByText("LOCAL · this device")).toBeInTheDocument();
+    expect(screen.queryByText(/\d+ tracks?$/)).not.toBeInTheDocument();
+  });
 });
