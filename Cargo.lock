@@ -3230,6 +3230,7 @@ name = "sonic-runtime"
 version = "0.1.0"
 dependencies = [
  "serde",
+ "serde_json",
  "sonic-catalog",
  "sonic-core",
  "thiserror 2.0.21",
