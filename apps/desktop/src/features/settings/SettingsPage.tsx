@@ -7,6 +7,7 @@ import {
   readThemePreference,
   type ThemePreference,
 } from "../../app/theme";
+import { Skeleton } from "../../components/Skeleton";
 import { ipc, isNativeRuntime } from "../../ipc/client";
 import "./settings.css";
 
@@ -17,24 +18,49 @@ const THEMES: { value: ThemePreference; label: string }[] = [
 ];
 
 function About() {
-  const info = useQuery({ queryKey: ["app-info"], queryFn: ipc.appInfo, enabled: isNativeRuntime() });
+  const native = isNativeRuntime();
+  const info = useQuery({ queryKey: ["app-info"], queryFn: ipc.appInfo, enabled: native });
+
+  let versions;
+  if (info.data) {
+    versions = (
+      <>
+        <dt>App</dt>
+        <dd>{info.data.app}</dd>
+        <dt>Engine</dt>
+        <dd>{info.data.engine}</dd>
+        <dt>Features</dt>
+        <dd>{info.data.featureSchema}</dd>
+      </>
+    );
+  } else if (!native) {
+    versions = (
+      <>
+        <dt>Versions</dt>
+        <dd>Shown in the desktop app</dd>
+      </>
+    );
+  } else if (info.isError) {
+    versions = (
+      <>
+        <dt>Versions</dt>
+        <dd>Not available</dd>
+      </>
+    );
+  } else {
+    versions = (
+      <>
+        <dt>Versions</dt>
+        <dd>
+          <Skeleton width={140} height={10} />
+        </dd>
+      </>
+    );
+  }
+
   return (
     <dl className="sm-about sm-data">
-      {info.data ? (
-        <>
-          <dt>App</dt>
-          <dd>{info.data.app}</dd>
-          <dt>Engine</dt>
-          <dd>{info.data.engine}</dd>
-          <dt>Features</dt>
-          <dd>{info.data.featureSchema}</dd>
-        </>
-      ) : (
-        <>
-          <dt>Versions</dt>
-          <dd>Shown in the desktop app</dd>
-        </>
-      )}
+      {versions}
       <dt>Analysis</dt>
       <dd>Runs on this computer. Nothing is uploaded.</dd>
     </dl>
