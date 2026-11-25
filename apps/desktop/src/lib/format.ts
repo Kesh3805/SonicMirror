@@ -52,3 +52,13 @@ export function formatChannels(count: number | null | undefined): string {
   if (count === 2) return "Stereo";
   return `${count} channels`;
 }
+
+/** Tempo to the nearest whole BPM; always presented as an estimate. */
+export function formatBpm(bpm: number | null | undefined): string {
+  return finite(bpm) ? String(Math.round(bpm)) : UNKNOWN;
+}
+
+/** Confidence in [0, 1] as a whole percentage. */
+export function formatConfidence(value: number | null | undefined): string {
+  return finite(value) ? `${Math.round(Math.max(0, Math.min(1, value)) * 100)}%` : UNKNOWN;
+}

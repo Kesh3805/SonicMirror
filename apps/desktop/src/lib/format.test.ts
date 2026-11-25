@@ -1,5 +1,7 @@
 import {
   UNKNOWN,
+  formatBpm,
+  formatConfidence,
   formatChannels,
   formatDecibels,
   formatDuration,
@@ -41,5 +43,14 @@ describe("other formatters", () => {
     expect(formatSampleRate(48_000)).toBe("48 kHz");
     expect(formatChannels(2)).toBe("Stereo");
     expect(formatChannels(6)).toBe("6 channels");
+  });
+});
+
+describe("tempo formatting", () => {
+  it("rounds tempo to whole BPM and clamps confidence", () => {
+    expect(formatBpm(119.6)).toBe("120");
+    expect(formatBpm(null)).toBe(UNKNOWN);
+    expect(formatConfidence(0.824)).toBe("82%");
+    expect(formatConfidence(1.4)).toBe("100%");
   });
 });
