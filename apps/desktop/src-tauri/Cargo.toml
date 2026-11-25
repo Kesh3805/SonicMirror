@@ -10,7 +10,8 @@ publish = false
 
 [lib]
 name = "sonicmirror_desktop_lib"
-crate-type = ["staticlib", "cdylib", "rlib"]
+# Desktop only: the cdylib/staticlib outputs are needed for mobile targets.
+crate-type = ["rlib"]
 
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
