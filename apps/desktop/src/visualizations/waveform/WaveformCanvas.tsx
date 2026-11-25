@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { formatDuration } from "../../lib/format";
 import type { WaveformView } from "../../ipc/types";
+import { useThemeKey } from "../useThemeKey";
 import { niceTimeTicks } from "./ticks";
 import "./waveform.css";
 
@@ -26,6 +27,7 @@ export function WaveformCanvas({ view, positionMs }: WaveformCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [width, setWidth] = useState(0);
+  const theme = useThemeKey();
 
   useEffect(() => {
     const el = containerRef.current;
@@ -94,7 +96,7 @@ export function WaveformCanvas({ view, positionMs }: WaveformCanvasProps) {
       ctx.fillStyle = cursor;
       ctx.fillRect(Math.round(playedX), 0, 1, PLOT_HEIGHT);
     }
-  }, [view, width, positionMs]);
+  }, [view, width, positionMs, theme]);
 
   const ticks = niceTimeTicks(view.durationMs);
   const peak = Math.max(...view.max.map(Math.abs), ...view.min.map(Math.abs));
