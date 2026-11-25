@@ -6,3 +6,4 @@ pub mod analysis;
 pub mod domain;
 pub mod dsp;
 pub mod media;
+pub mod similarity;
