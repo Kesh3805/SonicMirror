@@ -12,6 +12,9 @@ now are bug reports, DSP validation and careful review.
 
 ## Setup
 
+On Windows, use the MSVC Rust toolchain (`x86_64-pc-windows-msvc`) with the Visual Studio
+C++ build tools. The GNU toolchain cannot link the WebView2 dependencies reliably.
+
 ```sh
 pnpm install
 cargo test
