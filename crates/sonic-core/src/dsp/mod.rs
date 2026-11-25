@@ -6,6 +6,7 @@
 pub mod kweighting;
 pub mod level;
 pub mod loudness;
+pub mod mfcc;
 pub mod resample;
 pub mod spectral;
 pub mod synth;
