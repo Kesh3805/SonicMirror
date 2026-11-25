@@ -6,7 +6,9 @@ use std::sync::atomic::AtomicBool;
 
 use serde::Serialize;
 use sonic_catalog::{StoredAnalysis, TrackRecord};
-use sonic_runtime::{LibraryService, RuntimeError, SpectrogramView, WaveformView};
+use sonic_runtime::{
+    AtlasNeighbour, AtlasSnapshot, LibraryService, RuntimeError, SpectrogramView, WaveformView,
+};
 use tauri::{AppHandle, State};
 use tauri_plugin_dialog::DialogExt;
 
@@ -166,6 +168,22 @@ pub async fn analysis_get_spectrogram(
 ) -> CommandResult<SpectrogramView> {
     let library = Arc::clone(&library);
     blocking(move || library.spectrogram(&track_id, columns, bands)).await
+}
+
+#[tauri::command]
+pub async fn atlas_get_snapshot(library: State<'_, Library>) -> CommandResult<AtlasSnapshot> {
+    let library = Arc::clone(&library);
+    blocking(move || library.atlas()).await
+}
+
+#[tauri::command]
+pub async fn atlas_get_neighbors(
+    library: State<'_, Library>,
+    track_id: String,
+    k: usize,
+) -> CommandResult<Vec<AtlasNeighbour>> {
+    let library = Arc::clone(&library);
+    blocking(move || library.atlas_neighbours(&track_id, k)).await
 }
 
 /// Run catalog work off the IPC thread so the interface never blocks on disk.
