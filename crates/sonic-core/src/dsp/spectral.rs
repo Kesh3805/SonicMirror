@@ -22,6 +22,9 @@ const SILENT_FRAME_POWER: f64 = 1e-12;
 /// Floor that keeps logarithms and divisions finite on empty bins.
 const FLOOR: f64 = 1e-20;
 
+/// Log compression constant for the onset envelope: `ln(1 + γ·|X|)`.
+const ONSET_COMPRESSION: f64 = 100.0;
+
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct SpectralConfig {
     pub sample_rate: u32,
@@ -97,6 +100,8 @@ pub struct SpectralAnalyzer {
     scratch: Vec<Complex32>,
     magnitudes: Vec<f64>,
     previous: Option<Vec<f64>>,
+    log_previous: Vec<f64>,
+    onset: Vec<f32>,
     frames: u64,
     centroid: Running,
     bandwidth: Running,
@@ -136,6 +141,8 @@ impl SpectralAnalyzer {
             scratch: vec![Complex32::default(); config.frame_size],
             magnitudes: vec![0.0; config.frame_size / 2 + 1],
             previous: None,
+            log_previous: vec![0.0; config.frame_size / 2 + 1],
+            onset: Vec::new(),
             frames: 0,
             centroid: Running::default(),
             bandwidth: Running::default(),
@@ -147,6 +154,29 @@ impl SpectralAnalyzer {
 
     pub fn config(&self) -> &SpectralConfig {
         &self.config
+    }
+
+    /// Onset strength per frame (one value per hop, silent frames included):
+    /// the half-wave rectified increase in log-compressed magnitude, summed
+    /// over bins. Rises sharply at note and percussion onsets.
+    pub fn onset_envelope(&self) -> &[f32] {
+        &self.onset
+    }
+
+    /// Frames per second of the onset envelope.
+    pub fn frame_rate(&self) -> f64 {
+        f64::from(self.config.sample_rate) / self.config.hop_size as f64
+    }
+
+    fn push_onset(&mut self) {
+        let mut rise = 0.0;
+        for (m, prev) in self.magnitudes.iter().zip(self.log_previous.iter_mut()) {
+            let log = (ONSET_COMPRESSION * m).ln_1p();
+            rise += (log - *prev).max(0.0);
+            *prev = log;
+        }
+        #[allow(clippy::cast_possible_truncation)]
+        self.onset.push(rise as f32);
     }
 
     /// Feed mono samples at `config.sample_rate`. Returns descriptors for every
@@ -176,6 +206,7 @@ impl SpectralAnalyzer {
             *m = f64::from(c.norm());
         }
         self.frames += 1;
+        self.push_onset();
 
         let power: f64 = self.magnitudes.iter().map(|m| m * m).sum();
         if power < SILENT_FRAME_POWER {
@@ -414,5 +445,34 @@ mod tests {
         whole.push(&s);
         let (_, chunked) = analyze(&s);
         assert_eq!(whole.finish(), chunked);
+    }
+
+    #[test]
+    fn onset_envelope_has_one_value_per_frame() {
+        let mut a = SpectralAnalyzer::new(SpectralConfig::default());
+        a.push(&synth::silence(SR, 1.0));
+        assert_eq!(a.onset_envelope().len(), 40);
+        assert!(a.onset_envelope().iter().all(|&o| o == 0.0));
+        assert!((a.frame_rate() - 43.066).abs() < 0.01);
+    }
+
+    #[test]
+    fn onset_envelope_peaks_at_clicks() {
+        let mut a = SpectralAnalyzer::new(SpectralConfig::default());
+        a.push(&synth::click_track(SR, 4.0, 60.0, 0.8));
+        let env = a.onset_envelope();
+        let max = env.iter().copied().fold(0.0f32, f32::max);
+        // Strong frames sit within one hop of each one-second click.
+        let peaks: Vec<f64> = env
+            .iter()
+            .enumerate()
+            .filter(|(_, v)| **v > max * 0.5)
+            .map(|(i, _)| (i * 512 + 2048) as f64 / f64::from(SR))
+            .collect();
+        assert_ne!(peaks.len(), 0);
+        for p in peaks {
+            let nearest = p.round();
+            assert!((p - nearest).abs() < 0.1, "onset frame at {p}s");
+        }
     }
 }
