@@ -72,9 +72,9 @@
   background: var(--sm-hover);
 }
 
+/* Keyboard focus is not selection: the focus ring marks it, the accent does not. */
 .sm-table tbody tr:focus-within {
-  background: var(--sm-selected);
-  box-shadow: inset var(--sm-mark) 0 0 var(--sm-accent);
+  background: var(--sm-hover);
 }
 
 .sm-col-artist,
