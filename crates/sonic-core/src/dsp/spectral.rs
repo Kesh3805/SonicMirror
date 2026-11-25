@@ -10,6 +10,7 @@ use std::sync::Arc;
 
 use rustfft::{Fft, FftPlanner, num_complex::Complex32};
 
+use super::mfcc::{self, MfccExtractor, MfccSummary};
 use super::window::hann;
 use crate::domain::AudioFeature;
 
@@ -105,6 +106,9 @@ pub struct SpectralAnalyzer {
     log_previous: Vec<f64>,
     onset: Vec<f32>,
     frames: u64,
+    mfcc: MfccExtractor,
+    mfcc_summary: MfccSummary,
+    power: Vec<f64>,
     centroid: Running,
     bandwidth: Running,
     rolloff: Running,
@@ -146,6 +150,9 @@ impl SpectralAnalyzer {
             log_previous: vec![ONSET_FLOOR_DB; config.frame_size / 2 + 1],
             onset: Vec::new(),
             frames: 0,
+            mfcc: MfccExtractor::new(config.sample_rate, config.frame_size / 2 + 1),
+            mfcc_summary: MfccSummary::default(),
+            power: vec![0.0; config.frame_size / 2 + 1],
             centroid: Running::default(),
             bandwidth: Running::default(),
             rolloff: Running::default(),
@@ -232,11 +239,37 @@ impl SpectralAnalyzer {
         if let Some(flux) = d.flux {
             self.flux.push(flux);
         }
+        for (p, m) in self.power.iter_mut().zip(&self.magnitudes) {
+            *p = m * m;
+        }
+        let coefficients = self.mfcc.coefficients(&self.power);
+        self.mfcc_summary.push(&coefficients);
         match &mut self.previous {
             Some(prev) => prev.copy_from_slice(&self.magnitudes),
             None => self.previous = Some(self.magnitudes.clone()),
         }
         Some(d)
+    }
+
+    /// MFCC summary features: per-coefficient mean and standard deviation over
+    /// all non-silent frames (13-dimensional vectors).
+    pub fn mfcc_features(&self) -> Vec<AudioFeature> {
+        let v = mfcc::ALGORITHM_VERSION;
+        if self.mfcc_summary.frames() == 0 {
+            let reason = if self.frames == 0 {
+                "signal_shorter_than_frame"
+            } else {
+                "digital_silence"
+            };
+            return vec![
+                AudioFeature::unavailable("mfcc_mean", None, v, reason),
+                AudioFeature::unavailable("mfcc_std", None, v, reason),
+            ];
+        }
+        vec![
+            AudioFeature::vector("mfcc_mean", self.mfcc_summary.mean(), None, v),
+            AudioFeature::vector("mfcc_std", self.mfcc_summary.std(), None, v),
+        ]
     }
 
     /// Aggregate mean / standard deviation features over all frames seen.
@@ -505,5 +538,43 @@ mod tests {
         let median = sorted[sorted.len() / 2];
         let max = sorted[sorted.len() - 1];
         assert!(max > 20.0 * median.max(1e-3), "max {max}, median {median}");
+    }
+
+    #[test]
+    fn mfcc_vectors_summarize_and_separate_timbres() {
+        let vectors = |signal: &[f32]| -> Vec<f64> {
+            let mut a = SpectralAnalyzer::new(SpectralConfig::default());
+            a.push(signal);
+            let f = a.mfcc_features();
+            assert_eq!(f.len(), 2);
+            match &f[0].value {
+                Some(FeatureValue::Vector(v)) => v.clone(),
+                other => panic!("{other:?}"),
+            }
+        };
+        let tone = vectors(&synth::sine(SR, 1.0, 440.0, 0.5));
+        let noise = vectors(&synth::white_noise(SR, 1.0, 0.5, 4));
+        assert_eq!(tone.len(), 13);
+        let distance: f64 = tone
+            .iter()
+            .zip(&noise)
+            .map(|(a, b)| (a - b).powi(2))
+            .sum::<f64>()
+            .sqrt();
+        assert!(
+            distance > 5.0,
+            "tone and noise timbres should differ, distance {distance}"
+        );
+    }
+
+    #[test]
+    fn silent_signal_has_no_mfcc() {
+        let mut a = SpectralAnalyzer::new(SpectralConfig::default());
+        a.push(&synth::silence(SR, 1.0));
+        assert!(
+            a.mfcc_features()
+                .iter()
+                .all(|f| f.status == FeatureStatus::Unavailable)
+        );
     }
 }

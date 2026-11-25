@@ -30,7 +30,7 @@ use crate::media::{DecodedStream, MediaError, TechnicalProperties};
 pub const ENGINE_VERSION: &str = "sonic-engine/0.1.0";
 
 /// Version of the set of features the engine produces.
-pub const FEATURE_SCHEMA_VERSION: &str = "features/0.2.0";
+pub const FEATURE_SCHEMA_VERSION: &str = "features/0.3.0";
 
 const TECHNICAL_VERSION: &str = "technical/1.0.0";
 
@@ -148,6 +148,7 @@ pub fn analyze(
     features.extend(level.features());
     features.extend(loudness.features());
     features.extend(spectral.finish());
+    features.extend(spectral.mfcc_features());
     features.push(tempo_feature(
         spectral.onset_envelope(),
         spectral.frame_rate(),
