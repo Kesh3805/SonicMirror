@@ -13,6 +13,8 @@ All notable changes to this project are documented here. The format follows
 - Versioned acoustic feature result contract with explicit unavailable and failed states.
 - Deterministic synthetic signal generators for tests and benchmarks.
 - RMS level, sample peak and crest factor measurements.
+- Streaming spectral analyzer: centroid, bandwidth, rolloff, flatness and flux with a periodic Hann window.
+- Architecture decision records for the core architecture.
 - Design tokens, locally bundled fonts and light/dark themes.
 - Desktop application shell with Overview, Library, Atlas and Settings routes.
 - Tauri 2 desktop shell with minimal capabilities and a strict content security policy.

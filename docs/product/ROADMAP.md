@@ -20,11 +20,12 @@ committed; each phase ends on its exit criteria, not on a deadline.
 - [x] Versioned feature result contract
 - [x] Synthetic signal fixtures
 - [x] Level measurements (RMS, sample peak, crest factor)
+- [x] Streaming spectral features (centroid, bandwidth, rolloff, flatness, flux)
 - [x] Design tokens, local fonts, light/dark themes
 - [x] Application shell and routes
 - [x] Tauri 2 desktop shell with minimal capabilities
 - [x] CI quality gates
-- [ ] Architecture decision records ADR-001 – ADR-015
+- [ ] Remaining architecture decision records (007, 008, 011, 012, 014, 015)
 - [ ] Software Architecture Document
 - [ ] Decoder spike (Symphonia format matrix)
 - [ ] Playback spike (Rodio/CPAL on Windows)
