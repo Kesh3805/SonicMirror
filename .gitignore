@@ -1,0 +1,26 @@
+# Rust
+/target/
+**/target/
+
+# Node
+node_modules/
+dist/
+*.tsbuildinfo
+.vite/
+
+# Tauri
+apps/desktop/src-tauri/gen/
+
+# Editors / OS
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+
+# Local env and data
+.env
+.env.*
+*.sqlite
+*.sqlite-journal
+/benchmarks/results/
