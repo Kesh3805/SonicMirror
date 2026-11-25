@@ -1,31 +1,127 @@
-.sm-waveform {
+/* Instrument lanes: a labelled scale gutter beside each plot, one shared
+   time axis under the last lane, and a figure caption. No outer box. */
+.sm-lanes {
+  /* Fits a caps lane label beside right-aligned scale ticks. */
+  --sm-lane-gutter: 64px;
   margin: 0;
   display: flex;
   flex-direction: column;
   min-width: 0;
 }
 
-.sm-waveform-plot {
+.sm-lane {
+  display: grid;
+  grid-template-columns: var(--sm-lane-gutter) minmax(0, 1fr);
+  border-bottom: var(--sm-line) solid var(--sm-rule-quiet);
+}
+
+.sm-lane-gutter {
+  position: relative;
+  padding-right: var(--sm-space-2);
+}
+
+.sm-lane-label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  font-size: var(--sm-type-annotation);
+  font-weight: var(--sm-weight-medium);
+  letter-spacing: var(--sm-tracking-label);
+  text-transform: uppercase;
+  color: var(--sm-muted);
+}
+
+.sm-lane-tick {
+  position: absolute;
+  right: var(--sm-space-2);
+  font-family: var(--sm-font-data);
+  font-size: var(--sm-type-num-sm);
+  line-height: 1;
+  color: var(--sm-muted);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.sm-lane-tick[data-at="top"] {
+  top: 0;
+}
+
+.sm-lane-tick[data-at="mid"] {
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.sm-lane-tick[data-at="bottom"] {
+  bottom: 0;
+}
+
+.sm-lane-plot {
+  position: relative;
+  min-width: 0;
+  cursor: crosshair;
+}
+
+.sm-lane-plot canvas {
   display: block;
   width: 100%;
-  background: var(--sm-canvas);
-  border: var(--sm-line) solid var(--sm-border);
-  border-radius: var(--sm-radius-small);
+  height: 100%;
 }
 
-.sm-waveform-axis {
+.sm-crosshair {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--sm-rule-strong);
+  pointer-events: none;
+}
+
+.sm-lane-axis {
+  display: grid;
+  grid-template-columns: var(--sm-lane-gutter) minmax(0, 1fr);
+}
+
+.sm-lane-axis-ticks {
+  grid-column: 2;
   position: relative;
+  height: 24px;
 }
 
-.sm-waveform-tick {
+.sm-lane-axis-tick {
   position: absolute;
   top: var(--sm-space-1);
   transform: translateX(-50%);
-  font-size: var(--sm-type-annotation);
-  color: var(--sm-chart-axis);
+  font-family: var(--sm-font-data);
+  font-size: var(--sm-type-num-sm);
+  color: var(--sm-muted);
   white-space: nowrap;
+  font-variant-numeric: tabular-nums lining-nums;
 }
 
-.sm-waveform-tick:first-child {
+.sm-lane-axis-tick:first-child {
   transform: none;
+}
+
+/* Axis-edge readout chip, pinned under the axis rather than over the data. */
+.sm-readout {
+  position: absolute;
+  top: 2px;
+  z-index: 1;
+  transform: translateX(-50%);
+  padding: 1px var(--sm-space-2);
+  border: var(--sm-line) solid var(--sm-rule);
+  border-radius: var(--sm-radius-small);
+  background: var(--sm-raised);
+  font-family: var(--sm-font-data);
+  font-size: var(--sm-type-num-sm);
+  color: var(--sm-ink);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums lining-nums;
+  pointer-events: none;
+}
+
+.sm-lanes-caption {
+  padding-left: var(--sm-lane-gutter);
+  font-family: var(--sm-font-data);
+  font-size: var(--sm-type-num-sm);
+  color: var(--sm-muted);
 }

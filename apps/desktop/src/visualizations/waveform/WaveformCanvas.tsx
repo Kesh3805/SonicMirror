@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { formatDuration } from "../../lib/format";
+import { formatCount, formatDuration } from "../../lib/format";
 import type { WaveformView } from "../../ipc/types";
 import { useThemeKey } from "../useThemeKey";
+import { columnExtrema, formatReadout, readoutAt, type Readout } from "./readout";
 import { niceTimeTicks } from "./ticks";
 import "./waveform.css";
 
@@ -11,26 +12,28 @@ interface WaveformCanvasProps {
   positionMs?: number;
 }
 
-const PLOT_HEIGHT = 144;
-const AXIS_HEIGHT = 28;
+const PLOT_HEIGHT = 128;
 
 function readToken(el: Element, name: string): string {
   return getComputedStyle(el).getPropertyValue(name).trim();
 }
 
 /**
- * PDS §14 waveform: one vertical min/max stroke per pixel column from real
- * sample extrema, a zero baseline, a fixed −1..+1 amplitude scale and nice
- * time ticks. Nothing is interpolated or normalized per track.
+ * The waveform as an instrument lane (Redesign brief §4.4, PDS §14): a
+ * labelled scale gutter, one min/max stroke per pixel column from real sample
+ * extrema on a fixed −1..+1 scale, a shared time axis, a figure caption, and a
+ * crosshair readout taken from the same buckets that are drawn. Nothing is
+ * normalized, smoothed or interpolated.
  */
 export function WaveformCanvas({ view, positionMs }: WaveformCanvasProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const plotRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [width, setWidth] = useState(0);
+  const [hover, setHover] = useState<{ x: number; readout: Readout } | null>(null);
   const theme = useThemeKey();
 
   useEffect(() => {
-    const el = containerRef.current;
+    const el = plotRef.current;
     if (!el) return;
     const observer = new ResizeObserver(([entry]) => {
       if (entry) setWidth(Math.floor(entry.contentRect.width));
@@ -50,77 +53,107 @@ export function WaveformCanvas({ view, positionMs }: WaveformCanvasProps) {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, width, PLOT_HEIGHT);
 
-    const grid = readToken(canvas, "--sm-chart-grid");
+    const gridColor = readToken(canvas, "--sm-rule-quiet");
+    const baseline = readToken(canvas, "--sm-rule");
     const unplayed = readToken(canvas, "--sm-wave");
     const played = readToken(canvas, "--sm-wave-played");
     const cursor = readToken(canvas, "--sm-wave-cursor");
+    const halo = readToken(canvas, "--sm-paper");
     const mid = PLOT_HEIGHT / 2;
-    const half = PLOT_HEIGHT / 2 - 4;
+    const half = PLOT_HEIGHT / 2 - 2;
 
-    // Time grid.
-    ctx.strokeStyle = grid;
-    ctx.lineWidth = 1;
+    ctx.fillStyle = gridColor;
     for (const t of niceTimeTicks(view.durationMs)) {
-      const x = Math.round((t / view.durationMs) * width) + 0.5;
-      ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, PLOT_HEIGHT);
-      ctx.stroke();
+      ctx.fillRect(Math.round((t / view.durationMs) * width), 0, 1, PLOT_HEIGHT);
     }
-    // Zero baseline.
-    ctx.beginPath();
-    ctx.moveTo(0, mid + 0.5);
-    ctx.lineTo(width, mid + 0.5);
-    ctx.stroke();
+    ctx.fillStyle = baseline;
+    ctx.fillRect(0, Math.round(mid), width, 1);
 
-    // One min/max stroke per pixel column, merging buckets that share a column.
-    const buckets = view.min.length;
     const playedX = positionMs === undefined ? -1 : (positionMs / view.durationMs) * width;
     for (let x = 0; x < width; x++) {
-      const start = Math.floor((x / width) * buckets);
-      const end = Math.max(start + 1, Math.floor(((x + 1) / width) * buckets));
-      let lo = Infinity;
-      let hi = -Infinity;
-      for (let i = start; i < end && i < buckets; i++) {
-        lo = Math.min(lo, view.min[i] ?? 0);
-        hi = Math.max(hi, view.max[i] ?? 0);
-      }
-      if (!Number.isFinite(lo) || !Number.isFinite(hi)) continue;
+      const extrema = columnExtrema(view, x, width);
+      if (!extrema) continue;
       ctx.fillStyle = x < playedX ? played : unplayed;
-      const top = mid - Math.max(-1, Math.min(1, hi)) * half;
-      const bottom = mid - Math.max(-1, Math.min(1, lo)) * half;
+      const top = mid - Math.max(-1, Math.min(1, extrema.max)) * half;
+      const bottom = mid - Math.max(-1, Math.min(1, extrema.min)) * half;
       ctx.fillRect(x, top, 1, Math.max(1, bottom - top));
     }
 
+    // Playhead: 2px oxide with a 1px paper halo so it clears 3:1 over ink.
     if (playedX >= 0) {
+      const px = Math.round(playedX);
+      ctx.fillStyle = halo;
+      ctx.fillRect(px - 2, 0, 4, PLOT_HEIGHT);
       ctx.fillStyle = cursor;
-      ctx.fillRect(Math.round(playedX), 0, 1, PLOT_HEIGHT);
+      ctx.fillRect(px - 1, 0, 2, PLOT_HEIGHT);
     }
   }, [view, width, positionMs, theme]);
 
   const ticks = niceTimeTicks(view.durationMs);
-  const peak = Math.max(...view.max.map(Math.abs), ...view.min.map(Math.abs));
+  const peak = Math.max(0, ...view.max.map(Math.abs), ...view.min.map(Math.abs));
 
   return (
-    <figure className="sm-waveform" ref={containerRef}>
-      <canvas
-        ref={canvasRef}
-        className="sm-waveform-plot"
-        style={{ height: PLOT_HEIGHT }}
-        role="img"
-        aria-label={`Waveform, ${formatDuration(view.durationMs)} long, peak amplitude ${peak.toFixed(2)} of full scale.`}
-      />
-      <div className="sm-waveform-axis" style={{ height: AXIS_HEIGHT }} aria-hidden="true">
-        {ticks.map((t) => (
-          <span
-            key={t}
-            className="sm-waveform-tick sm-data"
-            style={{ left: `${(t / view.durationMs) * 100}%` }}
-          >
-            {formatDuration(t)}
+    <figure className="sm-lanes">
+      <div className="sm-lane">
+        <div className="sm-lane-gutter" aria-hidden="true">
+          <span className="sm-lane-label">Ampl</span>
+          <span className="sm-lane-tick" data-at="top">
+            +1
           </span>
-        ))}
+          <span className="sm-lane-tick" data-at="mid">
+            0
+          </span>
+          <span className="sm-lane-tick" data-at="bottom">
+            −1
+          </span>
+        </div>
+        <div
+          className="sm-lane-plot"
+          ref={plotRef}
+          style={{ height: PLOT_HEIGHT }}
+          onPointerMove={(e) => {
+            const rect = e.currentTarget.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const readout = readoutAt(view, x, rect.width);
+            setHover(readout ? { x, readout } : null);
+          }}
+          onPointerLeave={() => setHover(null)}
+        >
+          <canvas
+            ref={canvasRef}
+            role="img"
+            aria-label={`Waveform, ${formatDuration(view.durationMs)} long, peak amplitude ${peak.toFixed(2)} of full scale.`}
+          />
+          {hover && (
+            <span className="sm-crosshair" style={{ left: hover.x }} aria-hidden="true" />
+          )}
+        </div>
       </div>
+
+      <div className="sm-lane-axis" aria-hidden="true">
+        <div className="sm-lane-axis-ticks">
+          {ticks.map((t) => (
+            <span
+              key={t}
+              className="sm-lane-axis-tick"
+              style={{ left: `${(t / view.durationMs) * 100}%` }}
+            >
+              {formatDuration(t)}
+            </span>
+          ))}
+          {hover && (
+            <span className="sm-readout" style={{ left: hover.x }}>
+              {formatReadout(hover.readout)}
+            </span>
+          )}
+        </div>
+      </div>
+
+      <figcaption className="sm-lanes-caption">
+        Fig. 1 — Sample extrema, {formatCount(view.min.length)} buckets of{" "}
+        {view.bucketDurationMs}
+        {" "}ms, fixed full scale; nothing normalized.
+      </figcaption>
     </figure>
   );
 }
