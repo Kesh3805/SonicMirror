@@ -1,0 +1,31 @@
+.sm-waveform {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.sm-waveform-plot {
+  display: block;
+  width: 100%;
+  background: var(--sm-canvas);
+  border: var(--sm-line) solid var(--sm-border);
+  border-radius: var(--sm-radius-small);
+}
+
+.sm-waveform-axis {
+  position: relative;
+}
+
+.sm-waveform-tick {
+  position: absolute;
+  top: var(--sm-space-1);
+  transform: translateX(-50%);
+  font-size: var(--sm-type-annotation);
+  color: var(--sm-chart-axis);
+  white-space: nowrap;
+}
+
+.sm-waveform-tick:first-child {
+  transform: none;
+}
