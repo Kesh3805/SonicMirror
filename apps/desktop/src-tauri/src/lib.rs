@@ -30,6 +30,7 @@ pub fn run() {
             commands::library_get_track,
             commands::analysis_get_features,
             commands::analysis_get_waveform,
+            commands::analysis_get_spectrogram,
         ])
         .run(tauri::generate_context!())
         .expect("error while running SonicMirror");
