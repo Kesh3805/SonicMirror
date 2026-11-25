@@ -8,6 +8,8 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- MFCC timbre summaries (13 coefficients, 40 mel bands; mean and spread per track), shown as
+  coefficient tables in the Observatory's technical details. Feature schema `features/0.3.0`.
 - Interface redesign from a 652-site research survey (`docs/design/REDESIGN_BRIEF.md`):
   neutral surface and rule tokens, an oxide accent reserved for playhead, selection and
   primary action, lightness-ordered data ramps, square geometry, a serif/sans/mono role

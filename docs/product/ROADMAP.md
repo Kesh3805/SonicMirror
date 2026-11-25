@@ -42,7 +42,7 @@ committed; each phase ends on its exit criteria, not on a deadline.
 - [x] Import through the native dialog, tracks table, Observatory screen
 - [x] BS.1770 integrated loudness and loudness range
 - [x] Onset and tempo estimation with confidence
-- [ ] MFCC summary
+- [x] MFCC summary
 - [ ] Spectrogram artifact and view
 - [ ] Reconcile features with the Audio Analysis Technical Specification
 - [ ] Fixtures for MP3, FLAC, Ogg and M4A
