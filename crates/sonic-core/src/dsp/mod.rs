@@ -9,6 +9,7 @@ pub mod loudness;
 pub mod mfcc;
 pub mod resample;
 pub mod spectral;
+pub mod spectrogram;
 pub mod synth;
 pub mod tempo;
 pub mod waveform;
