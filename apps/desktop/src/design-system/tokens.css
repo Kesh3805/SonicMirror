@@ -96,11 +96,11 @@
   --sm-focus-width: 2px;
   --sm-focus-offset: 2px;
   --sm-shadow-float: 0 1px 0 var(--sm-rule), 0 6px 16px rgb(37 38 34 / 10%);
-  --sm-duration-fast: 120ms;
-  --sm-duration-control: 180ms;
-  --sm-duration-panel: 220ms;
-  --sm-duration-focus: 320ms;
-  --sm-ease: cubic-bezier(0.2, 0, 0, 1);
+  --sm-duration-fast: 100ms;
+  --sm-duration-control: 160ms;
+  --sm-duration-panel: 240ms;
+  --sm-duration-focus: 400ms; /* Atlas re-projection only */
+  --sm-ease: cubic-bezier(0.16, 1, 0.3, 1);
   --sm-topbar: 44px;
   --sm-sidebar: 224px;
   --sm-sidebar-compact: 56px;
