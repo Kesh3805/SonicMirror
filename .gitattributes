@@ -6,3 +6,5 @@
 *.mp3 binary
 *.ogg binary
 *.woff2 binary
+*.aiff binary
+*.m4a binary
