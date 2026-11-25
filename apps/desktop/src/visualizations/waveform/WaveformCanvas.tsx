@@ -29,7 +29,9 @@ export function WaveformCanvas({ view, positionMs }: WaveformCanvasProps) {
   const plotRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [width, setWidth] = useState(0);
-  const [hover, setHover] = useState<{ x: number; readout: Readout } | null>(null);
+  const [hover, setHover] = useState<{ x: number; readout: Readout; keyboard?: true } | null>(
+    null,
+  );
   const theme = useThemeKey();
 
   useEffect(() => {
@@ -111,13 +113,41 @@ export function WaveformCanvas({ view, positionMs }: WaveformCanvasProps) {
           className="sm-lane-plot"
           ref={plotRef}
           style={{ height: PLOT_HEIGHT }}
+          tabIndex={0}
+          role="group"
+          aria-label="Waveform readout. Use the arrow keys to move through time; Shift moves further."
           onPointerMove={(e) => {
             const rect = e.currentTarget.getBoundingClientRect();
             const x = e.clientX - rect.left;
             const readout = readoutAt(view, x, rect.width);
             setHover(readout ? { x, readout } : null);
           }}
-          onPointerLeave={() => setHover(null)}
+          onPointerLeave={() => setHover((h) => (h?.keyboard ? h : null))}
+          onBlur={() => setHover(null)}
+          onKeyDown={(e) => {
+            if (width === 0) return;
+            const step = (e.shiftKey ? 0.1 : 0.01) * width;
+            const current = hover?.x ?? 0;
+            const next =
+              e.key === "ArrowRight"
+                ? current + step
+                : e.key === "ArrowLeft"
+                  ? current - step
+                  : e.key === "Home"
+                    ? 0
+                    : e.key === "End"
+                      ? width - 1
+                      : null;
+            if (e.key === "Escape") {
+              setHover(null);
+              return;
+            }
+            if (next === null) return;
+            e.preventDefault();
+            const x = Math.max(0, Math.min(width - 1, next));
+            const readout = readoutAt(view, x, width);
+            setHover(readout ? { x, readout, keyboard: true } : null);
+          }}
         >
           <canvas
             ref={canvasRef}
@@ -142,12 +172,20 @@ export function WaveformCanvas({ view, positionMs }: WaveformCanvasProps) {
             </span>
           ))}
           {hover && (
-            <span className="sm-readout" style={{ left: hover.x }}>
+            <span
+              className="sm-readout"
+              data-side={hover.x > width / 2 ? "left" : "right"}
+              style={{ left: hover.x }}
+            >
               {formatReadout(hover.readout)}
             </span>
           )}
         </div>
       </div>
+
+      <span className="sm-visually-hidden" role="status">
+        {hover?.keyboard ? formatReadout(hover.readout) : ""}
+      </span>
 
       <figcaption className="sm-lanes-caption">
         Fig. 1 — Sample extrema, {formatCount(view.min.length)} buckets of{" "}
