@@ -55,7 +55,7 @@ describe("MeasurementGrid", () => {
   it("labels tempo as an estimate with its confidence", () => {
     render(<MeasurementGrid features={features} />);
     expect(screen.getByText("120")).toBeInTheDocument();
-    expect(screen.getByText("Estimated · 82% confidence")).toBeInTheDocument();
+    expect(screen.getByText("est. · confidence 0.82")).toBeInTheDocument();
   });
 
   it("shows unavailable measurements with a reason, never a zero", () => {

@@ -66,10 +66,10 @@ function Measurement({ feature, info }: { feature: AudioFeature; info: FeatureIn
             {unit && <span className="sm-metric-unit">{unit}</span>}
           </p>
           {info.format === "bpm" && (
-            <p className="sm-metric-qualifier">
-              Estimated
+            <p className="sm-metric-qualifier sm-data">
+              est.
               {feature.confidence !== undefined &&
-                ` · ${formatConfidence(feature.confidence)} confidence`}
+                ` · confidence ${formatConfidence(feature.confidence)}`}
             </p>
           )}
         </>

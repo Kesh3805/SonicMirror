@@ -1,10 +1,25 @@
-// Display formatting rules from PDS §14 "Formatting".
-// Unknown values render as an em dash; NaN is never displayed.
+// Display formatting rules (PDS §14, amended by the Redesign Brief §3.3 / A9).
+// Unknown values render as an em dash; NaN is never displayed. Numbers use a
+// typographic minus (U+2212), fixed decimals per metric for tabular alignment,
+// and thin-space (U+2009) digit grouping.
 
 export const UNKNOWN = "—";
+/** U+2009 THIN SPACE: between a value and its unit, and between digit groups. */
+export const THIN = " ";
+const MINUS = "−";
 
 const finite = (v: number | null | undefined): v is number =>
   typeof v === "number" && Number.isFinite(v);
+
+/** Fixed decimals, thin-space grouping, typographic minus, no signed zero. */
+export function formatNumber(value: number, decimals: number): string {
+  const fixed = Math.abs(value).toFixed(decimals);
+  const [int = "0", frac] = fixed.split(".");
+  const grouped = int.length > 4 ? int.replace(/\B(?=(\d{3})+(?!\d))/g, THIN) : int;
+  const body = frac === undefined ? grouped : `${grouped}.${frac}`;
+  const isZero = Number(fixed) === 0;
+  return value < 0 && !isZero ? `${MINUS}${body}` : body;
+}
 
 /** mm:ss, or h:mm:ss for an hour or more. */
 export function formatDuration(ms: number | null | undefined): string {
@@ -16,34 +31,46 @@ export function formatDuration(ms: number | null | undefined): string {
   return h > 0 ? `${h}:${String(m).padStart(2, "0")}:${s}` : `${m}:${s}`;
 }
 
-function trimDecimals(value: number, max: number): string {
-  return value.toLocaleString("en-US", { maximumFractionDigits: max, minimumFractionDigits: 0 });
+/** A library total: "86 h 12 min", or "12 min" under an hour. */
+export function formatTotalDuration(ms: number | null | undefined): string {
+  if (!finite(ms) || ms < 0) return UNKNOWN;
+  const minutes = Math.round(ms / 60_000);
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return h > 0 ? `${formatNumber(h, 0)}${THIN}h ${m}${THIN}min` : `${m}${THIN}min`;
 }
 
-/** Hz below 1000, kHz above, up to two decimals. */
+/** A whole-number count with thin-space grouping: "1 284". */
+export function formatCount(n: number | null | undefined): string {
+  return finite(n) ? formatNumber(Math.round(n), 0).replace(MINUS, "-") : UNKNOWN;
+}
+
+/**
+ * Integer Hz below 1 kHz; two fixed decimals of kHz from 1 to 10 kHz; one
+ * fixed decimal at 10 kHz and above. Fixed decimals keep columns aligned.
+ */
 export function formatFrequency(hz: number | null | undefined): { value: string; unit: string } {
   if (!finite(hz)) return { value: UNKNOWN, unit: "" };
-  return hz < 1000
-    ? { value: trimDecimals(hz, 0), unit: "Hz" }
-    : { value: trimDecimals(hz / 1000, 2), unit: "kHz" };
+  if (Math.abs(hz) < 1000) return { value: formatNumber(hz, 0), unit: "Hz" };
+  const khz = hz / 1000;
+  return { value: formatNumber(khz, Math.abs(khz) >= 10 ? 1 : 2), unit: "kHz" };
 }
 
-/** Sample rate in kHz, up to two decimals. */
+/** Sample rate in kHz with the unit: "44.1 kHz", "48 kHz". */
 export function formatSampleRate(hz: number | null | undefined): string {
-  return finite(hz) ? `${trimDecimals(hz / 1000, 2)} kHz` : UNKNOWN;
+  if (!finite(hz)) return UNKNOWN;
+  const khz = hz / 1000;
+  const text = Number.isInteger(khz) ? String(khz) : khz.toFixed(khz * 10 === Math.round(khz * 10) ? 1 : 2);
+  return `${text}${THIN}kHz`;
 }
 
-/** dB, dBFS and LUFS use one decimal; the minus sign is typographic. */
+/** dB, dBFS, LUFS and LU use one fixed decimal. */
 export function formatDecibels(db: number | null | undefined): string {
-  if (!finite(db)) return UNKNOWN;
-  const text = db.toFixed(1);
-  // −0.0003 rounds to "-0.0"; a signed zero carries no meaning.
-  if (Number(text) === 0) return "0.0";
-  return text.replace("-", "−");
+  return finite(db) ? formatNumber(db, 1) : UNKNOWN;
 }
 
 export function formatRatio(value: number | null | undefined, decimals = 3): string {
-  return finite(value) ? value.toFixed(decimals) : UNKNOWN;
+  return finite(value) ? formatNumber(value, decimals) : UNKNOWN;
 }
 
 export function formatChannels(count: number | null | undefined): string {
@@ -53,12 +80,48 @@ export function formatChannels(count: number | null | undefined): string {
   return `${count} channels`;
 }
 
-/** Tempo to the nearest whole BPM; always presented as an estimate. */
+/**
+ * Tempo to the nearest whole BPM. The engine refines an integer-lag peak, so
+ * decimals would be false precision; tempo is always labelled an estimate.
+ */
 export function formatBpm(bpm: number | null | undefined): string {
   return finite(bpm) ? String(Math.round(bpm)) : UNKNOWN;
 }
 
-/** Confidence in [0, 1] as a whole percentage. */
+/** Confidence in [0, 1] with two decimals: "0.62". */
 export function formatConfidence(value: number | null | undefined): string {
-  return finite(value) ? `${Math.round(Math.max(0, Math.min(1, value)) * 100)}%` : UNKNOWN;
+  return finite(value) ? Math.max(0, Math.min(1, value)).toFixed(2) : UNKNOWN;
+}
+
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+/**
+ * Locale-independent date, "23 Nov 2026", in local time; with `time`,
+ * "23 Nov 2026 14:02". Avoids `toLocaleString`, which varies by machine.
+ */
+export function formatDate(ms: number | null | undefined, options: { time?: boolean } = {}): string {
+  if (!finite(ms)) return UNKNOWN;
+  const d = new Date(ms);
+  if (Number.isNaN(d.getTime())) return UNKNOWN;
+  const date = `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+  if (!options.time) return date;
+  const hh = String(d.getHours()).padStart(2, "0");
+  const mm = String(d.getMinutes()).padStart(2, "0");
+  return `${date} ${hh}:${mm}`;
+}
+
+/** Display names for codec identifiers reported by the decoder. */
+export function formatCodec(codec: string | null | undefined): string {
+  if (!codec) return UNKNOWN;
+  const c = codec.toLowerCase();
+  if (c.startsWith("pcm")) return "PCM";
+  const known: Record<string, string> = {
+    flac: "FLAC",
+    mp3: "MP3",
+    aac: "AAC",
+    alac: "ALAC",
+    vorbis: "Vorbis",
+    opus: "Opus",
+  };
+  return known[c] ?? codec.toUpperCase();
 }
