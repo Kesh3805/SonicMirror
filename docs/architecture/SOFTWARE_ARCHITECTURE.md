@@ -148,13 +148,18 @@ Use a pinned Rust toolchain in `rust-toolchain.toml`. The project should use sta
 
 The first validated native toolchain will target:
 
-Plain textx86_64-pc-windows-msvcThe development environment requires the Rust MSVC toolchain, compatible Visual Studio C++ build tools, Windows SDK, WebView2 runtime, Node.js and pnpm.
+```text
+x86_64-pc-windows-msvc
+```
+
+The development environment requires the Rust MSVC toolchain, compatible Visual Studio C++ build tools, Windows SDK, WebView2 runtime, Node.js and pnpm.
 
 The exact installation procedure and supported dependency versions belong in `CONTRIBUTING.md` after verification on the actual Windows development environment.
 
 ## 6. Repository structure
 
-Plain textsonicmirror/
+```text
+sonicmirror/
 ├── apps/
 │   └── desktop/
 │       ├── src/
@@ -277,7 +282,10 @@ Plain textsonicmirror/
 ├── CONTRIBUTING.md
 ├── SECURITY.md
 ├── CHANGELOG.md
-└── LICENSEDirectories may be created incrementally. Do not create dozens of empty modules, placeholder traits or speculative implementations merely to match the eventual tree.
+└── LICENSE
+```
+
+Directories may be created incrementally. Do not create dozens of empty modules, placeholder traits or speculative implementations merely to match the eventual tree.
 
 ## 7. Dependency graph
 
@@ -407,7 +415,7 @@ Job status is a separate runtime concept. A successful analysis record and a cur
 
 Do not overload one enum to represent file availability, feature validity, job execution and cache freshness.
 
-### **8.3 Measurement values**
+### 8.3 Measurement values
 
 ```rust
 #[derive(Debug, Clone)]
@@ -490,7 +498,7 @@ pub trait AnalysisRepository {
 
 These interfaces describe architectural responsibilities. Concrete repositories may be used directly until alternative implementations or test substitutions justify traits.
 
-## **10. **`sonic-runtime`
+## 10. `sonic-runtime`
 
 **Responsibility:** Coordinate user-facing application operations.
 
@@ -518,7 +526,7 @@ For example, `LibraryService` discovers an authorized file, requests metadata ex
 
 The Tauri command adapter does not reproduce that workflow.
 
-### **10.1 Application service interfaces**
+### 10.1 Application service interfaces
 
 ```rust
 pub struct AppServices {
@@ -548,7 +556,7 @@ Application initialization must be ordered, observable and recoverable.
 
 The frontend must distinguish between:
 
-```typescript
+```ts
 type BootstrapState =
   | { status: "initializing"; stage: string }
   | { status: "ready"; onboardingCompleted: boolean }
@@ -559,7 +567,7 @@ The application must not mount the normal library workspace and issue catalog re
 
 Startup failures must produce actionable states rather than a blank webview.
 
-### **Single-instance ownership**
+### Single-instance ownership
 
 The core release supports one running SonicMirror instance per application-data directory.
 
@@ -569,7 +577,7 @@ Use a validated Tauri single-instance mechanism or platform-compatible locking s
 
 Development and production builds must use separate application-data roots.
 
-## **12. Application directories**
+## 12. Application directories
 
 Use Tauri's platform path-resolution APIs.
 
@@ -577,11 +585,16 @@ Never construct installation or user-data paths by concatenating assumptions abo
 
 The proposed application identifier is:
 
-Plain textio.sonicmirror.desktopThe identifier must be approved before public distribution because changing it may affect installer behavior and application-data locations.
+```text
+io.sonicmirror.desktop
+```
 
-### **Logical storage layout**
+The identifier must be approved before public distribution because changing it may affect installer behavior and application-data locations.
 
-Plain text<app-local-data>/
+### Logical storage layout
+
+```text
+<app-local-data>/
 ├── catalog/
 │   └── sonicmirror.sqlite3
 ├── artifacts/
@@ -593,7 +606,10 @@ Plain text<app-local-data>/
 │   └── audio/
 ├── logs/
 ├── backups/
-└── runtime/| Directory | Contents | Regenerable |
+└── runtime/
+```
+
+| Directory | Contents | Regenerable |
 |---|---|---|
 | `catalog` | Catalog, jobs, configuration, collections | No |
 | `artifacts/waveform` | Waveform envelope files | Yes |
@@ -608,7 +624,7 @@ On Windows, this will typically resolve under an application-specific local AppD
 
 The application must remain functional when user paths contain Unicode, spaces, long filenames or non-ASCII characters.
 
-### **Path representation**
+### Path representation
 
 Native paths must use Rust's `Path` and `PathBuf` internally.
 
@@ -624,7 +640,7 @@ For Windows, the lossless representation may encode native UTF-16 code units int
 
 The display string is never used as the authoritative filesystem-access path.
 
-## **13. Shutdown behavior**
+## 13. Shutdown behavior
 
 Normal shutdown proceeds as follows:
 
@@ -634,13 +650,13 @@ If graceful shutdown cannot complete within the configured timeout, the applicat
 
 Do not rely on destructors or frontend unload events as the only persistence mechanism.
 
-# **Part V — Persistence architecture**
+# Part V — Persistence architecture
 
-## **14. SQLite configuration**
+## 14. SQLite configuration
 
 Use one embedded SQLite database for authoritative application state.
 
-### **Connection policy**
+### Connection policy
 
 | Setting | Baseline |
 |---|---|
@@ -1286,7 +1302,7 @@ BEGIN
 END;
 ```
 
-### **16.1 Schema implementation notes**
+### 16.1 Schema implementation notes
 
 Several invariants require application-level validation in addition to SQL constraints:
 
@@ -1302,14 +1318,18 @@ Several invariants require application-level validation in addition to SQL const
 
 The initial migration intentionally does not include journal entries, listening history, AI interpretations or future Studio data.
 
-## **17. Migration strategy**
+## 17. Migration strategy
 
 Migrations use monotonically increasing versions:
 
-Plain textcrates/sonic-catalog/migrations/
+```text
+crates/sonic-catalog/migrations/
 ├── 0001_initial_schema.sql
 ├── 0002_example_future_change.sql
-└── ...Only the initial migration is needed at project initialization. The second filename illustrates future ordering.
+└── ...
+```
+
+Only the initial migration is needed at project initialization. The second filename illustrates future ordering.
 
 Migration requirements:
 
@@ -1325,11 +1345,11 @@ Migration requirements:
 
 Use SQLite's supported backup facilities for consistent database backups. Copying only the main database file while WAL activity is present is not a valid general-purpose backup strategy.
 
-## **18. Catalog search**
+## 18. Catalog search
 
 The initial search implementation uses FTS5 over title, artist, album and genre.
 
-### **Search behavior**
+### Search behavior
 
 - Search is case-insensitive according to the configured tokenizer.
 - Diacritics are normalized through the selected FTS tokenizer.
@@ -1340,7 +1360,7 @@ The initial search implementation uses FTS5 over title, artist, album and genre.
 - Sorting uses an explicit whitelist of supported fields.
 - Sorting includes a stable track identifier as a deterministic tie-breaker.
 
-### **Query limitations**
+### Query limitations
 
 | Parameter | Limit |
 |---|---|
@@ -1354,13 +1374,13 @@ Offset pagination is acceptable for the initial 10,000-track capacity target.
 
 If measured performance deteriorates with larger libraries, keyset pagination can be introduced without changing the product behavior.
 
-# **Part VI — Media ingestion and source reconciliation**
+# Part VI — Media ingestion and source reconciliation
 
-## **19. Ingestion architecture**
+## 19. Ingestion architecture
 
 The scanner should publish metadata incrementally rather than block initial Library access until every file has been hashed and decoded.
 
-### **Source authorization**
+### Source authorization
 
 The frontend requests a native picker operation.
 
@@ -1370,7 +1390,7 @@ The frontend must not supply arbitrary paths to a generic `read_file`, `open_pat
 
 Existing registered sources may be accessed through their `SourceId`.
 
-### **Scan policy**
+### Scan policy
 
 For the core release:
 
@@ -1382,7 +1402,7 @@ For the core release:
 - Scan results are committed in small batches.
 - Temporary access failures are distinguishable from confirmed deletion.
 
-### **Initial scan limits**
+### Initial scan limits
 
 | Resource | Baseline |
 |---|---|
@@ -1395,7 +1415,7 @@ For the core release:
 
 These limits are provisional engineering defaults. The reference workload must validate them.
 
-## **20. File identity and duplicate handling**
+## 20. File identity and duplicate handling
 
 Three distinct identities exist.
 
@@ -1405,7 +1425,7 @@ Three distinct identities exist.
 | Path identity | A normalized platform-specific filesystem location |
 | Content digest | Hash of the complete source file contents |
 
-### **20.1 Content identity**
+### 20.1 Content identity
 
 Use BLAKE3 over the complete source-file byte sequence.
 
@@ -1417,7 +1437,7 @@ Because the initial digest includes tags and container bytes, modifying metadata
 
 That conservative behavior is intentional for P0. Audio-stream-only fingerprinting is a possible later optimization.
 
-### **20.2 Duplicate files**
+### 20.2 Duplicate files
 
 If two different paths contain byte-identical files:
 
@@ -1429,7 +1449,7 @@ If two different paths contain byte-identical files:
 
 Atlas points may overlap for identical feature vectors. The interface must handle coincident points through selection lists or equivalent inspection behavior rather than artificially jittering data coordinates.
 
-### **20.3 Renamed or moved files**
+### 20.3 Renamed or moved files
 
 A catalog track may preserve its identity when a rename or move can be reconciled unambiguously using a reliable platform filesystem identifier or verified content identity.
 
@@ -1437,13 +1457,13 @@ If several candidates match, do not guess. Preserve the missing entry and regist
 
 Windows filesystem identity handling requires a native compatibility test, particularly across volumes, removable media and network-mounted directories.
 
-### **20.4 Source overlap**
+### 20.4 Source overlap
 
 Importing a directory already covered by an existing source may establish an additional source relationship.
 
 The canonical path identity prevents a second physical-file catalog entry from being created merely because the same file was discovered through two source roots.
 
-## **21. Scan generation reconciliation**
+## 21. Scan generation reconciliation
 
 Each source scan receives a monotonically increasing generation.
 
@@ -1455,7 +1475,7 @@ An interrupted, partial or failed scan must not automatically mark every unseen 
 
 A missing external drive must be treated as an unavailable source, not as an instruction to remove thousands of catalog entries.
 
-## **22. Metadata normalization**
+## 22. Metadata normalization
 
 Metadata extraction and presentation normalization are separate operations.
 
@@ -1476,9 +1496,9 @@ Album and artist grouping keys are normalized internal identifiers. Case folding
 
 All textual metadata is treated as untrusted content.
 
-# **Part VII — Audio analysis architecture**
+# Part VII — Audio analysis architecture
 
-## **23. Analysis engine boundary**
+## 23. Analysis engine boundary
 
 The computational engine consumes an authorized, readable media input and produces typed analysis output.
 
@@ -1490,7 +1510,7 @@ It does not know:
 - How a result will be visualized.
 - Which operating-system-specific window initiated the request.
 
-### **Engine input contract**
+### Engine input contract
 
 ```rust
 use std::io::{Read, Seek};
@@ -1532,7 +1552,7 @@ pub trait AudioAnalysisEngine: Send + Sync {
 }
 ```
 
-### **Engine output**
+### Engine output
 
 ```rust
 pub struct AnalysisOutput {
@@ -1628,7 +1648,7 @@ Not every analyzer needs dynamic dispatch. The pipeline may use concrete composi
 
 The lifecycle exists to establish bounded streaming behavior, not to force every DSP operation behind a trait object.
 
-## **26. Numerical validity**
+## 26. Numerical validity
 
 The engine must reject or explicitly represent:
 
@@ -1645,7 +1665,7 @@ Some mathematical measurements, such as logarithmic silence levels, naturally pr
 
 The technical specification must define their correct semantic representation. The frontend must not receive non-finite JSON numbers or substitute misleading arbitrary values.
 
-### **Partial analysis semantics**
+### Partial analysis semantics
 
 | Condition | Analysis outcome |
 |---|---|
@@ -1658,15 +1678,19 @@ The technical specification must define their correct semantic representation. T
 
 A valid unavailable tempo estimate is not automatically an application error.
 
-## **27. Cache identity**
+## 27. Cache identity
 
 A valid analysis cache key incorporates:
 
-Plain textcache-key-format-version
+```text
+cache-key-format-version
 content-digest
 analysis-engine-version
 feature-schema-version
-canonical-analysis-configurationThe serialization must use unambiguous field boundaries.
+canonical-analysis-configuration
+```
+
+The serialization must use unambiguous field boundaries.
 
 Do not build cache keys using naïve concatenation of variable-length strings.
 
@@ -1837,9 +1861,9 @@ If that consumer-management mechanism is too complex for the first vertical slic
 
 The first approach is more capable. The second is an acceptable simpler P0 baseline.
 
-## **32. Job execution sequence**
+## 32. Job execution sequence
 
-## **33. Cancellation and pause**
+## 33. Cancellation and pause
 
 Use cooperative cancellation rather than forcibly terminating Rust worker threads.
 
@@ -1850,7 +1874,7 @@ A cancellation token must be checked:
 - Between artifact-writing batches.
 - Between similarity or projection computation stages where practical.
 
-### **Pause policy**
+### Pause policy
 
 For P0, pause means:
 
@@ -1862,17 +1886,21 @@ For P0, pause means:
 
 Persisting every intermediate FFT window is unnecessary.
 
-### **Cancellation acknowledgment**
+### Cancellation acknowledgment
 
 The UI distinguishes between:
 
-Plain textRunning
+```text
+Running
 Cancelling…
-Cancelled`Cancelling…` is a transient presentation state while the durable job may still be `running`.
+Cancelled
+```
+
+`Cancelling…` is a transient presentation state while the durable job may still be `running`.
 
 The application must not show a terminal cancellation state before the runtime confirms that execution or result attachment has been stopped.
 
-## **34. Retry policy**
+## 34. Retry policy
 
 | Failure class | Automatic retry |
 |---|---|
@@ -1894,7 +1922,7 @@ A user-initiated retry may establish a new attempt budget after resolving the un
 
 Do not retry a known unsupported codec indefinitely.
 
-## **35. Recovery after abnormal termination**
+## 35. Recovery after abnormal termination
 
 At startup:
 
@@ -1911,15 +1939,15 @@ Recovery must respect the user's previously persisted paused-queue preference.
 
 An application restart must not silently resume a globally paused workload.
 
-# **Part IX — Artifact storage and visualization data**
+# Part IX — Artifact storage and visualization data
 
-## **36. Artifact storage model**
+## 36. Artifact storage model
 
 Large visualization payloads should not be stored as unrestricted database blobs or transported as enormous nested JSON arrays.
 
 The catalog stores artifact references and metadata. The artifact store owns binary files.
 
-### **Artifact categories**
+### Artifact categories
 
 | Artifact | Storage |
 |---|---|
@@ -1931,13 +1959,14 @@ The catalog stores artifact references and metadata. The artifact store owns bin
 | Atlas coordinates | SQLite |
 | PCA model and normalization data | Versioned structured catalog data |
 
-### **Managed path construction**
+### Managed path construction
 
 Artifacts are addressed by internally generated identifiers.
 
 Example:
 
-Plain textartifacts/
+```text
+artifacts/
 ├── waveform/
 │   └── 7f/
 │       └── <analysis-key>/
@@ -1948,15 +1977,18 @@ Plain textartifacts/
 │           └── tile-000000.smg
 └── artwork/
     └── c1/
-        └── <content-key>-256.webpThe frontend must never construct native artifact paths.
+        └── <content-key>-256.webp
+```
 
-## **37. Waveform artifact contract**
+The frontend must never construct native artifact paths.
+
+## 37. Waveform artifact contract
 
 The waveform is a multiresolution envelope of actual PCM sample extrema.
 
-### **Logical representation**
+### Logical representation
 
-```typescript
+```ts
 interface WaveformMetadata {
   formatVersion: number;
   durationMs: number;
@@ -1984,7 +2016,7 @@ pub struct WaveformBucket {
 
 The serialized format must explicitly encode little-endian floating-point values. Do not write raw Rust structure memory directly to disk because that can introduce layout and compatibility assumptions.
 
-### **Multiresolution policy**
+### Multiresolution policy
 
 The initial base bucket width is provisionally 10 ms.
 
@@ -1994,11 +2026,11 @@ mk=min⁡(m2k,m2k+1)m_k = \min(m_{2k},m_{2k+1})mk​=min(m2k​,m2k+1​)Mk=max�
 
 The final partial bucket must be retained.
 
-### **Viewport retrieval**
+### Viewport retrieval
 
 The frontend requests a time range and target display resolution.
 
-```typescript
+```ts
 interface WaveformRequest {
   trackId: TrackId;
   startMs: number;
@@ -2019,7 +2051,7 @@ The spectrogram represents a versioned time-frequency intensity matrix.
 
 ### Metadata
 
-```typescript
+```ts
 interface SpectrogramMetadata {
   formatVersion: number;
   durationMs: number;
@@ -2037,7 +2069,7 @@ interface SpectrogramMetadata {
 }
 ```
 
-### **Storage policy**
+### Storage policy
 
 Proposed representation:
 
@@ -2052,9 +2084,9 @@ The intensity floor, ceiling and decibel reference must be established by the Au
 
 Quantization is a visualization-storage decision. It must not silently change the numerical feature calculations.
 
-### **Tile retrieval**
+### Tile retrieval
 
-```typescript
+```ts
 interface SpectrogramTileRequest {
   trackId: TrackId;
   level: number;
@@ -2144,7 +2176,7 @@ The feature registry is the authoritative mapping between analysis output, persi
 
 The frontend must not independently decide that a particular measurement represents happiness, danceability, mood or another unsupported interpretation.
 
-### **Vector construction rules**
+### Vector construction rules
 
 - Include only approved acoustic descriptors.
 - Exclude artist, album, genre and other descriptive metadata.
@@ -2156,7 +2188,7 @@ The frontend must not independently decide that a particular measurement represe
 
 The exact feature set and weights will be established in the technical audio specification after validating candidate descriptors.
 
-## **42. Normalization and distance model**
+## 42. Normalization and distance model
 
 ```rust
 pub struct NormalizationModel {
@@ -2255,7 +2287,7 @@ pub struct ProjectionPoint {
 
 The snapshot establishes both coordinates and the analysis inputs used to produce them.
 
-### **Snapshot consistency**
+### Snapshot consistency
 
 A saved snapshot must not change coordinates when:
 
@@ -2270,7 +2302,7 @@ The user explicitly regenerates the Atlas.
 
 If a track is deleted from the catalog, its point may disappear, but surviving points retain their coordinates. The snapshot is marked stale.
 
-### **Projection concurrency**
+### Projection concurrency
 
 The runtime captures the input set and associated catalog revision before expensive PCA computation.
 
@@ -2280,7 +2312,7 @@ Before committing, it verifies that the referenced analysis records remain valid
 
 If the current collection has changed, the projection may still be saved as a valid historical snapshot but must be identified as stale. It must not be represented as a projection of a newer library state.
 
-## **45. Nearest-neighbor retrieval**
+## 45. Nearest-neighbor retrieval
 
 The core release uses exact linear search.
 
@@ -2295,7 +2327,7 @@ For a target vector:
 
 For the 10,000-track design target, approximate indexing is not required until benchmarks demonstrate a need.
 
-### **Retrieval contexts**
+### Retrieval contexts
 
 Two explicit contexts are supported.
 
@@ -2308,7 +2340,7 @@ A neighbor list calculated from an older snapshot must not silently be labeled a
 
 The Observatory should default to the current compatible model when available and clearly identify snapshot-based results when used.
 
-### **Memory cache**
+### Memory cache
 
 A normalized feature matrix may be cached in the runtime by model identity.
 
@@ -2316,11 +2348,11 @@ The cache must have a bounded size and explicit invalidation based on relevant a
 
 A similarity query must not repeatedly load every waveform or spectrogram artifact.
 
-## **46. Track comparison service**
+## 46. Track comparison service
 
 The runtime comparison service returns:
 
-```typescript
+```ts
 interface TrackComparisonDto {
   left: TrackSummaryDto;
   right: TrackSummaryDto;
@@ -2332,7 +2364,7 @@ interface TrackComparisonDto {
 }
 ```
 
-```typescript
+```ts
 interface ComparisonMeasurementDto {
   featureKey: string;
   unit: string | null;
@@ -2348,9 +2380,9 @@ A numerical difference is computed only when both values are valid, scalar and s
 
 Different feature-schema versions may expose individual raw measurements for inspection, but the application must not automatically calculate a shared acoustic distance from incompatible representations.
 
-# **Part XI — Native audio playback**
+# Part XI — Native audio playback
 
-## **47. Playback ownership**
+## 47. Playback ownership
 
 Playback is managed by a dedicated native actor.
 
@@ -2358,9 +2390,9 @@ The actor owns the audio output stream, current media decoder or playback source
 
 React does not own the playback clock.
 
-### **Playback states**
+### Playback states
 
-```typescript
+```ts
 type PlaybackStatus =
   | "idle"
   | "loading"
@@ -2405,9 +2437,9 @@ The runtime resolves the track identifier into an authorized source path.
 
 The frontend cannot pass arbitrary playback URLs or native filesystem paths.
 
-## **49. Playback state contract**
+## 49. Playback state contract
 
-```typescript
+```ts
 interface PlaybackStateDto {
   sessionId: string;
   revision: number;
@@ -2497,7 +2529,7 @@ Do not return raw `rusqlite` records, native paths, decoder objects or internal 
 
 ## 51. IPC contract version
 
-```typescript
+```ts
 interface ApplicationInfoDto {
   applicationVersion: string;
   ipcProtocolVersion: number;
@@ -2514,13 +2546,13 @@ Although the frontend and native backend ship together, protocol versioning prot
 
 A frontend/native protocol mismatch produces a recoverable application error rather than undefined behavior.
 
-## **52. Shared DTOs**
+## 52. Shared DTOs
 
 The following TypeScript declarations define the intended generated contract.
 
 Do not maintain a second handwritten production copy if the Rust binding generator can emit the authoritative type.
 
-```typescript
+```ts
 export type TrackId = string;
 export type SourceId = string;
 export type AlbumId = string;
@@ -2659,7 +2691,7 @@ Generated TypeScript bindings must not silently map arbitrary 64-bit identifiers
 
 ## 53. Library queries
 
-```typescript
+```ts
 type TrackSortField =
   | "title"
   | "artist"
@@ -2702,9 +2734,9 @@ Only registered scalar feature keys may be used as numerical filters.
 
 Missing values are excluded from numerical-range matches unless an explicit unavailable filter is active.
 
-### **Aggregate views**
+### Aggregate views
 
-```typescript
+```ts
 interface AlbumSummaryDto {
   id: AlbumId;
   title: string;
@@ -2733,7 +2765,7 @@ interface CollectionSummaryDto {
 
 ## 54. Job DTOs
 
-```typescript
+```ts
 interface AnalysisJobDto {
   id: JobId;
   trackId: TrackId;
@@ -2774,9 +2806,9 @@ Aggregate counts are computed from authoritative runtime or catalog state.
 
 The frontend must not derive global completion counts from whichever paginated jobs happen to be visible in the Analysis drawer.
 
-## **55. Atlas DTOs**
+## 55. Atlas DTOs
 
-```typescript
+```ts
 interface AtlasSnapshotSummaryDto {
   id: AtlasSnapshotId;
   createdAtMs: number;
@@ -2936,7 +2968,7 @@ This inventory extends the preliminary PRD command list to cover all core applic
 
 Cancellation of a file picker or save dialog is a normal user action.
 
-```typescript
+```ts
 type NativeDialogResult<T> =
   | { status: "completed"; value: T }
   | { status: "cancelled" };
@@ -2944,11 +2976,11 @@ type NativeDialogResult<T> =
 
 Do not present ordinary dialog cancellation as an application error.
 
-## **57. Event contract**
+## 57. Event contract
 
 Events carry revision information and session identity.
 
-```typescript
+```ts
 interface RuntimeEvent<T> {
   protocolVersion: number;
   runtimeSessionId: string;
@@ -3034,7 +3066,7 @@ pub enum RuntimeError {
 
 The actual implementation may wrap domain-specific errors while preserving diagnostic chains internally.
 
-### **Stable error codes**
+### Stable error codes
 
 | Code | Meaning |
 |---|---|
@@ -3060,7 +3092,7 @@ The actual implementation may wrap domain-specific errors while preserving diagn
 | `OPERATION_CANCELLED` | User or runtime cancelled work |
 | `INTERNAL_ERROR` | Unexpected failure |
 
-### **Error presentation**
+### Error presentation
 
 The native runtime supplies a safe user-facing message and stable code.
 
@@ -3068,13 +3100,13 @@ The frontend selects the PDS-defined recovery behavior based on that code.
 
 Raw SQL statements, Rust backtraces, native filesystem internals and media-parser diagnostic dumps must not be displayed as ordinary user-facing errors.
 
-# **Part XIII — Frontend software architecture**
+# Part XIII — Frontend software architecture
 
-## **59. Frontend layering**
+## 59. Frontend layering
 
 The frontend implements the approved PDS. This architecture governs state ownership, data retrieval, component boundaries and rendering behavior.
 
-### **Frontend module rules**
+### Frontend module rules
 
 | Module | Responsibility |
 |---|---|
@@ -3095,7 +3127,7 @@ Feature modules should not directly import unrelated feature internals.
 
 Cross-feature functionality belongs in a deliberately shared interface.
 
-## **60. Routing**
+## 60. Routing
 
 Use a desktop-compatible client-side router.
 
@@ -3124,7 +3156,7 @@ Hash-based routing is the proposed baseline because it avoids requiring server-s
 
 The Analysis drawer and playback strip are persistent application-shell components, not independent pages.
 
-### **Navigation state**
+### Navigation state
 
 Track-selection state for comparison may use route query parameters containing track IDs.
 
@@ -3132,7 +3164,7 @@ Native file paths and analysis artifact locations must never be placed in route 
 
 Navigation history must support the Windows keyboard interactions specified in the PDS.
 
-## **61. State ownership**
+## 61. State ownership
 
 State duplication is one of the primary frontend architectural risks.
 
@@ -3161,11 +3193,11 @@ Do not copy the entire library, analysis cache or all background jobs into Zusta
 
 Do not represent native authoritative state as a collection of unrelated global React contexts.
 
-## **62. Query-key conventions**
+## 62. Query-key conventions
 
 Use stable query-key factories.
 
-```typescript
+```ts
 export const queryKeys = {
   appInfo: ["app", "info"] as const,
 
@@ -3240,7 +3272,7 @@ Production components must not call Tauri's `invoke` directly.
 
 Use a typed centralized adapter.
 
-```typescript
+```ts
 import { invoke } from "@tauri-apps/api/core";
 
 export interface SonicMirrorClient {
@@ -3299,7 +3331,7 @@ export class TauriSonicMirrorClient
 
 This is a representative subset. The production client must implement the full approved command inventory as it becomes available.
 
-### **Development and test adapters**
+### Development and test adapters
 
 Provide an explicit fixture-backed client for:
 
@@ -3312,9 +3344,9 @@ The fixture adapter must never be selected automatically because production IPC 
 
 A failed native command must produce the correct error or unavailable state.
 
-## **64. Application shell composition**
+## 64. Application shell composition
 
-```typescript
+```ts
 function AppShell() {
   return (
     <ApplicationFrame>
@@ -3344,7 +3376,11 @@ The Analysis drawer must remain connected to the same native job coordinator acr
 
 The canonical file is:
 
-Plain textapps/desktop/src/design-system/tokens.cssIt is imported once at the application root.
+```text
+apps/desktop/src/design-system/tokens.css
+```
+
+It is imported once at the application root.
 
 Theme selection updates:
 
@@ -3400,7 +3436,7 @@ The implementation must not rely on inaccessible canvas-rendered table text.
 
 Canvas dimensions must distinguish CSS logical size from physical backing-store size.
 
-```typescript
+```ts
 function configureCanvas(
   canvas: HTMLCanvasElement,
   logicalWidth: number,
@@ -3429,7 +3465,7 @@ function configureCanvas(
 
 The provisional DPR cap of two limits excessive backing-store allocation. Higher-DPI rendering must be evaluated against Windows scaling, visual quality and memory requirements.
 
-### **Atlas rendering**
+### Atlas rendering
 
 The Canvas renderer owns:
 
@@ -3452,7 +3488,7 @@ The renderer must not own:
 
 Use `requestAnimationFrame` for interactive rendering, not a React state update for every pointer-movement coordinate.
 
-### **Spatial interaction index**
+### Spatial interaction index
 
 An in-memory quadtree, such as a D3-compatible quadtree, may support efficient point hit testing.
 
@@ -3460,13 +3496,13 @@ The quadtree indexes displayed coordinates for interaction. It is not the acoust
 
 Coincident points must remain individually accessible through an appropriate selection list.
 
-# **Part XIV — Settings, exports and data lifecycle**
+# Part XIV — Settings, exports and data lifecycle
 
-## **67. Settings contract**
+## 67. Settings contract
 
 Settings are typed, versioned and persisted through the native runtime.
 
-```typescript
+```ts
 interface ApplicationSettingsDto {
   version: number;
 
@@ -3532,7 +3568,7 @@ interface ApplicationSettingsDto {
 
 Reduced motion is active if either the operating-system preference or the application setting requests it.
 
-### **Update validation**
+### Update validation
 
 The frontend submits a typed patch.
 
@@ -3546,11 +3582,11 @@ The native runtime must:
 
 An arbitrary JSON configuration editor is not exposed through production IPC.
 
-## **68. Export architecture**
+## 68. Export architecture
 
 The export service owns file serialization and native save-dialog interaction.
 
-### **Track analysis JSON**
+### Track analysis JSON
 
 ```json
 {
@@ -3587,13 +3623,21 @@ The example values are illustrative, not measured output.
 
 Initial columns:
 
-Plain texttrack_id,title,artist,album,genre,duration_ms,availability,analysis_statusAdditional validated measurement columns can be provided through a fixed versioned export schema.
+```text
+track_id,title,artist,album,genre,duration_ms,availability,analysis_status
+```
+
+Additional validated measurement columns can be provided through a fixed versioned export schema.
 
 ### Atlas CSV
 
 Initial columns:
 
-Plain textsnapshot_id,track_id,title,artist,analysis_id,pc1,pc2The export should include sufficient version and model context through a companion metadata file or documented columns.
+```text
+snapshot_id,track_id,title,artist,analysis_id,pc1,pc2
+```
+
+The export should include sufficient version and model context through a companion metadata file or documented columns.
 
 ### Export security
 
@@ -3634,14 +3678,14 @@ Do not delete tracks, analysis records or source files.
 
 Destructive application-data operations require a native preparation and confirmation workflow.
 
-```typescript
+```ts
 type ResetScope =
   | "visualizationCache"
   | "analysisData"
   | "entireCatalog";
 ```
 
-```typescript
+```ts
 interface ResetPreviewDto {
   token: string;
   scope: ResetScope;
@@ -3692,13 +3736,17 @@ Do not grant broad filesystem, shell, process execution, unrestricted URL openin
 
 ### Explicitly prohibited production surfaces
 
-Plain textread_arbitrary_file
+```text
+read_arbitrary_file
 write_arbitrary_file
 execute_shell_command
 execute_sql
 fetch_arbitrary_url
 delete_filesystem_path
-open_unvalidated_pathThe actual Tauri permission identifiers depend on the selected dependency versions and plugin configuration.
+open_unvalidated_path
+```
+
+The actual Tauri permission identifiers depend on the selected dependency versions and plugin configuration.
 
 The production `capabilities` file must be generated and audited against the installed Tauri version rather than copy unverified permission names into a release.
 
@@ -3856,7 +3904,7 @@ tracing::info!(
 
 Use internal identifiers rather than personal filenames wherever practical.
 
-## **79. Performance instrumentation**
+## 79. Performance instrumentation
 
 Record local timing metrics around important subsystem boundaries.
 
@@ -3879,7 +3927,7 @@ These diagnostics remain local.
 
 Benchmarks must record hardware, operating system, dependency configuration, workload characteristics and execution conditions.
 
-## **80. Performance budgets**
+## 80. Performance budgets
 
 The PRD's non-functional requirements remain authoritative.
 
@@ -3899,7 +3947,7 @@ The PRD's non-functional requirements remain authoritative.
 
 No numerical performance claim should appear in the repository README until it has supporting benchmark evidence.
 
-### **Optimization policy**
+### Optimization policy
 
 Optimize only after identifying a measured bottleneck.
 
@@ -3917,11 +3965,11 @@ For example:
 
 Do not introduce WebGL, vector databases, distributed processing or approximate indexing without evidence that the simpler architecture is insufficient.
 
-# **Part XVII — Testing and verification architecture**
+# Part XVII — Testing and verification architecture
 
-## **81. Testing boundaries**
+## 81. Testing boundaries
 
-### **Test ownership**
+### Test ownership
 
 | Layer | Tooling |
 |---|---|
@@ -3937,7 +3985,7 @@ Do not introduce WebGL, vector databases, distributed processing or approximate 
 
 Browser E2E tests using fixture adapters are not a substitute for native integration tests.
 
-## **82. Mandatory computational tests**
+## 82. Mandatory computational tests
 
 | Test ID | Requirement |
 |---|---|
@@ -3958,7 +4006,7 @@ Browser E2E tests using fixture adapters are not a substitute for native integra
 
 The next technical specification will define exact expected values and tolerances for these tests.
 
-## **83. Mandatory catalog tests**
+## 83. Mandatory catalog tests
 
 | Test ID | Requirement |
 |---|---|
@@ -3982,7 +4030,7 @@ Use temporary test directories and isolated databases.
 
 SQLite in-memory databases are useful for repository tests, but file-backed WAL tests are required for concurrency, recovery and migration verification.
 
-## **84. Mandatory runtime tests**
+## 84. Mandatory runtime tests
 
 | Test ID | Requirement |
 |---|---|
@@ -4003,7 +4051,7 @@ SQLite in-memory databases are useful for repository tests, but file-backed WAL 
 | RUN-015 | Reset operations preserve original audio files. |
 | RUN-016 | Unauthorized path access is rejected. |
 
-## **85. Mandatory frontend tests**
+## 85. Mandatory frontend tests
 
 | Test ID | Requirement |
 |---|---|
@@ -4024,7 +4072,7 @@ SQLite in-memory databases are useful for repository tests, but file-backed WAL 
 | FE-015 | Canvas experiences have keyboard-accessible alternatives. |
 | FE-016 | Navigation restores focus according to the PDS. |
 
-## **86. Windows-native validation matrix**
+## 86. Windows-native validation matrix
 
 Since Windows 11 is the confirmed development environment, it is the first platform on which architectural assumptions must be validated.
 
@@ -4056,15 +4104,19 @@ macOS and Linux must pass equivalent platform-specific validation before being a
 
 A successful cross-platform compilation is not sufficient evidence of platform support.
 
-## **87. Test fixtures and asset provenance**
+## 87. Test fixtures and asset provenance
 
 Fixtures are divided into:
 
-Plain texttests/fixtures/
+```text
+tests/fixtures/
 ├── generated/
 ├── reference/
 ├── malformed/
-└── manifests/### **Generated fixtures**
+└── manifests/
+```
+
+### Generated fixtures
 
 Generate controlled audio signals programmatically:
 
@@ -4081,7 +4133,7 @@ Generate controlled audio signals programmatically:
 
 Generated fixtures should include reproducible generator parameters and expected measurement definitions.
 
-### **Real music fixtures**
+### Real music fixtures
 
 Real recordings must have documented permission for the intended repository, test and distribution usage.
 
@@ -4089,9 +4141,9 @@ The demonstration collection is subject to separate licensing and provenance ver
 
 Do not commit copyrighted music simply because it is available in the developer's local collection.
 
-# **Part XVIII — Build, packaging and release architecture**
+# Part XVIII — Build, packaging and release architecture
 
-## **88. Development workflow**
+## 88. Development workflow
 
 The project should provide root-level commands that coordinate the frontend and Rust workspace.
 
@@ -4118,17 +4170,48 @@ Feature-specific Cargo configurations require their own verified CI matrix.
 
 Blindly enabling every optional crate feature may activate incompatible combinations.
 
-## **89. Cargo workspace baseline**
+## 89. Cargo workspace baseline
 
 The root Cargo workspace should coordinate the three internal crates and the Tauri application.
 
-toml[workspace]members = ["apps/desktop/src-tauri","crates/sonic-core","crates/sonic-catalog","crates/sonic-runtime"]resolver = "2"[workspace.package]version = "0.1.0"edition = "2024"[workspace.lints.rust]unsafe_code = "forbid"[workspace.lints.clippy]dbg_macro = "warn"todo = "warn"unimplemented = "warn"[profile.dev]debug = true[profile.release]lto = "thin"codegen-units = 1strip = "symbols"Each member crate must explicitly inherit workspace lint configuration where applicable.
+```toml
+[workspace]
+members = [
+    "apps/desktop/src-tauri",
+    "crates/sonic-core",
+    "crates/sonic-catalog",
+    "crates/sonic-runtime"
+]
+resolver = "2"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+
+[workspace.lints.clippy]
+dbg_macro = "warn"
+todo = "warn"
+unimplemented = "warn"
+
+[profile.dev]
+debug = true
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = "symbols"
+```
+
+Each member crate must explicitly inherit workspace lint configuration where applicable.
 
 The chosen Rust toolchain must support the declared edition and all selected dependencies.
 
 The first release should preserve unwinding behavior unless an ADR justifies changing the panic strategy. Do not select `panic = "abort"` purely to reduce binary size without assessing runtime recovery consequences.
 
-### **Unsafe code policy**
+### Unsafe code policy
 
 Owned Rust code should remain safe Rust by default.
 
@@ -4136,7 +4219,7 @@ If native Windows integration eventually requires unsafe FFI, isolate it behind 
 
 That would require an explicit revision to the applicable `unsafe_code` lint policy rather than an unnoticed architectural exception.
 
-## **90. JavaScript workspace**
+## 90. JavaScript workspace
 
 ```yaml
 packages:
@@ -4153,12 +4236,16 @@ The `pnpm-lock.yaml` file is authoritative for frontend dependency resolution.
 
 Proposed workflow layout:
 
-Plain text.github/workflows/
+```text
+.github/workflows/
 ├── rust-ci.yml
 ├── frontend-ci.yml
 ├── native-build.yml
 ├── security.yml
-└── release.yml### **Pull-request checks**
+└── release.yml
+```
+
+### Pull-request checks
 
 ### Required CI behavior
 
@@ -4179,9 +4266,13 @@ CI duration and runner usage should be monitored so that routine contributions r
 
 Proposed initial distribution:
 
-Plain textSonicMirror_<version>_x64-setup.exe
+```text
+SonicMirror_<version>_x64-setup.exe
 SHA256SUMS.txt
-THIRD_PARTY_NOTICES.txtNSIS is the proposed initial Windows installer format through the supported Tauri bundler configuration.
+THIRD_PARTY_NOTICES.txt
+```
+
+NSIS is the proposed initial Windows installer format through the supported Tauri bundler configuration.
 
 MSI packaging can be added when its distribution or deployment benefits justify it.
 
@@ -4281,7 +4372,11 @@ Playback events are the exception to database persistence because playback state
 
 Each ADR should be a separate Markdown file under:
 
-Plain textdocs/adr/| ADR | Decision | Status |
+```text
+docs/adr/
+```
+
+| ADR | Decision | Status |
 |---|---|---|
 | ADR-001 | Local-first desktop architecture | Accepted |
 | ADR-002 | Tauri with Rust and React | Selected, compatibility verification pending |
@@ -4310,7 +4405,42 @@ Plain textdocs/adr/| ADR | Decision | Status |
 
 ### ADR template
 
-Markdown# ADR-XXX: Decision title## StatusProposed | Accepted | Superseded | Rejected## ContextDescribe the architectural problem, relevantconstraints and reasons a decision is required.## DecisionDescribe the selected architectural approach.## Alternatives consideredDocument credible alternatives and their trade-offs.## ConsequencesDescribe benefits, costs, limitations and risks.## ValidationDescribe the tests, benchmarks or compatibilitychecks needed to establish confidence.## Reconsideration conditionsDescribe concrete circumstances that would justifyreplacing or revising this decision.Do not create an ADR simply to document every ordinary code-level implementation choice.
+```markdown
+# ADR-XXX: Decision title
+
+## Status
+
+Proposed | Accepted | Superseded | Rejected
+
+## Context
+
+Describe the architectural problem, relevant
+constraints and reasons a decision is required.
+
+## Decision
+
+Describe the selected architectural approach.
+
+## Alternatives considered
+
+Document credible alternatives and their trade-offs.
+
+## Consequences
+
+Describe benefits, costs, limitations and risks.
+
+## Validation
+
+Describe the tests, benchmarks or compatibility
+checks needed to establish confidence.
+
+## Reconsideration conditions
+
+Describe concrete circumstances that would justify
+replacing or revising this decision.
+```
+
+Do not create an ADR simply to document every ordinary code-level implementation choice.
 
 Use ADRs for decisions with material architectural consequences.
 
