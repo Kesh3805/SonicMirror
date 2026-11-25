@@ -182,3 +182,20 @@
     display: none;
   }
 }
+
+.sm-vector-table {
+  border-collapse: collapse;
+  font-size: var(--sm-type-num-sm);
+}
+
+.sm-vector-table th {
+  padding-right: var(--sm-space-3);
+  font-weight: var(--sm-weight-regular);
+  color: var(--sm-muted);
+  text-align: left;
+}
+
+.sm-vector-table td {
+  text-align: right;
+  color: var(--sm-ink);
+}

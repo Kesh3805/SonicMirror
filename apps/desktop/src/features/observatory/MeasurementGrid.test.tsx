@@ -34,6 +34,13 @@ const features: AudioFeature[] = [
     diagnosticCode: "below_absolute_gate",
   },
   {
+    key: "mfcc_mean",
+    value: [-312.456, 41.2, -7.5, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+    unit: null,
+    status: "valid",
+    algorithmVersion: "mfcc/1.0.0",
+  },
+  {
     key: "spectral_flux_mean",
     value: null,
     unit: null,
@@ -84,5 +91,14 @@ describe("MeasurementGrid", () => {
     expect(within(levels).getByText("1 measured · 1 unavailable")).toBeInTheDocument();
     const rhythm = screen.getByRole("region", { name: "Rhythm" });
     expect(within(rhythm).getByText("1 measured · 0 unavailable")).toBeInTheDocument();
+  });
+
+  it("shows vector features as a coefficient count with every value on request", () => {
+    render(<MeasurementGrid features={features} />);
+    expect(screen.getByText("coefficients")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Method for MFCC mean" }));
+    expect(screen.getByText("c0")).toBeInTheDocument();
+    expect(screen.getByText("−312.46")).toBeInTheDocument();
+    expect(screen.getByText("c12")).toBeInTheDocument();
   });
 });

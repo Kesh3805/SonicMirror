@@ -11,7 +11,8 @@ export type FeatureFormat =
   | "seconds"
   | "count"
   | "bpm"
-  | "sampleRate";
+  | "sampleRate"
+  | "vector";
 
 export interface FeatureInfo {
   label: string;
@@ -98,6 +99,20 @@ export const FEATURE_CATALOG: Record<string, FeatureInfo> = {
     format: "ratio",
     explanation:
       "How much the spectrum's shape changes from one analysis frame to the next, on a 0–1.41 scale.",
+  },
+  mfcc_mean: {
+    label: "MFCC mean",
+    group: "Spectrum",
+    format: "vector",
+    explanation:
+      "Thirteen mel-frequency cepstral coefficients averaged over the recording: a compact description of the spectral envelope (broad timbre). Individual coefficients have no direct perceptual meaning; they are useful for comparing tracks.",
+  },
+  mfcc_std: {
+    label: "MFCC spread",
+    group: "Spectrum",
+    format: "vector",
+    explanation:
+      "How much each MFCC coefficient varies over the recording. Higher spread means the timbre changes more over time.",
   },
   tempo_bpm: {
     label: "Tempo",

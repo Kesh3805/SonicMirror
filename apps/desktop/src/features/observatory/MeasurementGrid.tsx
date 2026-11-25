@@ -17,6 +17,9 @@ import { ReferenceScale } from "./ReferenceScale";
 import "./measurements.css";
 
 function display(feature: AudioFeature, info: FeatureInfo): { value: string; unit: string } {
+  if (feature.status === "valid" && Array.isArray(feature.value) && info.format === "vector") {
+    return { value: String(feature.value.length), unit: "coefficients" };
+  }
   if (feature.status !== "valid" || typeof feature.value !== "number") {
     return { value: UNKNOWN, unit: "" };
   }
@@ -34,11 +37,29 @@ function display(feature: AudioFeature, info: FeatureInfo): { value: string; uni
       return { value: formatChannels(v), unit: "" };
     case "bpm":
       return { value: formatBpm(v), unit: "BPM" };
+    case "vector":
+      return { value: UNKNOWN, unit: "" };
     case "sampleRate": {
       const [rate = UNKNOWN, unit = ""] = formatSampleRate(v).split(THIN);
       return { value: rate, unit };
     }
   }
+}
+
+/** Every component of a vector feature, so nothing is summarized away. */
+function VectorTable({ values }: { values: number[] }) {
+  return (
+    <table className="sm-vector-table sm-data">
+      <tbody>
+        {values.map((v, i) => (
+          <tr key={i}>
+            <th scope="row">c{i}</th>
+            <td>{formatRatio(v, 2)}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
 }
 
 function firstSentence(text: string): string {
@@ -113,6 +134,7 @@ function Measurement({
       {open && (
         <div id={methodId} className="sm-metric-method-body">
           <p>{info.explanation}</p>
+          {valid && Array.isArray(feature.value) && <VectorTable values={feature.value} />}
           <p className="sm-data">algorithm {feature.algorithmVersion}</p>
         </div>
       )}
