@@ -6,4 +6,5 @@
 pub mod level;
 pub mod spectral;
 pub mod synth;
+pub mod waveform;
 pub mod window;
