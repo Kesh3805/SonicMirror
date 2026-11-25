@@ -1,5 +1,6 @@
 //! Import and analyze audio files from the command line, printing the same
-//! JSON payloads the desktop IPC commands return.
+//! JSON payloads the desktop IPC commands return, plus the Atlas for the
+//! whole data directory.
 //!
 //! ```sh
 //! cargo run -p sonic-runtime --example analyze -- <data-dir> <audio-file>...
@@ -38,6 +39,20 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             Err(e) => eprintln!("{}: {} ({})", path.display(), e, e.code()),
         }
     }
-    println!("{}", serde_json::to_string_pretty(&results)?);
+    let atlas = library.atlas()?;
+    let neighbours: serde_json::Map<String, serde_json::Value> = atlas
+        .points
+        .iter()
+        .filter_map(|p| {
+            let n = library.atlas_neighbours(&p.track_id, 5).ok()?;
+            Some((p.track_id.clone(), serde_json::to_value(n).ok()?))
+        })
+        .collect();
+    let output = serde_json::json!({
+        "tracks": results,
+        "atlas": atlas,
+        "neighbours": neighbours,
+    });
+    println!("{}", serde_json::to_string_pretty(&output)?);
     Ok(())
 }
