@@ -72,3 +72,49 @@ export interface AppInfo {
   engine: string;
   featureSchema: string;
 }
+
+export interface AtlasPoint {
+  trackId: string;
+  title: string;
+  artist: string | null;
+  x: number;
+  y: number;
+  centroidHz: number | null;
+  integratedLufs: number | null;
+  tempoBpm: number | null;
+  flatness: number | null;
+}
+
+export interface AtlasExclusion {
+  trackId: string;
+  title: string;
+  reason: string;
+}
+
+export interface AtlasAxis {
+  /** Fraction of variance along this axis, 0..1. */
+  explained: number;
+  /** Strongest dimensions with signed loadings. */
+  top: [string, number][];
+}
+
+export interface AtlasSnapshot {
+  status: "ready" | "unavailable";
+  reason: "too_few_tracks" | "insufficient_variance" | null;
+  vectorVersion: string;
+  projectionVersion: string;
+  minTracks: number;
+  total: number;
+  points: AtlasPoint[];
+  excluded: AtlasExclusion[];
+  axes: AtlasAxis[];
+}
+
+export interface AtlasNeighbour {
+  trackId: string;
+  title: string;
+  artist: string | null;
+  distance: number;
+  /** Share of squared distance per feature group, summing to 1. */
+  contributions: Record<string, number>;
+}

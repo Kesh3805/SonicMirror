@@ -2,6 +2,8 @@ import { invoke } from "@tauri-apps/api/core";
 import type {
   AppInfo,
   ApplicationError,
+  AtlasNeighbour,
+  AtlasSnapshot,
   ImportOutcome,
   SpectrogramView,
   StoredAnalysis,
@@ -55,4 +57,7 @@ export const ipc = {
     call<WaveformView>("analysis_get_waveform", { trackId, targetBuckets }),
   getSpectrogram: (trackId: string, columns: number, bands: number) =>
     call<SpectrogramView>("analysis_get_spectrogram", { trackId, columns, bands }),
+  getAtlas: () => call<AtlasSnapshot>("atlas_get_snapshot"),
+  getNeighbours: (trackId: string, k: number) =>
+    call<AtlasNeighbour[]>("atlas_get_neighbors", { trackId, k }),
 };
