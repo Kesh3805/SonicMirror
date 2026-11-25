@@ -65,12 +65,14 @@ export function LibraryPage() {
         <EmptyState title={`No ${label.toLowerCase()} yet.`} size="section">
           Grouped views arrive with the full library catalog.
         </EmptyState>
-      ) : tracks.isError ? (
-        <ErrorNotice error={tracks.error} onRetry={() => void tracks.refetch()} />
-      ) : tracks.isPending ? (
-        <div className="sm-table-frame" aria-busy="true">
-          <SkeletonRows rows={8} rowHeight={32} />
-        </div>
+      ) : tracks.data === undefined ? (
+        tracks.isError ? (
+          <ErrorNotice error={tracks.error} onRetry={() => void tracks.refetch()} />
+        ) : (
+          <div className="sm-table-frame" aria-busy="true">
+            <SkeletonRows rows={8} rowHeight={32} />
+          </div>
+        )
       ) : tracks.data.length === 0 ? (
         <EmptyState title="Your library is empty.">
           Import a folder of audio files. Every measurement is computed on this device; your files
