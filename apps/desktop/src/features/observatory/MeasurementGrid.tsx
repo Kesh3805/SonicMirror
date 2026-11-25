@@ -99,7 +99,7 @@ function Measurement({
         type="button"
         className="sm-text-button sm-metric-method sm-data"
         aria-expanded={open}
-        aria-controls={methodId}
+        aria-controls={open ? methodId : undefined}
         aria-label={`Method for ${info.label}`}
         onClick={() => setOpen((o) => !o)}
       >
