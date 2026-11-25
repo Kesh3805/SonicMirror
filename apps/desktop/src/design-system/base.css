@@ -182,3 +182,10 @@ a:focus-visible {
     outline-color: Highlight;
   }
 }
+
+.sm-skeleton-row {
+  display: flex;
+  align-items: center;
+  padding-inline: var(--sm-space-3);
+  border-bottom: var(--sm-line) solid var(--sm-rule-quiet);
+}
