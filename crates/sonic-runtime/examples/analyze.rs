@@ -27,10 +27,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 let track = library.track(&id)?;
                 let analysis = library.analysis(&id)?;
                 let waveform = library.waveform(&id, 1600)?;
+                let spectrogram = library.spectrogram(&id, 1024, 128)?;
                 results.push(serde_json::json!({
                     "track": track,
                     "analysis": analysis,
                     "waveform": waveform,
+                    "spectrogram": spectrogram,
                 }));
             }
             Err(e) => eprintln!("{}: {} ({})", path.display(), e, e.code()),
