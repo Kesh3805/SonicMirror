@@ -3,7 +3,9 @@ import { useId, useState } from "react";
 import type { AudioFeature } from "../../ipc/types";
 import {
   UNKNOWN,
+  formatBpm,
   formatChannels,
+  formatConfidence,
   formatDecibels,
   formatFrequency,
   formatRatio,
@@ -28,6 +30,8 @@ function display(feature: AudioFeature, info: FeatureInfo): { value: string; uni
       return { value: formatDuration(v * 1000), unit: "" };
     case "count":
       return { value: formatChannels(v), unit: "" };
+    case "bpm":
+      return { value: formatBpm(v), unit: "BPM" };
   }
 }
 
@@ -56,10 +60,19 @@ function Measurement({ feature, info }: { feature: AudioFeature; info: FeatureIn
         </button>
       </div>
       {valid ? (
-        <p className="sm-metric-value sm-data">
-          {value}
-          {unit && <span className="sm-metric-unit">{unit}</span>}
-        </p>
+        <>
+          <p className="sm-metric-value sm-data">
+            {value}
+            {unit && <span className="sm-metric-unit">{unit}</span>}
+          </p>
+          {info.format === "bpm" && (
+            <p className="sm-metric-qualifier">
+              Estimated
+              {feature.confidence !== undefined &&
+                ` · ${formatConfidence(feature.confidence)} confidence`}
+            </p>
+          )}
+        </>
       ) : (
         <p className="sm-metric-unavailable">
           Not available<span className="sm-metric-reason">{reason}</span>

@@ -94,3 +94,8 @@
 .sm-metric-version {
   font-size: var(--sm-type-annotation);
 }
+
+.sm-metric-qualifier {
+  font-size: var(--sm-type-label);
+  color: var(--sm-muted);
+}

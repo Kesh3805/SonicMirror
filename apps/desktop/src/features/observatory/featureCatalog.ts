@@ -2,9 +2,15 @@
 // honest explanations (PRD OBS-006). Explanations state limitations rather
 // than overclaiming what a number means.
 
-export type FeatureGroup = "Levels" | "Spectrum" | "Technical";
+export type FeatureGroup = "Levels" | "Spectrum" | "Rhythm" | "Technical";
 
-export type FeatureFormat = "decibels" | "frequency" | "ratio" | "seconds" | "count";
+export type FeatureFormat =
+  | "decibels"
+  | "frequency"
+  | "ratio"
+  | "seconds"
+  | "count"
+  | "bpm";
 
 export interface FeatureInfo {
   label: string;
@@ -14,6 +20,20 @@ export interface FeatureInfo {
 }
 
 export const FEATURE_CATALOG: Record<string, FeatureInfo> = {
+  integrated_loudness: {
+    label: "Integrated loudness",
+    group: "Levels",
+    format: "decibels",
+    explanation:
+      "Programme loudness over the whole recording per ITU-R BS.1770: frequency-weighted to approximate hearing, with quiet passages gated out. Streaming services normalize around −14 LUFS.",
+  },
+  loudness_range: {
+    label: "Loudness range",
+    group: "Levels",
+    format: "decibels",
+    explanation:
+      "How much loudness varies over the recording (EBU Tech 3342): the spread between quieter and louder sections, ignoring brief extremes.",
+  },
   rms_dbfs: {
     label: "RMS level",
     group: "Levels",
@@ -74,6 +94,13 @@ export const FEATURE_CATALOG: Record<string, FeatureInfo> = {
     explanation:
       "How much the spectrum's shape changes from one analysis frame to the next, on a 0–1.41 scale.",
   },
+  tempo_bpm: {
+    label: "Tempo",
+    group: "Rhythm",
+    format: "bpm",
+    explanation:
+      "The dominant pulse, estimated from how regularly note onsets recur. Music with changing or ambiguous rhythm has no single correct tempo, and half or double time can be equally valid.",
+  },
   duration: {
     label: "Duration",
     group: "Technical",
@@ -94,7 +121,7 @@ export const FEATURE_CATALOG: Record<string, FeatureInfo> = {
   },
 };
 
-export const GROUP_ORDER: FeatureGroup[] = ["Levels", "Spectrum", "Technical"];
+export const GROUP_ORDER: FeatureGroup[] = ["Levels", "Spectrum", "Rhythm", "Technical"];
 
 /** Human-readable reasons for diagnostic codes. */
 export const UNAVAILABLE_REASONS: Record<string, string> = {
@@ -103,4 +130,13 @@ export const UNAVAILABLE_REASONS: Record<string, string> = {
   signal_shorter_than_frame: "The recording is too short to analyze.",
   single_frame: "Too short to measure change over time.",
   non_finite_value: "The calculation did not produce a valid number.",
+  below_absolute_gate: "Too quiet to measure loudness (below −70 LUFS).",
+  signal_shorter_than_block: "Too short to measure loudness (under 0.4 s).",
+  signal_shorter_than_short_term_window: "Too short to measure loudness range (under 3 s).",
+  insufficient_short_term_blocks: "Too little audible material to measure loudness range.",
+  unsupported_channel_layout: "Loudness is not measured for this channel layout.",
+  sample_rate_too_low: "The sample rate is too low for loudness measurement.",
+  signal_too_short_for_tempo: "Too short to estimate tempo (under 8 s).",
+  no_rhythmic_onsets: "No rhythmic onsets were detected.",
+  low_confidence: "No steady pulse was found with enough confidence.",
 };
