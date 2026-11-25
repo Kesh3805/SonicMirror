@@ -13,6 +13,11 @@
   border-bottom: var(--sm-line) solid var(--sm-rule-quiet);
 }
 
+/* Controls keep their natural width, also when the row stacks. */
+.sm-setting > :last-child {
+  justify-self: start;
+}
+
 .sm-setting-text {
   display: flex;
   flex-direction: column;
