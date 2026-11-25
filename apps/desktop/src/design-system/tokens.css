@@ -30,14 +30,17 @@
   --sm-overlay: rgb(37 38 34 / 48%);
   --sm-chart-grid: var(--sm-rule-quiet);
   --sm-chart-axis: var(--sm-muted);
-  --sm-wave: #A53726;
+  /* Accent budget: oxide means playhead, selection or the single primary
+     action per view, nothing else. Data is drawn in ink and stone. */
+  --sm-wave: #8C887D;
   --sm-wave-played: #252622;
-  --sm-wave-cursor: #175E84;
-  --sm-point: #376B82;
+  --sm-wave-cursor: var(--sm-accent);
+  --sm-point: #5E5F57;
   --sm-point-outline: #252622;
-  --sm-point-selected: #A53726;
-  --sm-compare-a: #A53726;
-  --sm-compare-b: #245E7A;
+  --sm-point-selected: var(--sm-accent);
+  /* Compare A is a filled shape, B a hollow one: shape, not hue. */
+  --sm-compare-a: #252622;
+  --sm-compare-b: #252622;
   --sm-heat-0: #171916;
   --sm-heat-1: #33264F;
   --sm-heat-2: #83435D;
@@ -143,14 +146,12 @@
   --sm-danger: #F28C88;
   --sm-info: #91C5E0;
   --sm-overlay: rgb(0 0 0 / 60%);
-  --sm-wave: #E17B60;
+  --sm-wave: #7F8277;
   --sm-wave-played: #E9E6DD;
-  --sm-wave-cursor: #8CCAE8;
-  --sm-point: #8CCAE8;
+  --sm-point: #A3A59A;
   --sm-point-outline: #E9E6DD;
-  --sm-point-selected: #E17B60;
-  --sm-compare-a: #E17B60;
-  --sm-compare-b: #8CCAE8;
+  --sm-compare-a: #E9E6DD;
+  --sm-compare-b: #E9E6DD;
   --sm-seq-0: #28424B;
   --sm-seq-1: #376B82;
   --sm-seq-2: #64969F;

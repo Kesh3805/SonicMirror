@@ -14,6 +14,12 @@ Import `tokens.css` once at application root; use semantic variables, not hardco
 
 Shared tokens: base 4px; spacing 0/4/8/12/16/20/24/32/40/48/64; radii 0/4/6/8/999 (round only dots and sliders); borders 1px; control minimum 32px hit area, default height 36px; focus 2px outline + 2px offset; shadow only menus/dialogs. Durations 120/180/220/320ms with cubic-bezier(.2,0,0,1). No perpetual ornamental motion. Reduced motion sets all transitions to zero and disables smooth scrolling/viewport animation. Skeletons are static. Playback and analysis progress remain functional. Decorative divider token is not a sufficient control boundary: use control-border for inputs and meaningful outlines. Color never sole status cue.
 
+**Accent budget (amended by the Redesign Brief).** Oxide may appear only as the playhead and
+playing-track marker, a selected item (selected row or nav rule, active tab, selected Atlas point)
+and the single primary button of a view. It is never used for headings, the brand, nav text,
+section fills, chart marks or links. Waveforms and points are drawn in ink and stone; comparisons
+distinguish A and B by shape (filled versus hollow), not hue.
+
 ## 3. App shell
 
 Use native Windows title bar, OS minimize/maximize/close and snap; do not recreate window controls. All viewport sizes below refer to webview content, excluding native title bar, CSS logical pixels. At 1440×900: top command bar 48px across entire width; middle height 780px with 216px left rail and 1224px workspace; bottom player 72px across entire width. Top bar and player fixed in grid rows, not position overlays. Main workspace and rail scroll independently as needed. Root uses grid rows 48px minmax(0,1fr) 72px; middle uses columns sidebar minmax(0,1fr). Use min-width/min-height 0 throughout. One main scroll container per page; tables may own their own virtual scrolling region; Atlas canvas is not a page scroll surface. Default content padding 32px and max width 1440px centered; 24px below 1200, 16px below 1100. At 1024×640 minimum: rail 56px icon-only, tooltips + accessible names; main width 968px; inspector becomes collapsible overlay below 1200; drawers overlay at every size; no horizontal page scrolling. Native minimum window size set after OS scaling validation; if smaller effective viewport due to zoom, allow vertical scrolling and collapse secondary columns. No fixed-height text containers.
