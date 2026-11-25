@@ -5,8 +5,8 @@ committed; each phase ends on its exit criteria, not on a deadline.
 
 | Phase | Name | Exit criteria | Status |
 |---|---|---|---|
-| 00 | Foundation | Workspace, CI, design tokens, app shell, synthetic fixtures, compatibility spikes | In progress |
-| 01 | Audio vertical slice | One recording imported, decoded, analyzed, stored and displayed with validated numbers | Planned |
+| 00 | Foundation | Workspace, CI, design tokens, app shell, synthetic fixtures, compatibility spikes | Mostly done |
+| 01 | Audio vertical slice | One recording imported, decoded, analyzed, stored and displayed with validated numbers | In progress |
 | 02 | Library and runtime | 10,000-track library indexed and analyzed incrementally without blocking the UI | Planned |
 | 03 | Observatory | Waveform, spectrogram, explained measurements and integrated playback | Planned |
 | 04 | Sonic Atlas | Feature vectors, exact neighbors, PCA map, filters, comparison, collections | Planned |
@@ -28,9 +28,23 @@ committed; each phase ends on its exit criteria, not on a deadline.
 - [ ] Remaining architecture decision records (007, 008, 011, 012, 014, 015)
 - [x] Software Architecture Document
 - [ ] Audio Analysis Technical Specification
-- [ ] Decoder spike (Symphonia format matrix)
+- [x] Decoder spike (Symphonia, WAV verified; other formats pending fixtures)
 - [ ] Playback spike (Rodio/CPAL on Windows)
 - [ ] IPC type generation spike
+
+## Phase 01 checklist
+
+- [x] Streaming decode, downmix and resampling
+- [x] Level and spectral features end to end
+- [x] Waveform envelope artifact
+- [x] SQLite catalog and artifact cache
+- [x] Import through the native dialog, tracks table, Observatory screen
+- [ ] BS.1770 integrated loudness and loudness range
+- [ ] Onset and tempo estimation with confidence
+- [ ] MFCC summary
+- [ ] Spectrogram artifact and view
+- [ ] Reconcile features with the Audio Analysis Technical Specification
+- [ ] Fixtures for MP3, FLAC, Ogg and M4A
 
 ## After the core release
 
