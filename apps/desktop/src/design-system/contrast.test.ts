@@ -79,6 +79,11 @@ describe.each([
     expect(ratio(theme, fg, bg)).toBeGreaterThanOrEqual(min);
   });
 
+  it("orders the sequential ramp by increasing contrast with the ground", () => {
+    const steps = [0, 1, 2, 3, 4].map((i) => ratio(theme, `--sm-seq-${i}`, "--sm-paper"));
+    for (let i = 1; i < steps.length; i++) expect(steps[i]!).toBeGreaterThan(steps[i - 1]!);
+  });
+
   it("keeps selection distinct from skeleton fills", () => {
     expect(resolve(theme, "--sm-selected")).not.toBe(resolve(theme, "--sm-inset"));
     expect(resolve(theme, "--sm-selected")).not.toBe(resolve(theme, "--sm-rule-quiet"));

@@ -41,19 +41,14 @@
   /* Compare A is a filled shape, B a hollow one: shape, not hue. */
   --sm-compare-a: #252622;
   --sm-compare-b: #252622;
-  --sm-heat-0: #171916;
-  --sm-heat-1: #33264F;
-  --sm-heat-2: #83435D;
-  --sm-heat-3: #D17A4C;
-  --sm-heat-4: #F8E6A0;
-  --sm-seq-0: #DCE8E9;
-  --sm-seq-1: #A3C4C9;
-  --sm-seq-2: #64969F;
-  --sm-seq-3: #376B82;
-  --sm-seq-4: #193E58;
-  --sm-div-0: #245E7A;
-  --sm-div-1: #F3F0E8;
-  --sm-div-2: #A53726;
+  /* Sequential ramp for spectrograms and colour-by: lightness-monotonic,
+     most energy = most contrast with the ground (darkest on paper). */
+  --sm-seq-0: #F3F0E8;
+  --sm-seq-1: #D2C9B8;
+  --sm-seq-2: #9C8F7C;
+  --sm-seq-3: #5C5246;
+  --sm-seq-4: #252622;
+  /* Categorical hues are reserved for validated categories (never clusters). */
   --sm-cat-1: #A53726;
   --sm-cat-2: #376B82;
   --sm-cat-3: #35644D;
@@ -152,14 +147,11 @@
   --sm-point-outline: #E9E6DD;
   --sm-compare-a: #E9E6DD;
   --sm-compare-b: #E9E6DD;
-  --sm-seq-0: #28424B;
-  --sm-seq-1: #376B82;
-  --sm-seq-2: #64969F;
-  --sm-seq-3: #A3C4C9;
-  --sm-seq-4: #DCE8E9;
-  --sm-div-0: #8CCAE8;
-  --sm-div-1: #393D36;
-  --sm-div-2: #E17B60;
+  --sm-seq-0: #171916;
+  --sm-seq-1: #3B3530;
+  --sm-seq-2: #7A5E4F;
+  --sm-seq-3: #C08A6E;
+  --sm-seq-4: #F3E3CF;
   --sm-cat-1: #E17B60;
   --sm-cat-2: #8CCAE8;
   --sm-cat-3: #91C8A5;
