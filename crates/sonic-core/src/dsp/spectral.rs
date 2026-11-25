@@ -11,6 +11,7 @@ use std::sync::Arc;
 use rustfft::{Fft, FftPlanner, num_complex::Complex32};
 
 use super::mfcc::{self, MfccExtractor, MfccSummary};
+use super::spectrogram::{Spectrogram, SpectrogramBuilder};
 use super::window::hann;
 use crate::domain::AudioFeature;
 
@@ -109,6 +110,7 @@ pub struct SpectralAnalyzer {
     mfcc: MfccExtractor,
     mfcc_summary: MfccSummary,
     power: Vec<f64>,
+    spectrogram: SpectrogramBuilder,
     centroid: Running,
     bandwidth: Running,
     rolloff: Running,
@@ -153,6 +155,11 @@ impl SpectralAnalyzer {
             mfcc: MfccExtractor::new(config.sample_rate, config.frame_size / 2 + 1),
             mfcc_summary: MfccSummary::default(),
             power: vec![0.0; config.frame_size / 2 + 1],
+            spectrogram: SpectrogramBuilder::new(
+                config.sample_rate,
+                config.frame_size,
+                config.hop_size,
+            ),
             centroid: Running::default(),
             bandwidth: Running::default(),
             rolloff: Running::default(),
@@ -219,6 +226,11 @@ impl SpectralAnalyzer {
         }
         self.frames += 1;
         self.push_onset();
+        for (p, m) in self.power.iter_mut().zip(&self.magnitudes) {
+            *p = m * m;
+        }
+        // Every frame, silent ones included, so the image stays time-aligned.
+        self.spectrogram.push(&self.power);
 
         let power: f64 = self.magnitudes.iter().map(|m| m * m).sum();
         if power < SILENT_FRAME_POWER {
@@ -239,9 +251,6 @@ impl SpectralAnalyzer {
         if let Some(flux) = d.flux {
             self.flux.push(flux);
         }
-        for (p, m) in self.power.iter_mut().zip(&self.magnitudes) {
-            *p = m * m;
-        }
         let coefficients = self.mfcc.coefficients(&self.power);
         self.mfcc_summary.push(&coefficients);
         match &mut self.previous {
@@ -249,6 +258,16 @@ impl SpectralAnalyzer {
             None => self.previous = Some(self.magnitudes.clone()),
         }
         Some(d)
+    }
+
+    /// Take the spectrogram built so far, leaving an empty builder behind.
+    pub fn take_spectrogram(&mut self) -> Spectrogram {
+        let fresh = SpectrogramBuilder::new(
+            self.config.sample_rate,
+            self.config.frame_size,
+            self.config.hop_size,
+        );
+        std::mem::replace(&mut self.spectrogram, fresh).finish()
     }
 
     /// MFCC summary features: per-coefficient mean and standard deviation over

@@ -21,6 +21,7 @@ use crate::dsp::level::LevelAccumulator;
 use crate::dsp::loudness::LoudnessMeter;
 use crate::dsp::resample::{MonoResampler, downmix_mean};
 use crate::dsp::spectral::{SpectralAnalyzer, SpectralConfig};
+use crate::dsp::spectrogram::Spectrogram;
 use crate::dsp::tempo::tempo_feature;
 use crate::dsp::waveform::{EnvelopeBuilder, WaveformEnvelope};
 use crate::media::{DecodedStream, MediaError, TechnicalProperties};
@@ -44,6 +45,8 @@ pub struct AnalysisOutput {
     pub features: Vec<AudioFeature>,
     #[serde(skip)]
     pub waveform: WaveformEnvelope,
+    #[serde(skip)]
+    pub spectrogram: Spectrogram,
 }
 
 /// Technical properties measured from the decoded stream.
@@ -167,6 +170,7 @@ pub fn analyze(
         },
         features,
         waveform: envelope.finish(),
+        spectrogram: spectral.take_spectrogram(),
     })
 }
 
@@ -203,6 +207,27 @@ mod tests {
         let centroid = value(&out, "spectral_centroid_mean");
         assert!((centroid - 440.0).abs() < 22.0, "centroid {centroid}");
         assert_eq!(out.waveform.levels[0].len(), 300);
+        // The spectrogram spans the track and is loudest in the band holding 440 Hz.
+        let s = &out.spectrogram;
+        assert!(
+            s.duration_ms().abs_diff(3000) < 120,
+            "{} ms",
+            s.duration_ms()
+        );
+        let bands = usize::from(s.bands);
+        let mid = s.columns() / 2;
+        let column = &s.cells[mid * bands..(mid + 1) * bands];
+        let loudest = column
+            .iter()
+            .enumerate()
+            .max_by_key(|(_, v)| **v)
+            .unwrap()
+            .0;
+        let centre_hz = (loudest as f64 + 0.5) * s.max_hz() / bands as f64;
+        assert!(
+            (centre_hz - 440.0).abs() < 50.0,
+            "loudest band at {centre_hz} Hz"
+        );
     }
 
     #[test]
