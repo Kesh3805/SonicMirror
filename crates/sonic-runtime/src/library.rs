@@ -12,12 +12,16 @@ use sonic_catalog::{Catalog, CatalogError, NewAnalysis, NewTrack, StoredAnalysis
 use sonic_core::analysis::{self, AnalysisError, ENGINE_VERSION, FEATURE_SCHEMA_VERSION};
 use sonic_core::domain::{ContentDigest, cache_key};
 use sonic_core::dsp::spectral::SpectralConfig;
+use sonic_core::dsp::spectrogram::{self, Spectrogram};
 use sonic_core::dsp::waveform::{BASE_BUCKET_MS, WaveformEnvelope};
 use sonic_core::media::DecodedStream;
 use sonic_core::media::metadata::read_metadata;
 
 /// Most buckets a single waveform request may return.
 pub const MAX_WAVEFORM_BUCKETS: usize = 8192;
+/// Bounds on a spectrogram request (columns × bands cells).
+pub const MAX_SPECTROGRAM_COLUMNS: usize = 2048;
+pub const MAX_SPECTROGRAM_BANDS: usize = 256;
 
 #[derive(Debug, thiserror::Error)]
 pub enum RuntimeError {
@@ -67,6 +71,22 @@ pub struct WaveformView {
     pub bucket_duration_ms: f64,
     pub min: Vec<f32>,
     pub max: Vec<f32>,
+}
+
+/// A bounded spectrogram image with its scale. `cells` holds `columns × bands`
+/// quantized levels, column-major with band 0 lowest; level `v` is
+/// `floor_db + v × step_db` dB relative to a full-scale sine in one bin.
+#[derive(Debug, Clone, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SpectrogramView {
+    pub duration_ms: u64,
+    pub max_hz: f64,
+    pub floor_db: f64,
+    pub step_db: f64,
+    pub reference: &'static str,
+    pub columns: usize,
+    pub bands: usize,
+    pub cells: Vec<u8>,
 }
 
 /// Coordinates catalog, artifacts and the analysis engine.
@@ -143,6 +163,11 @@ impl LibraryService {
         let waveform =
             self.artifacts
                 .write(ArtifactKind::Waveform, &key, &output.waveform.to_bytes())?;
+        let spectrogram = self.artifacts.write(
+            ArtifactKind::Spectrogram,
+            &key,
+            &output.spectrogram.to_bytes(),
+        )?;
 
         let technical = &output.technical;
         let duration_ms = (technical.duration_seconds * 1000.0).round();
@@ -167,7 +192,7 @@ impl LibraryService {
             feature_schema_version: output.feature_schema_version,
             configuration_json: &config_json,
             features: &output.features,
-            artifacts: std::slice::from_ref(&waveform),
+            artifacts: &[waveform, spectrogram],
         })?;
         Ok(track_id)
     }
@@ -217,6 +242,46 @@ impl LibraryService {
     }
 }
 
+impl LibraryService {
+    /// The spectrogram downsampled to at most `columns × bands` cells, keeping
+    /// the loudest cell of each block.
+    ///
+    /// # Errors
+    ///
+    /// Fails if the track is not analyzed or its artifact cannot be read.
+    pub fn spectrogram(
+        &self,
+        track_id: &str,
+        columns: usize,
+        bands: usize,
+    ) -> Result<SpectrogramView> {
+        let path = self
+            .analysis(track_id)?
+            .and_then(|a| a.spectrogram_path)
+            .ok_or(RuntimeError::NotAnalyzed)?;
+        let bytes = self
+            .artifacts
+            .read(&path)
+            .map_err(|_| RuntimeError::ArtifactUnavailable)?;
+        let full =
+            Spectrogram::from_bytes(&bytes).map_err(|_| RuntimeError::ArtifactUnavailable)?;
+        let s = full.downsample(
+            columns.clamp(1, MAX_SPECTROGRAM_COLUMNS),
+            bands.clamp(1, MAX_SPECTROGRAM_BANDS),
+        );
+        Ok(SpectrogramView {
+            duration_ms: s.duration_ms(),
+            max_hz: s.max_hz(),
+            floor_db: spectrogram::FLOOR_DB,
+            step_db: 0.5,
+            reference: "dB re full-scale sine (per bin)",
+            columns: s.columns(),
+            bands: usize::from(s.bands),
+            cells: s.cells,
+        })
+    }
+}
+
 fn view(envelope: &WaveformEnvelope, target: usize) -> WaveformView {
     let level = envelope.level_for(target);
     let buckets = &envelope.levels[level];
@@ -240,6 +305,7 @@ fn canonical_config() -> String {
             "{{\"loudness\":{{\"version\":\"{}\"}},",
             "\"mfcc\":{{\"bands\":{},\"coefficients\":{},\"minHz\":{},\"version\":\"{}\"}},",
             "\"spectral\":{{\"frameSize\":{},\"hopSize\":{},\"rolloffFraction\":{},\"sampleRate\":{}}},",
+            "\"spectrogram\":{{\"bands\":{},\"version\":\"{}\"}},",
             "\"tempo\":{{\"maxBpm\":{},\"minBpm\":{},\"minConfidence\":{},\"version\":\"{}\"}},",
             "\"waveform\":{{\"baseBucketMs\":{}}}}}"
         ),
@@ -252,6 +318,8 @@ fn canonical_config() -> String {
         s.hop_size,
         s.rolloff_fraction,
         s.sample_rate,
+        spectrogram::BANDS,
+        spectrogram::ALGORITHM_VERSION,
         tempo::MAX_BPM,
         tempo::MIN_BPM,
         tempo::MIN_CONFIDENCE,
@@ -297,6 +365,11 @@ mod tests {
                 .iter()
                 .any(|f| f.key == "spectral_centroid_mean")
         );
+
+        let sg = service.spectrogram(&id, 64, 32).unwrap();
+        assert_eq!((sg.columns, sg.bands), (64, 32));
+        assert_eq!(sg.cells.len(), 64 * 32);
+        assert!(sg.duration_ms.abs_diff(2000) < 120);
 
         let wf = service.waveform(&id, 100).unwrap();
         assert!(wf.min.len() >= 100 && wf.min.len() == wf.max.len());

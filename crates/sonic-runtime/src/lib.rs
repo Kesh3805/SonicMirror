@@ -3,4 +3,4 @@
 
 pub mod library;
 
-pub use library::{LibraryService, RuntimeError, WaveformView};
+pub use library::{LibraryService, RuntimeError, SpectrogramView, WaveformView};
