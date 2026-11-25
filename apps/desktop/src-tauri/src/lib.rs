@@ -4,6 +4,11 @@
 
 mod commands;
 
+use std::sync::Arc;
+
+use sonic_runtime::LibraryService;
+use tauri::Manager;
+
 /// Build and run the Tauri application.
 ///
 /// # Panics
@@ -11,7 +16,21 @@ mod commands;
 /// Panics if the Tauri runtime fails to start.
 pub fn run() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![commands::app_info])
+        .plugin(tauri_plugin_dialog::init())
+        .setup(|app| {
+            let data_dir = app.path().app_local_data_dir()?;
+            let library = LibraryService::open(&data_dir)?;
+            app.manage::<commands::Library>(Arc::new(library));
+            Ok(())
+        })
+        .invoke_handler(tauri::generate_handler![
+            commands::app_info,
+            commands::library_import_files,
+            commands::library_list_tracks,
+            commands::library_get_track,
+            commands::analysis_get_features,
+            commands::analysis_get_waveform,
+        ])
         .run(tauri::generate_context!())
         .expect("error while running SonicMirror");
 }

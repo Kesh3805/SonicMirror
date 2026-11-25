@@ -20,6 +20,9 @@ tauri-build = { version = "2", features = [] }
 tauri = { version = "2", features = [] }
 serde.workspace = true
 sonic-core.workspace = true
+sonic-catalog.workspace = true
+sonic-runtime.workspace = true
+tauri-plugin-dialog = "2"
 
 [lints]
 workspace = true
