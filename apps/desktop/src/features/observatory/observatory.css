@@ -70,11 +70,6 @@
   font-weight: var(--sm-weight-medium);
 }
 
-.sm-skeleton {
-  background: var(--sm-inset);
-  border-radius: var(--sm-radius-small);
-}
-
 .sm-obs-header-skeleton {
   height: 120px;
 }

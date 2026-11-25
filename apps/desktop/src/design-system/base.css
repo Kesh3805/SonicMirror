@@ -60,17 +60,102 @@ a:focus-visible {
   font-weight: var(--sm-weight-regular);
 }
 
-.sm-eyebrow {
-  font-size: var(--sm-type-label);
+.sm-display-title {
+  font-family: var(--sm-font-display);
+  font-size: var(--sm-type-display);
+  line-height: var(--sm-leading-display);
+  letter-spacing: var(--sm-tracking-display);
+  font-weight: var(--sm-weight-regular);
+}
+
+/* Stat-as-sentence: the finding, stated before the figure. */
+.sm-headline {
+  font-family: var(--sm-font-display);
+  font-size: var(--sm-type-headline);
+  line-height: var(--sm-leading-heading);
+  letter-spacing: var(--sm-tracking-headline);
+  font-weight: var(--sm-weight-regular);
+  max-width: 60ch;
+}
+
+/* Measured numbers inside serif text sit slightly smaller so mono does not shout. */
+.sm-headline .sm-data {
+  font-size: 0.86em;
+}
+
+.sm-section-title {
+  font-family: var(--sm-font-display);
+  font-style: italic;
+  font-size: var(--sm-type-section);
+  line-height: var(--sm-leading-heading);
+  font-weight: var(--sm-weight-regular);
+}
+
+/* Kicker above a title: literal words in caps. */
+.sm-eyebrow,
+.sm-kicker {
+  font-family: var(--sm-font-label);
+  font-size: var(--sm-type-annotation);
   font-weight: var(--sm-weight-medium);
   letter-spacing: var(--sm-tracking-label);
   text-transform: uppercase;
   color: var(--sm-muted);
 }
 
+/* Mono kicker of file facts: never text-transformed, so units keep their case. */
+.sm-kicker-data {
+  font-family: var(--sm-font-data);
+  font-size: var(--sm-type-num-sm);
+  letter-spacing: 0.02em;
+  color: var(--sm-muted);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* Mono means measured or decoded. */
 .sm-data {
   font-family: var(--sm-font-data);
-  font-variant-numeric: tabular-nums;
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* Inline Geist numbers that must align. */
+.sm-num {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* Units follow a thin space in the text and are set smaller and muted. */
+.sm-unit {
+  font-size: 0.8em;
+  color: var(--sm-muted);
+}
+
+.sm-kbd {
+  display: inline-block;
+  padding: 1px 6px;
+  border: var(--sm-line) solid var(--sm-rule);
+  border-radius: var(--sm-radius-small);
+  font-family: var(--sm-font-data);
+  font-size: var(--sm-type-num-sm);
+  line-height: 1.4;
+  color: var(--sm-muted);
+}
+
+@keyframes sm-pulse {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.7;
+  }
+}
+
+.sm-skeleton {
+  background: var(--sm-inset);
+  border-radius: var(--sm-radius-small);
+  animation: sm-pulse 1.4s ease-in-out infinite alternate;
+}
+
+:root[data-reduced-motion="true"] .sm-skeleton {
+  animation: none;
 }
 
 .sm-visually-hidden {
@@ -85,6 +170,10 @@ a:focus-visible {
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+
+  .sm-skeleton {
+    animation: none;
   }
 }
 
