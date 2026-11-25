@@ -35,6 +35,7 @@ export function formatDuration(ms: number | null | undefined): string {
 export function formatTotalDuration(ms: number | null | undefined): string {
   if (!finite(ms) || ms < 0) return UNKNOWN;
   const minutes = Math.round(ms / 60_000);
+  if (minutes === 0 && ms > 0) return `<${THIN}1${THIN}min`;
   const h = Math.floor(minutes / 60);
   const m = minutes % 60;
   return h > 0 ? `${formatNumber(h, 0)}${THIN}h ${m}${THIN}min` : `${m}${THIN}min`;

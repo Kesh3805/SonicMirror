@@ -47,6 +47,8 @@ describe("totals and counts", () => {
   it("formats library totals in hours and minutes", () => {
     expect(formatTotalDuration(86 * 3_600_000 + 12 * 60_000)).toBe(`86${THIN}h 12${THIN}min`);
     expect(formatTotalDuration(12 * 60_000)).toBe(`12${THIN}min`);
+    expect(formatTotalDuration(20_000)).toBe(`<${THIN}1${THIN}min`);
+    expect(formatTotalDuration(0)).toBe(`0${THIN}min`);
     expect(formatTotalDuration(null)).toBe(UNKNOWN);
   });
 
