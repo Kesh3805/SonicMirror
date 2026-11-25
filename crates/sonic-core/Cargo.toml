@@ -8,6 +8,7 @@ repository.workspace = true
 rust-version.workspace = true
 
 [dependencies]
+lofty = "0.25.5"
 rubato = "5.1.0"
 rustfft = "6"
 serde.workspace = true

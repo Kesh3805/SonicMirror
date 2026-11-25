@@ -1,6 +1,7 @@
 //! Media probing and streaming decoding.
 
 mod decode;
+pub mod metadata;
 pub mod wav;
 
 pub use decode::{AudioBlock, DecodedStream, TechnicalProperties};
