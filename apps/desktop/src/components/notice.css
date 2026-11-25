@@ -1,0 +1,69 @@
+.sm-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sm-space-3);
+  padding: var(--sm-space-3) var(--sm-space-4);
+  border: var(--sm-line) solid var(--sm-border);
+  border-left: 3px solid var(--sm-danger);
+  border-radius: var(--sm-radius-small);
+  background: var(--sm-canvas);
+}
+
+.sm-notice-icon {
+  color: var(--sm-danger);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.sm-notice-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sm-space-1);
+}
+
+.sm-notice-details {
+  font-size: var(--sm-type-label);
+  color: var(--sm-muted);
+}
+
+.sm-button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sm-space-2);
+  height: var(--sm-control);
+  padding-inline: var(--sm-space-3);
+  border-radius: var(--sm-radius-medium);
+  font-size: var(--sm-type-small);
+  font-weight: var(--sm-weight-medium);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color var(--sm-duration-fast) var(--sm-ease);
+}
+
+.sm-button:disabled {
+  cursor: not-allowed;
+  background: var(--sm-inset);
+  color: var(--sm-muted);
+  border-color: var(--sm-border);
+}
+
+.sm-button-primary {
+  border: 0;
+  background: var(--sm-accent);
+  color: var(--sm-accent-ink);
+}
+
+.sm-button-primary:hover:not(:disabled) {
+  background: var(--sm-accent-hover);
+}
+
+.sm-button-secondary {
+  border: var(--sm-line) solid var(--sm-control-border);
+  background: var(--sm-canvas);
+  color: var(--sm-ink);
+}
+
+.sm-button-secondary:hover:not(:disabled) {
+  background: var(--sm-hover);
+}
