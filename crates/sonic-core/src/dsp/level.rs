@@ -27,27 +27,54 @@ pub struct LevelStats {
 impl LevelStats {
     /// Measure a slice of samples. Accumulates in `f64` for long signals.
     pub fn measure(samples: &[f32]) -> Self {
-        let mut sum_sq = 0.0f64;
-        let mut peak = 0.0f64;
-        for &s in samples {
-            let s = f64::from(s);
-            sum_sq += s * s;
-            peak = peak.max(s.abs());
-        }
-        let rms = if samples.is_empty() {
-            0.0
-        } else {
-            (sum_sq / samples.len() as f64).sqrt()
-        };
-        Self {
-            rms,
-            peak,
-            samples: samples.len(),
-        }
+        let mut acc = LevelAccumulator::default();
+        acc.push(samples);
+        acc.stats()
     }
 
     pub fn is_silent(&self) -> bool {
         self.peak <= SILENCE_THRESHOLD
+    }
+}
+
+/// Streaming accumulator for [`LevelStats`].
+///
+/// Interleaved multichannel input is measured over every sample of every
+/// channel: the peak is the largest absolute sample on any channel and the RMS
+/// is the root of the mean power across all channels.
+#[derive(Debug, Clone, Copy, Default)]
+pub struct LevelAccumulator {
+    sum_sq: f64,
+    peak: f64,
+    samples: usize,
+}
+
+impl LevelAccumulator {
+    pub fn push(&mut self, samples: &[f32]) {
+        for &s in samples {
+            let s = f64::from(s);
+            self.sum_sq += s * s;
+            self.peak = self.peak.max(s.abs());
+        }
+        self.samples += samples.len();
+    }
+
+    pub fn stats(&self) -> LevelStats {
+        let rms = if self.samples == 0 {
+            0.0
+        } else {
+            (self.sum_sq / self.samples as f64).sqrt()
+        };
+        LevelStats {
+            rms,
+            peak: self.peak,
+            samples: self.samples,
+        }
+    }
+
+    /// Compute the level features from everything pushed so far.
+    pub fn features(&self) -> Vec<AudioFeature> {
+        features_from(self.stats())
     }
 }
 
@@ -58,7 +85,10 @@ pub fn to_dbfs(linear: f64) -> Option<f64> {
 
 /// Compute `rms_dbfs`, `sample_peak_dbfs` and `crest_factor_db` features.
 pub fn level_features(samples: &[f32]) -> Vec<AudioFeature> {
-    let stats = LevelStats::measure(samples);
+    features_from(LevelStats::measure(samples))
+}
+
+fn features_from(stats: LevelStats) -> Vec<AudioFeature> {
     let reason = if stats.samples == 0 {
         "empty_signal"
     } else {
