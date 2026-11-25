@@ -8,6 +8,8 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- Codec fixtures generated from a synthetic signal (WAV, AIFF, FLAC, ALAC, MP3, Vorbis,
+  AAC) with integration tests; lossless codecs are verified bit-exact.
 - Spectrograms: 256 linear bands with bounded memory for any track length, stored as a
   versioned artifact in dB re a full-scale sine, shown as an Observatory lane on the shared
   time axis with a fixed −80…0 dB colour ruler and a cell readout.

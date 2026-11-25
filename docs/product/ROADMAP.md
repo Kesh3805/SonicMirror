@@ -29,7 +29,7 @@ committed; each phase ends on its exit criteria, not on a deadline.
 - [ ] Remaining architecture decision records (007, 008, 011, 012, 014, 015)
 - [x] Software Architecture Document
 - [ ] Audio Analysis Technical Specification
-- [x] Decoder spike (Symphonia, WAV verified; other formats pending fixtures)
+- [x] Decoder spike (Symphonia: WAV, AIFF, FLAC, ALAC, MP3, Vorbis and AAC verified)
 - [ ] Playback spike (Rodio/CPAL on Windows)
 - [ ] IPC type generation spike
 
@@ -45,7 +45,7 @@ committed; each phase ends on its exit criteria, not on a deadline.
 - [x] MFCC summary
 - [x] Spectrogram artifact and view
 - [ ] Reconcile features with the Audio Analysis Technical Specification
-- [ ] Fixtures for MP3, FLAC, Ogg and M4A
+- [x] Fixtures for MP3, FLAC, Ogg, AAC/ALAC M4A and AIFF (synthetic, decoded and measured in CI)
 
 ## After the core release
 
