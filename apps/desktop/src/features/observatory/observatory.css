@@ -77,3 +77,34 @@
 .sm-waveform-skeleton {
   height: 172px;
 }
+
+/* Provenance: hairline boxes joined by faint arrows. */
+.sm-provenance {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sm-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sm-provenance-step {
+  padding: 2px var(--sm-space-2);
+  border: var(--sm-line) solid var(--sm-rule);
+  border-radius: var(--sm-radius-small);
+  font-family: var(--sm-font-data);
+  font-size: var(--sm-type-num-sm);
+  color: var(--sm-muted);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.sm-provenance-step[data-tone="danger"] {
+  box-shadow: inset var(--sm-mark) 0 0 var(--sm-danger);
+  color: var(--sm-ink);
+}
+
+.sm-provenance-arrow {
+  color: var(--sm-faint);
+  font-size: var(--sm-type-label);
+}
