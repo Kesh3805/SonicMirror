@@ -33,7 +33,18 @@ interface Readout {
  * the sequential ramp, a labelled legend stating the dB reference, and a
  * readout of the stored cell under the pointer.
  */
-export function SpectrogramLane({ view }: { view: SpectrogramView }) {
+export function SpectrogramLane({
+  view,
+  trackDurationMs,
+}: {
+  view: SpectrogramView;
+  /** The track's duration, so this lane shares the waveform's time axis. */
+  trackDurationMs: number;
+}) {
+  // Analysis frames end a partial window before the track does; the image is
+  // placed on the track's time axis rather than stretched to fill it.
+  const axisMs = Math.max(trackDurationMs, view.durationMs, 1);
+  const imageWidth = `${(view.durationMs / axisMs) * 100}%`;
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const legendRef = useRef<HTMLCanvasElement>(null);
   const [readout, setReadout] = useState<Readout | null>(null);
@@ -80,7 +91,7 @@ export function SpectrogramLane({ view }: { view: SpectrogramView }) {
     }
   }, [view, theme]);
 
-  const ticks = niceTimeTicks(view.durationMs);
+  const ticks = niceTimeTicks(axisMs);
   const freqTicks = frequencyTicks(view.maxHz);
 
   return (
@@ -105,7 +116,15 @@ export function SpectrogramLane({ view }: { view: SpectrogramView }) {
             const rect = e.currentTarget.getBoundingClientRect();
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
-            const c = Math.min(view.columns - 1, Math.max(0, Math.floor((x / rect.width) * view.columns)));
+            const timeMs = (x / rect.width) * axisMs;
+            if (timeMs > view.durationMs) {
+              setReadout(null);
+              return;
+            }
+            const c = Math.min(
+              view.columns - 1,
+              Math.max(0, Math.floor((timeMs / view.durationMs) * view.columns)),
+            );
             const b = Math.min(
               view.bands - 1,
               Math.max(0, Math.floor(((rect.height - y) / rect.height) * view.bands)),
@@ -120,7 +139,7 @@ export function SpectrogramLane({ view }: { view: SpectrogramView }) {
             setReadout({
               x,
               side: x > rect.width / 2 ? "left" : "right",
-              text: `${formatTimecode((x / rect.width) * view.durationMs)} · ${f0.value}–${f1.value} ${f1.unit} · ${level} dB`,
+              text: `${formatTimecode(timeMs)} · ${f0.value}–${f1.value} ${f1.unit} · ${level} dB`,
             });
           }}
           onPointerLeave={() => setReadout(null)}
@@ -128,6 +147,7 @@ export function SpectrogramLane({ view }: { view: SpectrogramView }) {
           <canvas
             ref={canvasRef}
             className="sm-spectrogram-image"
+            style={{ width: imageWidth }}
             role="img"
             aria-label={`Spectrogram, ${formatDuration(view.durationMs)} long, 0 to ${formatFrequency(view.maxHz).value} ${formatFrequency(view.maxHz).unit}, colour from ${DB_DOMAIN[0]} to ${DB_DOMAIN[1]} dB ${view.reference}.`}
           />
@@ -138,7 +158,7 @@ export function SpectrogramLane({ view }: { view: SpectrogramView }) {
       <div className="sm-lane-axis" aria-hidden="true">
         <div className="sm-lane-axis-ticks">
           {ticks.map((t) => (
-            <span key={t} className="sm-lane-axis-tick" style={{ left: `${(t / view.durationMs) * 100}%` }}>
+            <span key={t} className="sm-lane-axis-tick" style={{ left: `${(t / axisMs) * 100}%` }}>
               {formatDuration(t)}
             </span>
           ))}

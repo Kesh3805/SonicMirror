@@ -141,7 +141,10 @@ export function ObservatoryPage() {
               <Skeleton height={176} />
             )}
             {spectrogram.data ? (
-              <SpectrogramLane view={spectrogram.data} />
+              <SpectrogramLane
+                view={spectrogram.data}
+                trackDurationMs={waveform.data?.durationMs ?? spectrogram.data.durationMs}
+              />
             ) : spectrogram.isError ? (
               <ErrorNotice error={spectrogram.error} onRetry={() => void spectrogram.refetch()} />
             ) : (
