@@ -86,14 +86,16 @@
   --sm-space-12: 48px;
   --sm-space-16: 64px;
   --sm-radius-none: 0px;
-  --sm-radius-small: 4px;
-  --sm-radius-medium: 6px;
-  --sm-radius-large: 8px;
+  --sm-radius-small: 2px;
+  --sm-radius-medium: 2px;
+  --sm-radius-large: 4px; /* modal only */
   --sm-radius-round: 999px;
   --sm-line: 1px;
+  /* Selected and active markers: a 2px oxide rule. */
+  --sm-mark: 2px;
   --sm-focus-width: 2px;
   --sm-focus-offset: 2px;
-  --sm-shadow-float: 0 8px 24px rgb(0 0 0 / 16%);
+  --sm-shadow-float: 0 1px 0 var(--sm-rule), 0 6px 16px rgb(37 38 34 / 10%);
   --sm-duration-fast: 120ms;
   --sm-duration-control: 180ms;
   --sm-duration-panel: 220ms;
@@ -157,7 +159,7 @@
   --sm-cat-3: #91C8A5;
   --sm-cat-4: #E6BA6D;
   --sm-cat-5: #C2A5DE;
-  --sm-shadow-float: 0 8px 24px rgb(0 0 0 / 38%);
+  --sm-shadow-float: 0 1px 0 var(--sm-rule), 0 6px 16px rgb(0 0 0 / 40%);
 }
 @media (max-width: 1199px) {
   :root { --sm-sidebar: var(--sm-sidebar-compact); --sm-content-padding: 24px; }
