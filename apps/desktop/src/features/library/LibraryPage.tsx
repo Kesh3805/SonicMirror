@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useParams } from "react-router";
+import { Navigate, useParams } from "react-router";
 import { EmptyState } from "../../components/EmptyState";
 import { ErrorNotice } from "../../components/ErrorNotice";
 import { SkeletonRows } from "../../components/Skeleton";
@@ -37,13 +37,15 @@ function CountLine({ tracks }: { tracks: TrackRecord[] }) {
 
 export function LibraryPage() {
   const { view = "tracks" } = useParams();
-  const label = TITLES[view] ?? "Tracks";
+  const label = TITLES[view];
   const tracks = useQuery({
     queryKey: ["tracks"],
     queryFn: ipc.listTracks,
     enabled: view === "tracks",
   });
   const importer = useImportMusic();
+
+  if (label === undefined) return <Navigate to="/library/tracks" replace />;
 
   return (
     <div className="sm-page">

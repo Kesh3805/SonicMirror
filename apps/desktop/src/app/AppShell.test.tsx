@@ -36,6 +36,11 @@ describe("AppShell", () => {
     expect(player.querySelectorAll("button, input")).toHaveLength(0);
   });
 
+  it("redirects unknown library views to tracks", async () => {
+    renderAt("/library/nonsense");
+    expect(await screen.findByRole("heading", { level: 1, name: "Tracks" })).toBeInTheDocument();
+  });
+
   it("shows the current location as a breadcrumb", async () => {
     renderAt("/library/albums");
     const crumbs = await screen.findByRole("navigation", { name: "Breadcrumb" });
