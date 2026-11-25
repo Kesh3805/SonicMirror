@@ -8,6 +8,9 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- Spectrograms: 256 linear bands with bounded memory for any track length, stored as a
+  versioned artifact in dB re a full-scale sine, shown as an Observatory lane on the shared
+  time axis with a fixed −80…0 dB colour ruler and a cell readout.
 - MFCC timbre summaries (13 coefficients, 40 mel bands; mean and spread per track), shown as
   coefficient tables in the Observatory's technical details. Feature schema `features/0.3.0`.
 - Interface redesign from a 652-site research survey (`docs/design/REDESIGN_BRIEF.md`):
