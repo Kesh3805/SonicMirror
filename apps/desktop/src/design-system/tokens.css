@@ -57,20 +57,33 @@
   --sm-font-display: 'Instrument Serif', Georgia, serif;
   --sm-font-ui: 'Geist', 'Segoe UI', sans-serif;
   --sm-font-data: 'IBM Plex Mono', Consolas, monospace;
-  --sm-type-annotation: 11px;
+  /* Four type roles: serif for voice, Geist for chrome, Plex Mono for evidence
+     (if a glyph is in mono, SonicMirror measured or decoded it), caps labels. */
+  --sm-font-label: var(--sm-font-ui);
+  --sm-type-annotation: 11px; /* caps labels, mono ticks only */
   --sm-type-label: 12px;
   --sm-type-small: 13px;
   --sm-type-body: 14px;
-  --sm-type-data: 14px;
-  --sm-type-subhead: 18px;
-  --sm-type-heading: 24px;
+  --sm-type-subhead: 16px;
+  --sm-type-section: 22px; /* serif italic section heads */
+  --sm-type-headline: 28px; /* serif stat-as-sentence */
   --sm-type-page: 40px;
   --sm-type-display: 56px;
-  --sm-leading-tight: 1.08;
-  --sm-leading-heading: 1.25;
+  --sm-type-num-sm: 11px;
+  --sm-type-num: 13px;
+  --sm-type-num-lg: 20px;
+  --sm-type-num-hero: 36px;
+  /* Deprecated aliases kept for unmigrated consumers. */
+  --sm-type-heading: var(--sm-type-section);
+  --sm-type-data: var(--sm-type-num);
+  --sm-leading-tight: 1.05;
+  --sm-leading-display: 1.02;
+  --sm-leading-heading: 1.2;
   --sm-leading-body: 1.5;
-  --sm-tracking-display: -0.025em;
-  --sm-tracking-label: 0.06em;
+  --sm-leading-num: 1;
+  --sm-tracking-display: -0.02em;
+  --sm-tracking-headline: -0.01em;
+  --sm-tracking-label: 0.08em;
   --sm-weight-regular: 400;
   --sm-weight-medium: 500;
   --sm-weight-semibold: 600;
