@@ -29,5 +29,11 @@ All notable changes to this project are documented here. The format follows
   the schema itself rejects stored values on unavailable features.
 - Library service and Tauri commands: import through the native file dialog,
   list tracks, read features and waveform data.
+- BS.1770-4 K-weighting with rate-independent coefficients matching the
+  published 48 kHz values.
+- Integrated loudness (LUFS) with absolute and relative gating, and EBU Tech
+  3342 loudness range (LU); 5.0/5.1 surround weighting with LFE excluded.
+- Onset strength envelope and autocorrelation tempo estimation with
+  confidence; tempo is withheld with a reason when the pulse is unclear.
 - Library tracks table with import flow and the Track Observatory screen with a
   real-sample waveform and explained measurements.

@@ -39,8 +39,8 @@ committed; each phase ends on its exit criteria, not on a deadline.
 - [x] Waveform envelope artifact
 - [x] SQLite catalog and artifact cache
 - [x] Import through the native dialog, tracks table, Observatory screen
-- [ ] BS.1770 integrated loudness and loudness range
-- [ ] Onset and tempo estimation with confidence
+- [x] BS.1770 integrated loudness and loudness range
+- [x] Onset and tempo estimation with confidence
 - [ ] MFCC summary
 - [ ] Spectrogram artifact and view
 - [ ] Reconcile features with the Audio Analysis Technical Specification
