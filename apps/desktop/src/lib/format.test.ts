@@ -22,8 +22,9 @@ describe("formatNumber", () => {
     expect(formatNumber(2.4, 2)).toBe("2.40");
   });
 
-  it("groups digits with thin spaces only above four digits", () => {
-    expect(formatNumber(2418, 0)).toBe("2418");
+  it("groups digits with thin spaces from four digits", () => {
+    expect(formatNumber(999, 0)).toBe("999");
+    expect(formatNumber(1284, 0)).toBe(`1${THIN}284`);
     expect(formatNumber(12_418, 0)).toBe(`12${THIN}418`);
     expect(formatNumber(1_284_000, 0)).toBe(`1${THIN}284${THIN}000`);
   });

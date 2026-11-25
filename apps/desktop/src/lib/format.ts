@@ -15,7 +15,7 @@ const finite = (v: number | null | undefined): v is number =>
 export function formatNumber(value: number, decimals: number): string {
   const fixed = Math.abs(value).toFixed(decimals);
   const [int = "0", frac] = fixed.split(".");
-  const grouped = int.length > 4 ? int.replace(/\B(?=(\d{3})+(?!\d))/g, THIN) : int;
+  const grouped = int.length > 3 ? int.replace(/\B(?=(\d{3})+(?!\d))/g, THIN) : int;
   const body = frac === undefined ? grouped : `${grouped}.${frac}`;
   const isZero = Number(fixed) === 0;
   return value < 0 && !isZero ? `${MINUS}${body}` : body;
