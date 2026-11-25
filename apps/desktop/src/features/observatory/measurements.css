@@ -1,0 +1,96 @@
+.sm-measurements {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sm-space-6);
+}
+
+.sm-measure-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sm-space-3);
+}
+
+.sm-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-top: var(--sm-line) solid var(--sm-border);
+  border-left: var(--sm-line) solid var(--sm-border);
+}
+
+@media (max-width: 1199px) {
+  .sm-metric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.sm-metric {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sm-space-2);
+  padding: var(--sm-space-4);
+  border-right: var(--sm-line) solid var(--sm-border);
+  border-bottom: var(--sm-line) solid var(--sm-border);
+  background: var(--sm-canvas);
+  min-width: 0;
+}
+
+.sm-metric-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sm-space-2);
+  font-size: var(--sm-type-label);
+  color: var(--sm-muted);
+}
+
+.sm-metric-info {
+  display: inline-grid;
+  place-items: center;
+  width: var(--sm-target-min);
+  height: var(--sm-target-min);
+  margin: calc(var(--sm-space-2) * -1);
+  border: 0;
+  border-radius: var(--sm-radius-small);
+  background: transparent;
+  color: var(--sm-muted);
+  cursor: pointer;
+}
+
+.sm-metric-info:hover {
+  background: var(--sm-hover);
+  color: var(--sm-ink);
+}
+
+.sm-metric-value {
+  font-size: var(--sm-type-heading);
+  line-height: 1;
+}
+
+.sm-metric-unit {
+  margin-left: var(--sm-space-1);
+  font-size: var(--sm-type-label);
+  color: var(--sm-muted);
+}
+
+.sm-metric-unavailable {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sm-space-1);
+  font-size: var(--sm-type-body);
+  color: var(--sm-ink);
+}
+
+.sm-metric-reason {
+  font-size: var(--sm-type-label);
+  color: var(--sm-muted);
+}
+
+.sm-metric-explanation {
+  font-size: var(--sm-type-label);
+  color: var(--sm-muted);
+  line-height: var(--sm-leading-body);
+}
+
+.sm-metric-version {
+  font-size: var(--sm-type-annotation);
+}
