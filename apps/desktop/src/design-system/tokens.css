@@ -1,18 +1,26 @@
 /* SonicMirror PDS 1.0. All dimensions are CSS logical pixels. */
 :root {
   color-scheme: light;
+  /* Surfaces: fixed-meaning steps (paper → subtle → hover → selected). */
   --sm-paper: #F3F0E8;
-  --sm-canvas: #FAF8F3;
-  --sm-raised: #FFFFFF;
-  --sm-inset: #EAE6DC;
-  --sm-hover: #EAE6DC;
-  --sm-selected: #F3DED5;
+  --sm-subtle: #ECE8DE;
+  --sm-canvas: var(--sm-paper);
+  --sm-raised: #FBFAF6;
+  --sm-inset: #E7E2D7;
+  --sm-hover: #E6E2D6;
+  --sm-selected: #E1DCCF;
+  /* Text. Faint is for decorative, aria-hidden marks only (never text). */
   --sm-ink: #252622;
-  --sm-muted: #62635C;
-  --sm-border: #B6B3A9;
-  --sm-control-border: #817E74;
+  --sm-muted: #5E5F57;
+  --sm-faint: #7A786E;
+  /* Rules: quiet dividers, table rules, and ≥3:1 control boundaries. */
+  --sm-rule-quiet: #DDD8CC;
+  --sm-rule: #C9C4B7;
+  --sm-rule-strong: #8C887D;
+  --sm-border: var(--sm-rule);
+  --sm-control-border: var(--sm-rule-strong);
   --sm-accent: #A53726;
-  --sm-accent-hover: #842B1E;
+  --sm-accent-hover: #8E2E20;
   --sm-accent-ink: #FFFFFF;
   --sm-focus: #175E84;
   --sm-success: #35644D;
@@ -20,8 +28,8 @@
   --sm-danger: #A02E2E;
   --sm-info: #245E7A;
   --sm-overlay: rgb(37 38 34 / 48%);
-  --sm-chart-grid: #D8D4CA;
-  --sm-chart-axis: #62635C;
+  --sm-chart-grid: var(--sm-rule-quiet);
+  --sm-chart-axis: var(--sm-muted);
   --sm-wave: #A53726;
   --sm-wave-played: #252622;
   --sm-wave-cursor: #175E84;
@@ -115,15 +123,17 @@
 :root[data-theme='dark'] {
   color-scheme: dark;
   --sm-paper: #171916;
-  --sm-canvas: #212420;
-  --sm-raised: #292D28;
+  --sm-subtle: #1D201C;
+  --sm-raised: #262A25;
   --sm-inset: #131512;
-  --sm-hover: #30352E;
-  --sm-selected: #492D26;
+  --sm-hover: #242823;
+  --sm-selected: #30342D;
   --sm-ink: #E9E6DD;
   --sm-muted: #A3A59A;
-  --sm-border: #393D36;
-  --sm-control-border: #82877A;
+  --sm-faint: #7F8277;
+  --sm-rule-quiet: #2C302A;
+  --sm-rule: #3A3E37;
+  --sm-rule-strong: #73766A;
   --sm-accent: #E17B60;
   --sm-accent-hover: #F39B81;
   --sm-accent-ink: #171916;
@@ -133,8 +143,6 @@
   --sm-danger: #F28C88;
   --sm-info: #91C5E0;
   --sm-overlay: rgb(0 0 0 / 60%);
-  --sm-chart-grid: #393D36;
-  --sm-chart-axis: #A3A59A;
   --sm-wave: #E17B60;
   --sm-wave-played: #E9E6DD;
   --sm-wave-cursor: #8CCAE8;
