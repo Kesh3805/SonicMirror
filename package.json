@@ -1,0 +1,16 @@
+{
+  "name": "sonicmirror",
+  "private": true,
+  "packageManager": "pnpm@10.15.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @sonicmirror/desktop dev",
+    "build": "pnpm --filter @sonicmirror/desktop build",
+    "typecheck": "pnpm --filter @sonicmirror/desktop typecheck",
+    "lint": "pnpm --filter @sonicmirror/desktop lint",
+    "test": "pnpm --filter @sonicmirror/desktop test",
+    "tauri": "pnpm --filter @sonicmirror/desktop tauri"
+  }
+}
