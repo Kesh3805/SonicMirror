@@ -73,6 +73,7 @@ pnpm test           # interface tests
 
 - [Product Requirements](docs/product/PRD.md)
 - [Product Design Specification](docs/design/PRODUCT_DESIGN_SPECIFICATION.md)
+- [Software Architecture](docs/architecture/SOFTWARE_ARCHITECTURE.md)
 - [Roadmap](docs/product/ROADMAP.md)
 - [Architecture decisions](docs/adr/)
 

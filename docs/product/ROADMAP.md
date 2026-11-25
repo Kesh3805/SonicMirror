@@ -26,7 +26,8 @@ committed; each phase ends on its exit criteria, not on a deadline.
 - [x] Tauri 2 desktop shell with minimal capabilities
 - [x] CI quality gates
 - [ ] Remaining architecture decision records (007, 008, 011, 012, 014, 015)
-- [ ] Software Architecture Document
+- [x] Software Architecture Document
+- [ ] Audio Analysis Technical Specification
 - [ ] Decoder spike (Symphonia format matrix)
 - [ ] Playback spike (Rodio/CPAL on Windows)
 - [ ] IPC type generation spike
