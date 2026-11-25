@@ -4,8 +4,10 @@
 //!
 //! ```text
 //! decoder ─┬─► level accumulator        (native rate, all channels)
+//!          ├─► BS.1770 loudness meter    (native rate, K-weighted per channel)
 //!          ├─► waveform envelope         (native rate, channels combined)
 //!          └─► downmix ─► resample ─► spectral analyzer (22,050 Hz mono)
+//!                                         └─► onset envelope ─► tempo
 //! ```
 //!
 //! Cancellation is checked between decoded packets.
@@ -16,8 +18,10 @@ use serde::Serialize;
 
 use crate::domain::AudioFeature;
 use crate::dsp::level::LevelAccumulator;
+use crate::dsp::loudness::LoudnessMeter;
 use crate::dsp::resample::{MonoResampler, downmix_mean};
 use crate::dsp::spectral::{SpectralAnalyzer, SpectralConfig};
+use crate::dsp::tempo::tempo_feature;
 use crate::dsp::waveform::{EnvelopeBuilder, WaveformEnvelope};
 use crate::media::{DecodedStream, MediaError, TechnicalProperties};
 
@@ -26,7 +30,7 @@ use crate::media::{DecodedStream, MediaError, TechnicalProperties};
 pub const ENGINE_VERSION: &str = "sonic-engine/0.1.0";
 
 /// Version of the set of features the engine produces.
-pub const FEATURE_SCHEMA_VERSION: &str = "features/0.1.0";
+pub const FEATURE_SCHEMA_VERSION: &str = "features/0.2.0";
 
 const TECHNICAL_VERSION: &str = "technical/1.0.0";
 
@@ -95,6 +99,7 @@ pub fn analyze(
 
     let spectral_config = SpectralConfig::default();
     let mut level = LevelAccumulator::default();
+    let mut loudness = LoudnessMeter::new(sample_rate, usize::from(channels));
     let mut envelope = EnvelopeBuilder::new(sample_rate);
     let mut resampler = MonoResampler::new(sample_rate, spectral_config.sample_rate);
     let mut spectral = SpectralAnalyzer::new(spectral_config);
@@ -106,6 +111,7 @@ pub fn analyze(
             return Err(AnalysisError::Cancelled);
         }
         level.push(block.samples);
+        loudness.push(block.samples);
         envelope.push(block.samples, block.channels);
         downmix_mean(block.samples, block.channels, &mut mono);
         resampler.push(&mono, &mut |b| {
@@ -140,7 +146,12 @@ pub fn analyze(
         ),
     ];
     features.extend(level.features());
+    features.extend(loudness.features());
     features.extend(spectral.finish());
+    features.push(tempo_feature(
+        spectral.onset_envelope(),
+        spectral.frame_rate(),
+    ));
 
     Ok(AnalysisOutput {
         engine_version: ENGINE_VERSION,
@@ -233,6 +244,26 @@ mod tests {
         let b = run(&signal, 1, 44_100);
         assert_eq!(a.features, b.features);
         assert_eq!(a.waveform, b.waveform);
+    }
+
+    #[test]
+    fn loudness_and_tempo_through_the_pipeline() {
+        // −23 dBFS stereo sine with a 120 BPM click layer, 20 s at 44.1 kHz.
+        #[allow(clippy::cast_possible_truncation)]
+        let amp = 10f64.powf(-23.0 / 20.0) as f32;
+        let tone = synth::sine(44_100, 20.0, 997.0, amp);
+        let clicks = synth::click_track(44_100, 20.0, 120.0, 0.5);
+        let left: Vec<f32> = tone.iter().zip(&clicks).map(|(a, b)| a + b).collect();
+        let stereo: Vec<f32> = left.iter().zip(&tone).flat_map(|(l, r)| [*l, *r]).collect();
+        let out = run(&stereo, 2, 44_100);
+
+        let tempo = out.features.iter().find(|f| f.key == "tempo_bpm").unwrap();
+        assert!(tempo.is_valid(), "{tempo:?}");
+        assert!((value(&out, "tempo_bpm") - 120.0).abs() < 2.0);
+        assert!(tempo.confidence.is_some());
+
+        assert!(value(&out, "integrated_loudness") > -23.5);
+        assert!(value(&out, "loudness_range") >= 0.0);
     }
 
     #[test]
