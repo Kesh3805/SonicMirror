@@ -2,22 +2,24 @@ import type { ReactNode } from "react";
 import "./empty-state.css";
 
 interface EmptyStateProps {
-  icon: ReactNode;
   title: string;
   children: ReactNode;
   action?: ReactNode;
+  /** `page` for a whole view, `section` inside a page region. */
+  size?: "page" | "section";
 }
 
-/** PDS §4: centered, max 360px, 32px line icon, 24px heading, one action. */
-export function EmptyState({ icon, title, children, action }: EmptyStateProps) {
+/**
+ * Typographic empty state (Redesign brief §4.7): left-aligned, a serif title,
+ * one plain sentence and at most one action. No illustration, no icon, and no
+ * zero-count tiles standing in for data.
+ */
+export function EmptyState({ title, children, action, size = "page" }: EmptyStateProps) {
   return (
-    <section className="sm-empty" aria-label={title}>
-      <span className="sm-empty-icon" aria-hidden="true">
-        {icon}
-      </span>
+    <section className="sm-empty" data-size={size} aria-label={title}>
       <h2 className="sm-empty-title">{title}</h2>
       <p className="sm-empty-body">{children}</p>
-      {action}
+      {action && <div className="sm-empty-action">{action}</div>}
     </section>
   );
 }

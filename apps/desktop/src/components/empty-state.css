@@ -1,24 +1,41 @@
 .sm-empty {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--sm-space-3);
-  max-width: 360px;
-  margin: var(--sm-space-16) auto;
-  text-align: center;
+  max-width: 520px;
+  padding-block: var(--sm-space-8);
 }
 
-.sm-empty-icon {
-  color: var(--sm-muted);
-  display: inline-flex;
+/* The signature mark: a short tick on a baseline, drawn in rules. */
+.sm-empty::before {
+  content: "";
+  width: 12px;
+  height: 8px;
+  border-left: var(--sm-line) solid var(--sm-ink);
+  border-bottom: var(--sm-line) solid var(--sm-ink);
+  margin-left: 5px;
+  margin-bottom: var(--sm-space-1);
 }
 
 .sm-empty-title {
-  font-size: var(--sm-type-heading);
+  font-family: var(--sm-font-display);
+  font-size: var(--sm-type-headline);
   line-height: var(--sm-leading-heading);
-  font-weight: var(--sm-weight-medium);
+  letter-spacing: var(--sm-tracking-headline);
+  font-weight: var(--sm-weight-regular);
+}
+
+.sm-empty[data-size="section"] .sm-empty-title {
+  font-size: var(--sm-type-section);
 }
 
 .sm-empty-body {
+  max-width: 52ch;
+  font-size: var(--sm-type-body);
   color: var(--sm-muted);
+}
+
+.sm-empty-action {
+  margin-top: var(--sm-space-2);
 }

@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FolderOpen, Music } from "lucide-react";
+import { FolderOpen } from "lucide-react";
 import { useParams } from "react-router";
 import { EmptyState } from "../../components/EmptyState";
 import { ErrorNotice } from "../../components/ErrorNotice";
@@ -80,7 +80,7 @@ export function LibraryPage() {
       {importer.isError && <ErrorNotice error={importer.error} />}
 
       {view !== "tracks" ? (
-        <EmptyState icon={<Music size={32} />} title={`No ${label.toLowerCase()} yet`}>
+        <EmptyState title={`No ${label.toLowerCase()} yet.`} size="section">
           Grouped views arrive with the full library catalog.
         </EmptyState>
       ) : tracks.isError ? (
@@ -88,7 +88,7 @@ export function LibraryPage() {
       ) : tracks.isPending ? (
         <div className="sm-skeleton sm-table-skeleton" aria-busy="true" />
       ) : tracks.data.length === 0 ? (
-        <EmptyState icon={<Music size={32} />} title="No music in your library">
+        <EmptyState title="Your library is empty.">
           Import audio files to analyze them. Files stay on this device and are never modified.
         </EmptyState>
       ) : (

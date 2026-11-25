@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { AudioLines, Music } from "lucide-react";
+import { Music } from "lucide-react";
 import { Link, useParams } from "react-router";
 import { EmptyState } from "../../components/EmptyState";
 import { ErrorNotice } from "../../components/ErrorNotice";
@@ -78,7 +78,7 @@ export function ObservatoryPage() {
       )}
 
       {analysis.data === null && (
-        <EmptyState icon={<AudioLines size={32} />} title="Not analyzed yet">
+        <EmptyState title="Not analyzed yet." size="section">
           This track is in the catalog but has no analysis.
         </EmptyState>
       )}
