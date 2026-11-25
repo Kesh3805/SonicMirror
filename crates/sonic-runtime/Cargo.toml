@@ -8,6 +8,8 @@ repository.workspace = true
 rust-version.workspace = true
 
 [dependencies]
+serde.workspace = true
+thiserror.workspace = true
 sonic-core.workspace = true
 sonic-catalog.workspace = true
 
