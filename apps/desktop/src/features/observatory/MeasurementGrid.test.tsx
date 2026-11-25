@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import type { AudioFeature } from "../../ipc/types";
 import { MeasurementGrid } from "./MeasurementGrid";
 
@@ -67,12 +67,22 @@ describe("MeasurementGrid", () => {
     expect(screen.queryByText(/NaN/)).not.toBeInTheDocument();
   });
 
-  it("reveals an explanation on request", () => {
+  it("reveals the method and real algorithm version on request", () => {
     render(<MeasurementGrid features={features} />);
-    const button = screen.getByRole("button", { name: "About Spectral centroid" });
+    const button = screen.getByRole("button", { name: "Method for Spectral centroid" });
     expect(button).toHaveAttribute("aria-expanded", "false");
     fireEvent.click(button);
     expect(button).toHaveAttribute("aria-expanded", "true");
-    expect(screen.getByText(/centre of mass/)).toBeInTheDocument();
+    // The hero gloss repeats the first sentence; the method adds the rest.
+    expect(screen.getAllByText(/centre of mass/)).toHaveLength(2);
+    expect(screen.getByText("algorithm spectral/1.0.0")).toBeInTheDocument();
+  });
+
+  it("heads each group with honest counts of the features present", () => {
+    render(<MeasurementGrid features={features} />);
+    const levels = screen.getByRole("region", { name: "Levels" });
+    expect(within(levels).getByText("1 measured · 1 unavailable")).toBeInTheDocument();
+    const rhythm = screen.getByRole("region", { name: "Rhythm" });
+    expect(within(rhythm).getByText("1 measured · 0 unavailable")).toBeInTheDocument();
   });
 });

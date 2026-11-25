@@ -17,6 +17,8 @@ export interface FeatureInfo {
   group: FeatureGroup;
   format: FeatureFormat;
   explanation: string;
+  /** The group's single hero value (Redesign brief §4.4). Technical has none. */
+  hero?: true;
 }
 
 export const FEATURE_CATALOG: Record<string, FeatureInfo> = {
@@ -24,6 +26,7 @@ export const FEATURE_CATALOG: Record<string, FeatureInfo> = {
     label: "Integrated loudness",
     group: "Levels",
     format: "decibels",
+    hero: true,
     explanation:
       "Programme loudness over the whole recording per ITU-R BS.1770: frequency-weighted to approximate hearing, with quiet passages gated out. Streaming services normalize around −14 LUFS.",
   },
@@ -59,6 +62,7 @@ export const FEATURE_CATALOG: Record<string, FeatureInfo> = {
     label: "Spectral centroid",
     group: "Spectrum",
     format: "frequency",
+    hero: true,
     explanation:
       "The spectrum's centre of mass, averaged over time. Often read as brightness, but it is a measurement of energy balance, not a perception.",
   },
@@ -98,6 +102,7 @@ export const FEATURE_CATALOG: Record<string, FeatureInfo> = {
     label: "Tempo",
     group: "Rhythm",
     format: "bpm",
+    hero: true,
     explanation:
       "The dominant pulse, estimated from how regularly note onsets recur. Music with changing or ambiguous rhythm has no single correct tempo, and half or double time can be equally valid.",
   },
