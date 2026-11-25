@@ -9,7 +9,7 @@ committed; each phase ends on its exit criteria, not on a deadline.
 | 01 | Audio vertical slice | One recording imported, decoded, analyzed, stored and displayed with validated numbers | In progress |
 | 02 | Library and runtime | 10,000-track library indexed and analyzed incrementally without blocking the UI | Planned |
 | 03 | Observatory | Waveform, spectrogram, explained measurements and integrated playback | Planned |
-| 04 | Sonic Atlas | Feature vectors, exact neighbors, PCA map, filters, comparison, collections | Planned |
+| 04 | Sonic Atlas | Feature vectors, exact neighbors, PCA map, filters, comparison, collections | In progress |
 | 05 | Hardening | Demo collection, all interface states, accessibility, recovery, benchmarks, packaging | Planned |
 | 06 | Core release | A new user installs SonicMirror and completes the primary workflow unaided | Planned |
 
@@ -52,3 +52,15 @@ committed; each phase ends on its exit criteria, not on a deadline.
 Identity (collection portraits), Studio (generative artwork from audio features), Discovery
 (sonic journeys, collection bridges), then Journal, Lab, a CLI and optional AI — each only after
 the core is validated. See [PRD §48](PRD.md#48-post-core-roadmap).
+
+## Phase 04 checklist
+
+- [x] Feature vector definition with robust normalization and group weights (`vector/1.0.0`)
+- [x] Weighted distance, per-group contributions and exact neighbours
+- [x] Deterministic PCA projection with sign-fixed axes (`pca/1.0.0`)
+- [x] Atlas snapshot and neighbour IPC commands with exclusion reasons
+- [x] Atlas canvas: pan, anchored zoom, selection, colour by descriptor, legend, track list
+- [ ] Filters and region selection
+- [ ] Persisted snapshots with stale detection
+- [ ] Comparison view
+- [ ] Collections

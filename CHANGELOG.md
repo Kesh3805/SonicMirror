@@ -8,6 +8,12 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- Sonic Atlas: a deterministic PCA map of 19 measured dimensions (MFCC 1–12, spectral
+  balance, texture and dynamics) with robust median/IQR normalization and equal group
+  weights. Nearest neighbours are exact and measured in the original space, shown with
+  three-significant-digit distances and the group that drives each difference. Tracks that
+  cannot be placed are listed with the missing measurement. Colour by centroid, loudness,
+  tempo or flatness with measured endpoints and unknown counts, plus a track-list view.
 - Codec fixtures generated from a synthetic signal (WAV, AIFF, FLAC, ALAC, MP3, Vorbis,
   AAC) with integration tests; lossless codecs are verified bit-exact.
 - Spectrograms: 256 linear bands with bounded memory for any track length, stored as a
