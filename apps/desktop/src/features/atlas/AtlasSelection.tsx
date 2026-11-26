@@ -1,5 +1,8 @@
 import { X } from "lucide-react";
-import { Link } from "react-router";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router";
+import { NameDialog } from "../collections/NameDialog";
+import { useCreateCollection } from "../collections/mutations";
 import type { AtlasPoint } from "../../ipc/types";
 import { formatCount } from "../../lib/format";
 import { type Descriptor, domainOf } from "./colorBy";
@@ -21,6 +24,9 @@ export function AtlasSelection({ points, descriptor: d, onFocus, onClose }: Atla
     (a, b) => a.title.localeCompare(b.title) || a.trackId.localeCompare(b.trackId),
   );
   const domain = d.key === "uniform" ? null : domainOf(points, d);
+  const [saving, setSaving] = useState(false);
+  const create = useCreateCollection();
+  const navigate = useNavigate();
 
   return (
     <aside className="sm-atlas-inspector" aria-label={`${points.length} tracks selected`}>
@@ -78,10 +84,36 @@ export function AtlasSelection({ points, descriptor: d, onFocus, onClose }: Atla
             Compare these two
           </Link>
         )}
-        <button type="button" className="sm-button sm-button-secondary" onClick={onClose}>
+        <button
+          type="button"
+          className="sm-button sm-button-secondary"
+          onClick={() => {
+            create.reset();
+            setSaving(true);
+          }}
+        >
+          Save as collection
+        </button>
+        <button type="button" className="sm-button sm-button-quiet" onClick={onClose}>
           Clear selection
         </button>
       </div>
+      {saving && (
+        <NameDialog
+          title="Save as collection"
+          submitLabel="Create"
+          note={`${formatCount(points.length)} selected tracks will be added.`}
+          pending={create.isPending}
+          error={create.error}
+          onClose={() => setSaving(false)}
+          onSubmit={(name) =>
+            create.mutate(
+              { name, trackIds: sorted.map((p) => p.trackId) },
+              { onSuccess: (c) => void navigate(`/library/collections/${c.id}`) },
+            )
+          }
+        />
+      )}
     </aside>
   );
 }
