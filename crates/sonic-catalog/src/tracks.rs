@@ -45,11 +45,11 @@ pub struct TrackRecord {
     pub created_at_ms: i64,
 }
 
-const TRACK_COLUMNS: &str = "id, title, artist_display, album_display, genre, release_year, \
+pub(crate) const TRACK_COLUMNS: &str = "id, title, artist_display, album_display, genre, release_year, \
      duration_ms, sample_rate_hz, channel_count, codec, availability, path_display, \
      content_hash, created_at_ms";
 
-fn track_from_row(row: &Row<'_>) -> rusqlite::Result<TrackRecord> {
+pub(crate) fn track_from_row(row: &Row<'_>) -> rusqlite::Result<TrackRecord> {
     Ok(TrackRecord {
         id: row.get(0)?,
         title: row.get(1)?,

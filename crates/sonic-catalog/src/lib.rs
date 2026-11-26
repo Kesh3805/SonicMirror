@@ -4,6 +4,7 @@
 mod analysis;
 pub mod artifacts;
 mod atlas;
+mod collections;
 mod migrations;
 mod tracks;
 
@@ -14,6 +15,9 @@ use rusqlite::Connection;
 
 pub use analysis::{NewAnalysis, StoredAnalysis};
 pub use atlas::{KEPT_SNAPSHOTS, NewAtlasSnapshot, SnapshotPoint, StoredAtlasSnapshot};
+pub use collections::{
+    CollectionSummary, MAX_BATCH, MAX_NAME_CHARS, MembershipChange, validate_name,
+};
 pub use tracks::{NewTrack, TrackRecord};
 
 #[derive(Debug, thiserror::Error)]

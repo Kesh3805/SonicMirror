@@ -8,6 +8,7 @@ use crate::{CatalogError, Result};
 const MIGRATIONS: &[&str] = &[
     include_str!("../migrations/0001_initial_schema.sql"),
     include_str!("../migrations/0002_atlas_snapshots.sql"),
+    include_str!("../migrations/0003_collections.sql"),
 ];
 
 /// Latest schema version this build understands.
