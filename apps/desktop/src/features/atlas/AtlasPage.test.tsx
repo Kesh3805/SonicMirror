@@ -115,7 +115,7 @@ describe("AtlasPage", () => {
     fireEvent.click(within(banner).getByRole("button", { name: "Refresh map" }));
     await waitFor(() => expect(refreshAtlas).toHaveBeenCalledTimes(1));
     await waitFor(() => expect(screen.queryByText("New or changed analysis available")).toBeNull());
-    expect(screen.getByText(/4/, { selector: ".sm-atlas-coverage .sm-data" })).toBeInTheDocument();
+    expect(document.querySelector(".sm-atlas-coverage")).toHaveTextContent(/^4 of 5 tracks placed/);
   });
 
   it("links a neighbour that is not on this map to its Observatory page", async () => {
