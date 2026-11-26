@@ -6,6 +6,7 @@ import { SkeletonRows } from "../../components/Skeleton";
 import { ipc } from "../../ipc/client";
 import type { TrackRecord } from "../../ipc/types";
 import { formatCount, formatTotalDuration } from "../../lib/format";
+import { CollectionsView } from "../collections/CollectionsView";
 import { ImportButton, ImportStatus, useImportMusic } from "./importer";
 import { TracksTable } from "./TracksTable";
 import "./library.css";
@@ -63,7 +64,9 @@ export function LibraryPage() {
       <ImportStatus importer={importer} />
       {importer.isError && <ErrorNotice error={importer.error} />}
 
-      {view !== "tracks" ? (
+      {view === "collections" ? (
+        <CollectionsView />
+      ) : view !== "tracks" ? (
         <EmptyState title={`No ${label.toLowerCase()} yet.`} size="section">
           Grouped views arrive with the full library catalog.
         </EmptyState>

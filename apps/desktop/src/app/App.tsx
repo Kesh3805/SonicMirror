@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createBrowserRouter, Navigate, RouterProvider } from "react-router";
 import { AtlasPage } from "../features/atlas/AtlasPage";
+import { CollectionPage } from "../features/collections/CollectionPage";
 import { ComparePage } from "../features/comparison/ComparePage";
 import { LibraryPage } from "../features/library/LibraryPage";
 import { ObservatoryPage } from "../features/observatory/ObservatoryPage";
@@ -36,6 +37,7 @@ export const routes = [
       { index: true, element: <Navigate to="/overview" replace /> },
       { path: "overview", element: <OverviewPage /> },
       { path: "library", element: <Navigate to="/library/tracks" replace /> },
+      { path: "library/collections/:collectionId", element: <CollectionPage /> },
       { path: "library/:view", element: <LibraryPage /> },
       { path: "tracks/:trackId", element: <ObservatoryPage /> },
       { path: "atlas", element: <AtlasPage /> },
