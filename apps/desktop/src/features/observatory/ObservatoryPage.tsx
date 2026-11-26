@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link, useParams } from "react-router";
+import { AddToCollection } from "../collections/AddToCollection";
 import { EmptyState } from "../../components/EmptyState";
 import { ErrorNotice } from "../../components/ErrorNotice";
 import { Skeleton } from "../../components/Skeleton";
@@ -100,6 +101,7 @@ export function ObservatoryPage() {
           <Link className="sm-button sm-button-secondary" to={`/compare?a=${t.id}`}>
             Compare
           </Link>
+          <AddToCollection trackId={t.id} title={t.title} />
         </div>
       </header>
 
