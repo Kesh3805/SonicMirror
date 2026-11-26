@@ -173,3 +173,19 @@ export interface TrackComparison {
   modelContext: SimilarityContext | null;
   limitations: string[];
 }
+
+/** A logical collection (SAD §53). Membership only; files are never touched. */
+export interface CollectionSummary {
+  id: string;
+  name: string;
+  trackCount: number;
+  createdAtMs: number;
+  updatedAtMs: number;
+}
+
+export interface MembershipChange {
+  /** Tracks whose membership changed. */
+  changed: number;
+  /** Tracks already in (on add) or not in (on remove) the collection. */
+  unchanged: number;
+}

@@ -4,7 +4,9 @@ import type {
   ApplicationError,
   AtlasNeighbour,
   AtlasSnapshot,
+  CollectionSummary,
   ImportOutcome,
+  MembershipChange,
   SpectrogramView,
   StoredAnalysis,
   TrackComparison,
@@ -60,6 +62,21 @@ export const ipc = {
     call<SpectrogramView>("analysis_get_spectrogram", { trackId, columns, bands }),
   getAtlas: () => call<AtlasSnapshot>("atlas_get_snapshot"),
   refreshAtlas: () => call<AtlasSnapshot>("atlas_refresh"),
+  listCollections: () => call<CollectionSummary[]>("collections_list"),
+  getCollection: (collectionId: string) =>
+    call<CollectionSummary>("collections_get", { collectionId }),
+  collectionTracks: (collectionId: string) =>
+    call<TrackRecord[]>("collections_get_tracks", { collectionId }),
+  createCollection: (name: string, trackIds: string[] = []) =>
+    call<CollectionSummary>("collections_create", { name, trackIds }),
+  renameCollection: (collectionId: string, name: string) =>
+    call<CollectionSummary>("collections_rename", { collectionId, name }),
+  deleteCollection: (collectionId: string) =>
+    call<null>("collections_delete", { collectionId }),
+  addToCollection: (collectionId: string, trackIds: string[]) =>
+    call<MembershipChange>("collections_add_tracks", { collectionId, trackIds }),
+  removeFromCollection: (collectionId: string, trackIds: string[]) =>
+    call<MembershipChange>("collections_remove_tracks", { collectionId, trackIds }),
   compare: (leftTrackId: string, rightTrackId: string) =>
     call<TrackComparison>("comparison_get", { leftTrackId, rightTrackId }),
   getNeighbours: (trackId: string, k: number) =>
