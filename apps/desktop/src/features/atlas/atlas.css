@@ -541,3 +541,34 @@
   box-shadow: var(--sm-shadow-float);
   font-size: var(--sm-type-small);
 }
+
+/* Stale snapshot (PDS §9 "Stale"): frozen coordinates, explicit refresh. */
+.sm-atlas-stale {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sm-space-3) var(--sm-space-6);
+  padding: var(--sm-space-3) var(--sm-space-4);
+  border: var(--sm-line) solid var(--sm-rule);
+  box-shadow: inset var(--sm-mark) 0 0 var(--sm-accent);
+  background: var(--sm-canvas);
+  font-size: var(--sm-type-small);
+}
+
+.sm-atlas-stale-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sm-space-1);
+  max-width: 72ch;
+  color: var(--sm-muted);
+}
+
+.sm-atlas-stale-title {
+  color: var(--sm-ink);
+  font-weight: var(--sm-weight-medium);
+}
+
+a.sm-atlas-neighbour-button {
+  text-decoration: none;
+}

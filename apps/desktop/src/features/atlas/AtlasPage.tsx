@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Minus,
   Plus,
@@ -12,7 +12,7 @@ import { ErrorNotice } from "../../components/ErrorNotice";
 import { Skeleton } from "../../components/Skeleton";
 import { ipc } from "../../ipc/client";
 import type { AtlasPoint, AtlasSnapshot } from "../../ipc/types";
-import { formatCount } from "../../lib/format";
+import { formatCount, formatDate } from "../../lib/format";
 import { ImportButton, ImportStatus, useImportMusic } from "../library/importer";
 import { AtlasCanvas } from "./AtlasCanvas";
 import { AtlasFilters } from "./AtlasFilters";
@@ -27,6 +27,7 @@ import {
   unmeasuredHidden,
   visibleIds,
 } from "./filters";
+import { changeSummary } from "./stale";
 import { RESET, type Size, type Viewport, ZOOM_STEP, zoomAt } from "./viewport";
 import "./atlas.css";
 
@@ -39,6 +40,15 @@ export function AtlasPage() {
   const tracks = useQuery({ queryKey: ["tracks"], queryFn: ipc.listTracks });
   const atlas = useQuery({ queryKey: ["atlas"], queryFn: ipc.getAtlas });
   const importer = useImportMusic();
+  const queryClient = useQueryClient();
+  const refresh = useMutation({
+    mutationFn: ipc.refreshAtlas,
+    onSuccess: (map) => {
+      queryClient.setQueryData(["atlas"], map);
+      void queryClient.invalidateQueries({ queryKey: ["atlas-neighbours"] });
+    },
+  });
+  const refreshMap = () => refresh.mutate();
 
   return (
     <div className="sm-page sm-atlas-page">
@@ -54,23 +64,29 @@ export function AtlasPage() {
           <button
             type="button"
             className="sm-button sm-button-secondary"
-            onClick={() => void atlas.refetch()}
-            disabled={atlas.isFetching}
+            onClick={refreshMap}
+            disabled={refresh.isPending}
           >
-            {atlas.isFetching ? "Refreshing…" : "Refresh map"}
+            {refresh.isPending ? "Refreshing…" : "Refresh map"}
           </button>
         )}
       </header>
 
       <ImportStatus importer={importer} />
       {importer.isError && <ErrorNotice error={importer.error} />}
+      {refresh.isError && <ErrorNotice error={refresh.error} onRetry={refreshMap} />}
 
       {atlas.isError ? (
         <ErrorNotice error={atlas.error} onRetry={() => void atlas.refetch()} />
       ) : atlas.isPending || tracks.isPending ? (
         <Skeleton height={420} />
       ) : atlas.data.status === "ready" ? (
-        <AtlasWorkspace snapshot={atlas.data} />
+        <AtlasWorkspace
+          key={atlas.data.snapshotId ?? "live"}
+          snapshot={atlas.data}
+          onRefresh={refreshMap}
+          refreshing={refresh.isPending}
+        />
       ) : (
         <Unavailable
           snapshot={atlas.data}
@@ -152,7 +168,46 @@ type View = "map" | "list";
 
 const tracksWord = (n: number) => (n === 1 ? "track" : "tracks");
 
-function AtlasWorkspace({ snapshot }: { snapshot: AtlasSnapshot }) {
+function StaleBanner({
+  snapshot,
+  onRefresh,
+  refreshing,
+}: {
+  snapshot: AtlasSnapshot;
+  onRefresh: () => void;
+  refreshing: boolean;
+}) {
+  return (
+    <div className="sm-atlas-stale" role="status" aria-label="Map is out of date">
+      <div className="sm-atlas-stale-body">
+        <p className="sm-atlas-stale-title">New or changed analysis available</p>
+        <p>
+          {changeSummary(snapshot.changes)} Positions stay where they were until you refresh;
+          reanalyzed and new tracks are left off this map rather than placed from different
+          measurements.
+        </p>
+      </div>
+      <button
+        type="button"
+        className="sm-button sm-button-primary"
+        onClick={onRefresh}
+        disabled={refreshing}
+      >
+        {refreshing ? "Refreshing…" : "Refresh map"}
+      </button>
+    </div>
+  );
+}
+
+function AtlasWorkspace({
+  snapshot,
+  onRefresh,
+  refreshing,
+}: {
+  snapshot: AtlasSnapshot;
+  onRefresh: () => void;
+  refreshing: boolean;
+}) {
   const [colorKey, setColorKey] = useState<ColorKey>("uniform");
   const [selected, setSelected] = useState<ReadonlySet<string>>(() => new Set());
   const [viewport, setViewport] = useState<Viewport>(RESET);
@@ -213,8 +268,13 @@ function AtlasWorkspace({ snapshot }: { snapshot: AtlasSnapshot }) {
     select(next);
   };
 
+  const onMap = useMemo(() => new Set(points.map((p) => p.trackId)), [points]);
+
   return (
     <>
+      {snapshot.stale && (
+        <StaleBanner snapshot={snapshot} onRefresh={onRefresh} refreshing={refreshing} />
+      )}
       <p className="sm-atlas-coverage">
         <span className="sm-data">{formatCount(points.length)}</span> of{" "}
         <span className="sm-data">{formatCount(snapshot.total)}</span> tracks placed
@@ -229,6 +289,15 @@ function AtlasWorkspace({ snapshot }: { snapshot: AtlasSnapshot }) {
                 measurement)
               </>
             )}
+          </>
+        )}{" "}
+        {snapshot.createdAtMs !== null && (
+          <>
+            {" "}
+            · mapped{" "}
+            <time className="sm-data" dateTime={new Date(snapshot.createdAtMs).toISOString()}>
+              {formatDate(snapshot.createdAtMs, { time: true })}
+            </time>
           </>
         )}{" "}
         ·{" "}
@@ -378,6 +447,7 @@ function AtlasWorkspace({ snapshot }: { snapshot: AtlasSnapshot }) {
             key={picked[0]!.trackId}
             point={picked[0]!}
             descriptor={d}
+            onMap={onMap}
             onSelect={(id) => select([id])}
             onClose={() => select([])}
           />
