@@ -93,3 +93,23 @@ export function parseBound(text: string): number | null | "invalid" {
   const n = Number(t);
   return Number.isFinite(n) ? n : "invalid";
 }
+
+/** Placeholder step per descriptor, in its raw unit. */
+const HINT_STEP: Record<RangeKey, number> = {
+  centroidHz: 1,
+  integratedLufs: 0.1,
+  tempoBpm: 1,
+  flatness: 0.001,
+};
+
+/**
+ * Placeholder showing the snapshot's extent, rounded outward to a readable
+ * step so the hint always covers every measured track.
+ */
+export function hint(key: RangeKey, v: number, side: "min" | "max"): string {
+  const step = HINT_STEP[key];
+  const round = side === "min" ? Math.floor : Math.ceil;
+  const decimals = Math.max(0, -Math.floor(Math.log10(step)));
+  const out = (round(v / step + (side === "min" ? 1e-9 : -1e-9)) * step).toFixed(decimals);
+  return out === "-0" || /^-0\.0+$/.test(out) ? out.slice(1) : out;
+}

@@ -8,6 +8,7 @@ import {
   RANGE_KEYS,
   RANGE_UNITS,
   type RangeKey,
+  hint,
   parseBound,
 } from "./filters";
 
@@ -26,13 +27,6 @@ function draftsFrom(f: AtlasFilter): Drafts {
   return Object.fromEntries(
     RANGE_KEYS.map((k) => [k, { min: toText(f.ranges[k]?.min), max: toText(f.ranges[k]?.max) }]),
   ) as Drafts;
-}
-
-/** Raw-unit hint for a placeholder: the snapshot's actual extent. */
-function hint(key: RangeKey, v: number): string {
-  if (key === "flatness") return v.toPrecision(2);
-  if (key === "integratedLufs") return v.toFixed(1);
-  return String(Math.round(v));
 }
 
 /**
@@ -111,7 +105,7 @@ export function AtlasFilters({ points, filter, onChange, onClose }: AtlasFilters
               inputMode="decimal"
               aria-label={`${d.label} minimum, ${RANGE_UNITS[key]}`}
               aria-invalid={minBad || undefined}
-              placeholder={domain ? hint(key, domain.min) : "min"}
+              placeholder={domain ? hint(key, domain.min, "min") : "min"}
               value={drafts[key].min}
               onChange={(e) => setBound(key, "min", e.target.value)}
             />
@@ -121,7 +115,7 @@ export function AtlasFilters({ points, filter, onChange, onClose }: AtlasFilters
               inputMode="decimal"
               aria-label={`${d.label} maximum, ${RANGE_UNITS[key]}`}
               aria-invalid={maxBad || undefined}
-              placeholder={domain ? hint(key, domain.max) : "max"}
+              placeholder={domain ? hint(key, domain.max, "max") : "max"}
               value={drafts[key].max}
               onChange={(e) => setBound(key, "max", e.target.value)}
             />

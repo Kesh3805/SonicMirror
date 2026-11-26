@@ -3,6 +3,7 @@ import type { AtlasPoint } from "../../ipc/types";
 import {
   NO_FILTER,
   activeCount,
+  hint,
   matches,
   parseBound,
   unmeasuredHidden,
@@ -69,5 +70,16 @@ describe("Atlas filters", () => {
     expect(parseBound("")).toBeNull();
     expect(parseBound(" -14.5 ")).toBe(-14.5);
     expect(parseBound("abc")).toBe("invalid");
+  });
+});
+
+describe("range placeholders", () => {
+  it("round outward to a readable step", () => {
+    expect(hint("flatness", 8.5e-10, "min")).toBe("0.000");
+    expect(hint("flatness", 0.2871, "max")).toBe("0.288");
+    expect(hint("integratedLufs", -19.04, "min")).toBe("-19.1");
+    expect(hint("integratedLufs", -6.93, "max")).toBe("-6.9");
+    expect(hint("tempoBpm", 79.6, "min")).toBe("79");
+    expect(hint("centroidHz", 3749.2, "max")).toBe("3750");
   });
 });
