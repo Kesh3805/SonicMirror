@@ -34,6 +34,7 @@ pub fn run() {
             commands::atlas_get_snapshot,
             commands::atlas_refresh,
             commands::atlas_get_neighbors,
+            commands::comparison_get,
         ])
         .run(tauri::generate_context!())
         .expect("error while running SonicMirror");

@@ -7,7 +7,8 @@ use std::sync::atomic::AtomicBool;
 use serde::Serialize;
 use sonic_catalog::{StoredAnalysis, TrackRecord};
 use sonic_runtime::{
-    AtlasNeighbour, AtlasSnapshot, LibraryService, RuntimeError, SpectrogramView, WaveformView,
+    AtlasNeighbour, AtlasSnapshot, LibraryService, RuntimeError, SpectrogramView, TrackComparison,
+    WaveformView,
 };
 use tauri::{AppHandle, State};
 use tauri_plugin_dialog::DialogExt;
@@ -191,6 +192,17 @@ pub async fn atlas_get_neighbors(
 ) -> CommandResult<Vec<AtlasNeighbour>> {
     let library = Arc::clone(&library);
     blocking(move || library.atlas_neighbours(&track_id, k)).await
+}
+
+/// Two tracks side by side (SAD §46).
+#[tauri::command]
+pub async fn comparison_get(
+    library: State<'_, Library>,
+    left_track_id: String,
+    right_track_id: String,
+) -> CommandResult<TrackComparison> {
+    let library = Arc::clone(&library);
+    blocking(move || library.compare(&left_track_id, &right_track_id)).await
 }
 
 /// Run catalog work off the IPC thread so the interface never blocks on disk.
