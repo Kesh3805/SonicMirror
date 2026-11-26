@@ -1,5 +1,6 @@
 //! Library service: import a local file, analyze it and serve the results.
 
+use std::collections::BTreeMap;
 use std::fs::File;
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
@@ -8,7 +9,9 @@ use std::time::UNIX_EPOCH;
 
 use serde::Serialize;
 use sonic_catalog::artifacts::{ArtifactKind, ArtifactStore};
-use sonic_catalog::{Catalog, CatalogError, NewAnalysis, NewTrack, StoredAnalysis, TrackRecord};
+use sonic_catalog::{
+    Catalog, CatalogError, NewAnalysis, NewAtlasSnapshot, NewTrack, StoredAnalysis, TrackRecord,
+};
 use sonic_core::analysis::{self, AnalysisError, ENGINE_VERSION, FEATURE_SCHEMA_VERSION};
 use sonic_core::domain::{ContentDigest, cache_key};
 use sonic_core::dsp::spectral::SpectralConfig;
@@ -288,28 +291,96 @@ impl LibraryService {
 /// Most neighbours a single request may return.
 pub const MAX_NEIGHBOURS: usize = 50;
 
+/// Tracks with their features, and the analysis attached to each analyzed track.
+type CatalogInput = (
+    Vec<(TrackRecord, Option<Vec<sonic_core::domain::AudioFeature>>)>,
+    BTreeMap<String, String>,
+);
+
 impl LibraryService {
-    fn catalog_features(
-        &self,
-    ) -> Result<Vec<(TrackRecord, Option<Vec<sonic_core::domain::AudioFeature>>)>> {
+    fn catalog_input(&self) -> Result<CatalogInput> {
         let catalog = self.catalog();
-        catalog
+        let mut ids = BTreeMap::new();
+        let entries = catalog
             .tracks()?
             .into_iter()
             .map(|t| {
-                let features = catalog.analysis_for_track(&t.id)?.map(|a| a.features);
+                let analysis = catalog.analysis_for_track(&t.id)?;
+                let features = analysis.map(|a| {
+                    ids.insert(t.id.clone(), a.analysis_id);
+                    a.features
+                });
                 Ok((t, features))
             })
-            .collect()
+            .collect::<Result<Vec<_>>>()?;
+        Ok((entries, ids))
     }
 
-    /// The Sonic Atlas for the whole catalog.
+    fn catalog_features(
+        &self,
+    ) -> Result<Vec<(TrackRecord, Option<Vec<sonic_core::domain::AudioFeature>>)>> {
+        Ok(self.catalog_input()?.0)
+    }
+
+    /// The saved Sonic Atlas, read against the current catalog. The first
+    /// call computes and saves one; afterwards coordinates only change on
+    /// [`Self::refresh_atlas`], and the map reports when it is stale.
     ///
     /// # Errors
     ///
     /// Fails on a catalog error.
     pub fn atlas(&self) -> Result<crate::atlas::AtlasSnapshot> {
-        Ok(crate::atlas::snapshot(&self.catalog_features()?))
+        let (entries, ids) = self.catalog_input()?;
+        let digest = digest_of(&entries, &ids);
+        let saved = self.catalog().latest_atlas_snapshot()?;
+        if let Some(map) = saved
+            .as_ref()
+            .and_then(|s| crate::atlas::from_saved(s, &entries, &ids, &digest))
+        {
+            return Ok(map);
+        }
+        self.generate_atlas(&entries, &ids, &digest)
+    }
+
+    /// Recompute the projection from current measurements and save it.
+    /// When the catalog cannot be mapped, nothing is saved and the reason is
+    /// returned.
+    ///
+    /// # Errors
+    ///
+    /// Fails on a catalog error.
+    pub fn refresh_atlas(&self) -> Result<crate::atlas::AtlasSnapshot> {
+        let (entries, ids) = self.catalog_input()?;
+        let digest = digest_of(&entries, &ids);
+        self.generate_atlas(&entries, &ids, &digest)
+    }
+
+    fn generate_atlas(
+        &self,
+        entries: &[(TrackRecord, Option<Vec<sonic_core::domain::AudioFeature>>)],
+        ids: &BTreeMap<String, String>,
+        digest: &str,
+    ) -> Result<crate::atlas::AtlasSnapshot> {
+        let map = crate::atlas::snapshot(entries);
+        if map.status != "ready" {
+            return Ok(map);
+        }
+        let points = crate::atlas::snapshot_points(&map, ids);
+        let model = crate::atlas::model_json(&map);
+        let mut catalog = self.catalog();
+        catalog.save_atlas_snapshot(&NewAtlasSnapshot {
+            feature_schema_version: &map.vector_version,
+            algorithm_version: &map.projection_version,
+            input_digest: digest,
+            model_json: &model,
+            excluded_count: map.excluded.len(),
+            points: &points,
+        })?;
+        let saved = catalog
+            .latest_atlas_snapshot()?
+            .ok_or(CatalogError::NotFound)?;
+        drop(catalog);
+        Ok(crate::atlas::from_saved(&saved, entries, ids, digest).unwrap_or(map))
     }
 
     /// Nearest tracks to `track_id` in the original feature space.
@@ -377,6 +448,14 @@ fn canonical_config() -> String {
     )
 }
 
+fn digest_of(
+    entries: &[(TrackRecord, Option<Vec<sonic_core::domain::AudioFeature>>)],
+    ids: &BTreeMap<String, String>,
+) -> String {
+    let track_ids: Vec<&str> = entries.iter().map(|(t, _)| t.id.as_str()).collect();
+    crate::atlas::input_digest(ids, &track_ids)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -431,6 +510,48 @@ mod tests {
         assert_eq!(id, again);
         assert_eq!(service.tracks().unwrap().len(), 1);
         assert_eq!(std::fs::read(&audio).unwrap(), original);
+
+        drop(service);
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn the_atlas_is_saved_once_and_only_moves_on_refresh() {
+        let dir = temp_dir("atlas");
+        let service = LibraryService::open(&dir.join("data")).unwrap();
+        let none = AtomicBool::new(false);
+        let import = |name: &str, samples: Vec<f32>| {
+            let path = dir.join(format!("{name}.wav"));
+            std::fs::write(&path, wav::encode_pcm16(&samples, 1, 22_050)).unwrap();
+            service.import_and_analyze(&path, &none).unwrap()
+        };
+
+        assert_eq!(service.atlas().unwrap().status, "unavailable");
+        import("Low", synth::sine(22_050, 8.0, 220.0, 0.5));
+        import("Noise", synth::white_noise(22_050, 8.0, 0.3, 7));
+        import("Clicks", synth::click_track(22_050, 8.0, 120.0, 0.8));
+
+        let first = service.atlas().unwrap();
+        assert_eq!(
+            first.status, "ready",
+            "{:?} {:?}",
+            first.reason, first.excluded
+        );
+        assert!(!first.stale);
+        let id = first.snapshot_id.clone().unwrap();
+        assert_eq!(service.atlas().unwrap(), first);
+
+        import("Sweep", synth::chirp(22_050, 8.0, 200.0, 4000.0, 0.5));
+        let stale = service.atlas().unwrap();
+        assert!(stale.stale);
+        assert_eq!(stale.snapshot_id.as_deref(), Some(id.as_str()));
+        assert_eq!(stale.changes.added, 1);
+        assert_eq!(stale.points, first.points);
+
+        let fresh = service.refresh_atlas().unwrap();
+        assert!(!fresh.stale);
+        assert_ne!(fresh.snapshot_id.as_deref(), Some(id.as_str()));
+        assert_eq!(fresh.points.len(), 4);
 
         drop(service);
         let _ = std::fs::remove_dir_all(&dir);
