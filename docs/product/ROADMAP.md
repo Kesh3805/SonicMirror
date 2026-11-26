@@ -60,7 +60,7 @@ the core is validated. See [PRD §48](PRD.md#48-post-core-roadmap).
 - [x] Deterministic PCA projection with sign-fixed axes (`pca/1.0.0`)
 - [x] Atlas snapshot and neighbour IPC commands with exclusion reasons
 - [x] Atlas canvas: pan, anchored zoom, selection, colour by descriptor, legend, track list
-- [ ] Filters and region selection
+- [x] Filters and region selection
 - [ ] Persisted snapshots with stale detection
 - [ ] Comparison view
 - [ ] Collections
