@@ -106,3 +106,29 @@
   outline: var(--sm-focus-width) solid var(--sm-focus);
   outline-offset: calc(var(--sm-focus-width) * -1);
 }
+
+/* Text and numeric inputs: same geometry as select (PDS §2 "Select/filter"). */
+.sm-input {
+  height: var(--sm-control);
+  min-width: 0;
+  padding-inline: var(--sm-space-2);
+  border: var(--sm-line) solid var(--sm-control-border);
+  border-radius: var(--sm-radius-small);
+  background: var(--sm-paper);
+  color: var(--sm-ink);
+  font: inherit;
+  font-size: var(--sm-type-small);
+}
+
+.sm-input::placeholder {
+  color: var(--sm-muted);
+}
+
+.sm-input:focus-visible {
+  outline: var(--sm-focus-width) solid var(--sm-focus);
+  outline-offset: var(--sm-focus-offset);
+}
+
+.sm-input[aria-invalid="true"] {
+  border-color: var(--sm-danger);
+}
