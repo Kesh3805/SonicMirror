@@ -17,7 +17,7 @@ describe("AppShell", () => {
     renderAt("/overview");
     const nav = await screen.findByRole("navigation", { name: "Primary" });
     const labels = Array.from(nav.querySelectorAll("a")).map((a) => a.textContent);
-    expect(labels).toEqual(["Overview", "Library", "Atlas", "Settings"]);
+    expect(labels).toEqual(["Overview", "Library", "Atlas", "Compare", "Settings"]);
   });
 
   it("marks only the open library view as current", async () => {

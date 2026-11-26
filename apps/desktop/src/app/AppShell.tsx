@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Library, Orbit, PanelsTopLeft, Settings } from "lucide-react";
+import { ArrowLeftRight, Library, Orbit, PanelsTopLeft, Settings } from "lucide-react";
 import { Fragment } from "react";
 import { NavLink, Outlet, useLocation } from "react-router";
 import { PlaybackStrip } from "../features/playback/PlaybackStrip";
@@ -19,6 +19,7 @@ const SECTIONS: Record<string, string> = {
   library: "Library",
   tracks: "Library",
   atlas: "Atlas",
+  compare: "Compare",
   settings: "Settings",
 };
 
@@ -113,6 +114,10 @@ export function AppShell() {
           <NavLink className="sm-nav-link" to="/atlas">
             <Orbit size={16} aria-hidden="true" />
             <span className="sm-nav-label">Atlas</span>
+          </NavLink>
+          <NavLink className="sm-nav-link" to="/compare">
+            <ArrowLeftRight size={16} aria-hidden="true" />
+            <span className="sm-nav-label">Compare</span>
           </NavLink>
 
           <span className="sm-rail-spacer" />
