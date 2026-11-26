@@ -1,0 +1,76 @@
+/* Modal dialog (PDS §2 "Dialog"). */
+.sm-dialog-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: start center;
+  padding: 10vh var(--sm-space-4) var(--sm-space-4);
+  background: var(--sm-overlay);
+}
+
+.sm-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sm-space-4);
+  width: min(400px, 100%);
+  max-height: 80vh;
+  padding: var(--sm-space-4) var(--sm-space-6) var(--sm-space-6);
+  background: var(--sm-raised);
+  border: var(--sm-line) solid var(--sm-rule);
+  box-shadow: var(--sm-shadow-float);
+}
+
+.sm-dialog[data-wide] {
+  width: min(520px, 100%);
+}
+
+.sm-dialog:focus {
+  outline: none;
+}
+
+.sm-dialog-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sm-space-3);
+}
+
+.sm-dialog-title {
+  font-family: var(--sm-font-display);
+  font-size: var(--sm-type-section);
+  font-weight: var(--sm-weight-regular);
+  overflow-wrap: anywhere;
+}
+
+.sm-dialog-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sm-space-2);
+  font-size: var(--sm-type-small);
+  color: var(--sm-muted);
+}
+
+.sm-dialog-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sm-space-1);
+  font-size: var(--sm-type-small);
+}
+
+.sm-dialog-error {
+  color: var(--sm-danger);
+  font-size: var(--sm-type-label);
+}
+
+.sm-dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--sm-space-2);
+}
+
+.sm-button-danger {
+  background: var(--sm-danger);
+  color: var(--sm-accent-ink);
+}
