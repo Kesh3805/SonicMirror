@@ -35,6 +35,14 @@ pub fn run() {
             commands::atlas_refresh,
             commands::atlas_get_neighbors,
             commands::comparison_get,
+            commands::collections_list,
+            commands::collections_get,
+            commands::collections_get_tracks,
+            commands::collections_create,
+            commands::collections_rename,
+            commands::collections_delete,
+            commands::collections_add_tracks,
+            commands::collections_remove_tracks,
         ])
         .run(tauri::generate_context!())
         .expect("error while running SonicMirror");

@@ -5,7 +5,7 @@ use std::sync::Arc;
 use std::sync::atomic::AtomicBool;
 
 use serde::Serialize;
-use sonic_catalog::{StoredAnalysis, TrackRecord};
+use sonic_catalog::{CollectionSummary, MembershipChange, StoredAnalysis, TrackRecord};
 use sonic_runtime::{
     AtlasNeighbour, AtlasSnapshot, LibraryService, RuntimeError, SpectrogramView, TrackComparison,
     WaveformView,
@@ -203,6 +203,82 @@ pub async fn comparison_get(
 ) -> CommandResult<TrackComparison> {
     let library = Arc::clone(&library);
     blocking(move || library.compare(&left_track_id, &right_track_id)).await
+}
+
+#[tauri::command]
+pub async fn collections_list(
+    library: State<'_, Library>,
+) -> CommandResult<Vec<CollectionSummary>> {
+    let library = Arc::clone(&library);
+    blocking(move || library.collections()).await
+}
+
+#[tauri::command]
+pub async fn collections_get(
+    library: State<'_, Library>,
+    collection_id: String,
+) -> CommandResult<CollectionSummary> {
+    let library = Arc::clone(&library);
+    blocking(move || library.collection(&collection_id)).await
+}
+
+#[tauri::command]
+pub async fn collections_get_tracks(
+    library: State<'_, Library>,
+    collection_id: String,
+) -> CommandResult<Vec<TrackRecord>> {
+    let library = Arc::clone(&library);
+    blocking(move || library.collection_tracks(&collection_id)).await
+}
+
+#[tauri::command]
+pub async fn collections_create(
+    library: State<'_, Library>,
+    name: String,
+    track_ids: Vec<String>,
+) -> CommandResult<CollectionSummary> {
+    let library = Arc::clone(&library);
+    blocking(move || library.create_collection(&name, &track_ids)).await
+}
+
+#[tauri::command]
+pub async fn collections_rename(
+    library: State<'_, Library>,
+    collection_id: String,
+    name: String,
+) -> CommandResult<CollectionSummary> {
+    let library = Arc::clone(&library);
+    blocking(move || library.rename_collection(&collection_id, &name)).await
+}
+
+/// Removes the collection only; tracks and source files are untouched.
+#[tauri::command]
+pub async fn collections_delete(
+    library: State<'_, Library>,
+    collection_id: String,
+) -> CommandResult<()> {
+    let library = Arc::clone(&library);
+    blocking(move || library.delete_collection(&collection_id)).await
+}
+
+#[tauri::command]
+pub async fn collections_add_tracks(
+    library: State<'_, Library>,
+    collection_id: String,
+    track_ids: Vec<String>,
+) -> CommandResult<MembershipChange> {
+    let library = Arc::clone(&library);
+    blocking(move || library.add_to_collection(&collection_id, &track_ids)).await
+}
+
+#[tauri::command]
+pub async fn collections_remove_tracks(
+    library: State<'_, Library>,
+    collection_id: String,
+    track_ids: Vec<String>,
+) -> CommandResult<MembershipChange> {
+    let library = Arc::clone(&library);
+    blocking(move || library.remove_from_collection(&collection_id, &track_ids)).await
 }
 
 /// Run catalog work off the IPC thread so the interface never blocks on disk.
