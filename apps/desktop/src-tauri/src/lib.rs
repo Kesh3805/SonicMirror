@@ -32,6 +32,7 @@ pub fn run() {
             commands::analysis_get_waveform,
             commands::analysis_get_spectrogram,
             commands::atlas_get_snapshot,
+            commands::atlas_refresh,
             commands::atlas_get_neighbors,
         ])
         .run(tauri::generate_context!())

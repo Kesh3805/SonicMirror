@@ -176,6 +176,13 @@ pub async fn atlas_get_snapshot(library: State<'_, Library>) -> CommandResult<At
     blocking(move || library.atlas()).await
 }
 
+/// Recompute the map from current measurements and save it as the new snapshot.
+#[tauri::command]
+pub async fn atlas_refresh(library: State<'_, Library>) -> CommandResult<AtlasSnapshot> {
+    let library = Arc::clone(&library);
+    blocking(move || library.refresh_atlas()).await
+}
+
 #[tauri::command]
 pub async fn atlas_get_neighbors(
     library: State<'_, Library>,
