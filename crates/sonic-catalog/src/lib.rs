@@ -3,6 +3,7 @@
 
 mod analysis;
 pub mod artifacts;
+mod atlas;
 mod migrations;
 mod tracks;
 
@@ -12,6 +13,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use rusqlite::Connection;
 
 pub use analysis::{NewAnalysis, StoredAnalysis};
+pub use atlas::{KEPT_SNAPSHOTS, NewAtlasSnapshot, SnapshotPoint, StoredAtlasSnapshot};
 pub use tracks::{NewTrack, TrackRecord};
 
 #[derive(Debug, thiserror::Error)]

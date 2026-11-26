@@ -5,7 +5,10 @@ use rusqlite::Connection;
 use crate::{CatalogError, Result};
 
 /// Migrations in order. Index `i` upgrades the schema from version `i` to `i + 1`.
-const MIGRATIONS: &[&str] = &[include_str!("../migrations/0001_initial_schema.sql")];
+const MIGRATIONS: &[&str] = &[
+    include_str!("../migrations/0001_initial_schema.sql"),
+    include_str!("../migrations/0002_atlas_snapshots.sql"),
+];
 
 /// Latest schema version this build understands.
 #[allow(clippy::cast_possible_truncation)] // a handful of migrations, checked at compile time
