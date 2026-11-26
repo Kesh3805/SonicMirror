@@ -8,7 +8,9 @@ repository.workspace = true
 rust-version.workspace = true
 
 [dependencies]
+blake3 = "1.8.7"
 serde.workspace = true
+serde_json.workspace = true
 thiserror.workspace = true
 sonic-core.workspace = true
 sonic-catalog.workspace = true
@@ -16,5 +18,3 @@ sonic-catalog.workspace = true
 [lints]
 workspace = true
 
-[dev-dependencies]
-serde_json.workspace = true

@@ -4,10 +4,10 @@
 //! and neighbour search. Every number a user sees comes from stored
 //! measurements; tracks that cannot be placed are listed with the reason.
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap};
 
-use serde::Serialize;
-use sonic_catalog::TrackRecord;
+use serde::{Deserialize, Serialize};
+use sonic_catalog::{SnapshotPoint, StoredAtlasSnapshot, TrackRecord};
 use sonic_core::domain::{AudioFeature, FeatureValue};
 use sonic_core::similarity::{
     self, MIN_POINTS, Normalizer, PROJECTION_VERSION, VECTOR_VERSION, contributions, nearest,
@@ -40,22 +40,40 @@ pub struct AtlasExclusion {
 }
 
 /// One principal axis, described by its strongest dimensions.
-#[derive(Debug, Clone, PartialEq, Serialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AtlasAxis {
     pub explained: f64,
     pub top: Vec<(String, f64)>,
 }
 
-/// The map for the current catalog.
+/// How the catalog has moved on since a saved map was made.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AtlasChanges {
+    /// Eligible tracks that are not on the map.
+    pub added: usize,
+    /// Tracks on the map whose analysis has since been replaced.
+    pub changed: usize,
+    /// Tracks on the map that have since been deleted.
+    pub removed: usize,
+}
+
+/// The map: freshly computed, or a saved snapshot read back.
 #[derive(Debug, Clone, PartialEq, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AtlasSnapshot {
     /// `ready`, or `unavailable` with a reason code.
     pub status: &'static str,
     pub reason: Option<&'static str>,
-    pub vector_version: &'static str,
-    pub projection_version: &'static str,
+    /// Saved snapshot id and time; absent for a map that was not saved.
+    pub snapshot_id: Option<String>,
+    pub created_at_ms: Option<i64>,
+    /// The catalog or engine has changed since the coordinates were computed.
+    pub stale: bool,
+    pub changes: AtlasChanges,
+    pub vector_version: String,
+    pub projection_version: String,
     pub min_tracks: usize,
     pub total: usize,
     pub points: Vec<AtlasPoint>,
@@ -126,14 +144,32 @@ fn build_space(catalog: &[(TrackRecord, Option<Vec<AudioFeature>>)]) -> Space<'_
     }
 }
 
+fn point(t: &TrackRecord, f: &[AudioFeature], x: f64, y: f64) -> AtlasPoint {
+    AtlasPoint {
+        track_id: t.id.clone(),
+        title: t.title.clone(),
+        artist: t.artist.clone(),
+        x,
+        y,
+        centroid_hz: scalar(f, "spectral_centroid_mean"),
+        integrated_lufs: scalar(f, "integrated_loudness"),
+        tempo_bpm: scalar(f, "tempo_bpm"),
+        flatness: scalar(f, "spectral_flatness_mean"),
+    }
+}
+
 /// Compute the Atlas for a catalog of tracks and their stored features.
 pub fn snapshot(catalog: &[(TrackRecord, Option<Vec<AudioFeature>>)]) -> AtlasSnapshot {
     let space = build_space(catalog);
     let base = |status, reason| AtlasSnapshot {
         status,
         reason,
-        vector_version: VECTOR_VERSION,
-        projection_version: PROJECTION_VERSION,
+        snapshot_id: None,
+        created_at_ms: None,
+        stale: false,
+        changes: AtlasChanges::default(),
+        vector_version: VECTOR_VERSION.to_owned(),
+        projection_version: PROJECTION_VERSION.to_owned(),
         min_tracks: MIN_POINTS,
         total: catalog.len(),
         points: Vec::new(),
@@ -148,17 +184,7 @@ pub fn snapshot(catalog: &[(TrackRecord, Option<Vec<AudioFeature>>)]) -> AtlasSn
         .tracks
         .iter()
         .zip(&projection.coordinates)
-        .map(|((t, f), [x, y])| AtlasPoint {
-            track_id: t.id.clone(),
-            title: t.title.clone(),
-            artist: t.artist.clone(),
-            x: *x,
-            y: *y,
-            centroid_hz: scalar(f, "spectral_centroid_mean"),
-            integrated_lufs: scalar(f, "integrated_loudness"),
-            tempo_bpm: scalar(f, "tempo_bpm"),
-            flatness: scalar(f, "spectral_flatness_mean"),
-        })
+        .map(|((t, f), [x, y])| point(t, f, *x, *y))
         .collect();
     let axes = projection
         .axes
@@ -210,6 +236,122 @@ pub fn neighbours(
             })
             .collect(),
     )
+}
+
+/// Fingerprint of everything a projection depends on: the engine versions
+/// and, for every track, the analysis attached to it (or none). Any import,
+/// deletion or reanalysis changes it.
+pub fn input_digest(analysis_ids: &BTreeMap<String, String>, track_ids: &[&str]) -> String {
+    let mut ids: Vec<&str> = track_ids.to_vec();
+    ids.sort_unstable();
+    let mut h = blake3::Hasher::new();
+    h.update(VECTOR_VERSION.as_bytes());
+    h.update(b"\n");
+    h.update(PROJECTION_VERSION.as_bytes());
+    for id in ids {
+        h.update(b"\n");
+        h.update(id.as_bytes());
+        h.update(b"=");
+        if let Some(a) = analysis_ids.get(id) {
+            h.update(a.as_bytes());
+        }
+    }
+    h.finalize().to_hex().to_string()
+}
+
+/// Points of a freshly computed map, tied to the analyses they came from.
+pub fn snapshot_points(
+    map: &AtlasSnapshot,
+    analysis_ids: &BTreeMap<String, String>,
+) -> Vec<SnapshotPoint> {
+    map.points
+        .iter()
+        .filter_map(|p| {
+            Some(SnapshotPoint {
+                track_id: p.track_id.clone(),
+                analysis_id: analysis_ids.get(&p.track_id)?.clone(),
+                x: p.x,
+                y: p.y,
+            })
+        })
+        .collect()
+}
+
+/// Serialized principal axes for a saved snapshot.
+///
+/// # Panics
+///
+/// Never: axes are plain numbers and strings.
+pub fn model_json(map: &AtlasSnapshot) -> String {
+    serde_json::to_string(&map.axes).expect("axes serialize")
+}
+
+/// Read a saved snapshot back against the current catalog (SAD §44).
+///
+/// Saved coordinates are never moved. A point whose analysis has since been
+/// replaced is taken off the map rather than shown at a position computed
+/// from other measurements; tracks added since are listed, not placed.
+/// Returns `None` if the stored model cannot be read.
+pub fn from_saved(
+    saved: &StoredAtlasSnapshot,
+    catalog: &[(TrackRecord, Option<Vec<AudioFeature>>)],
+    analysis_ids: &BTreeMap<String, String>,
+    current_digest: &str,
+) -> Option<AtlasSnapshot> {
+    let axes: Vec<AtlasAxis> = serde_json::from_str(&saved.model_json).ok()?;
+    let saved_points: HashMap<&str, &SnapshotPoint> = saved
+        .points
+        .iter()
+        .map(|p| (p.track_id.as_str(), p))
+        .collect();
+    let mut points = Vec::new();
+    let mut excluded = Vec::new();
+    let mut changes = AtlasChanges {
+        removed: saved.eligible_count.saturating_sub(saved.points.len()),
+        ..AtlasChanges::default()
+    };
+    for (track, features) in catalog {
+        let exclude = |reason: String| AtlasExclusion {
+            track_id: track.id.clone(),
+            title: track.title.clone(),
+            reason,
+        };
+        let current = analysis_ids.get(&track.id);
+        match (saved_points.get(track.id.as_str()), features) {
+            (Some(sp), Some(f)) if current == Some(&sp.analysis_id) => {
+                points.push(point(track, f, sp.x, sp.y));
+            }
+            (Some(_), _) => {
+                changes.changed += 1;
+                excluded.push(exclude("reanalyzed since this map".to_owned()));
+            }
+            (None, None) => excluded.push(exclude("not analyzed".to_owned())),
+            (None, Some(f)) => match raw_vector(f) {
+                Ok(_) => {
+                    changes.added += 1;
+                    excluded.push(exclude("added since this map".to_owned()));
+                }
+                Err(key) => excluded.push(exclude(format!("{key} unavailable"))),
+            },
+        }
+    }
+    let versions_match = saved.feature_schema_version == VECTOR_VERSION
+        && saved.algorithm_version == PROJECTION_VERSION;
+    Some(AtlasSnapshot {
+        status: "ready",
+        reason: None,
+        snapshot_id: Some(saved.id.clone()),
+        created_at_ms: Some(saved.created_at_ms),
+        stale: !versions_match || saved.input_digest != current_digest,
+        changes,
+        vector_version: saved.feature_schema_version.clone(),
+        projection_version: saved.algorithm_version.clone(),
+        min_tracks: MIN_POINTS,
+        total: catalog.len(),
+        points,
+        excluded,
+        axes,
+    })
 }
 
 /// Dimensions in the vector, exposed for documentation and tests.
@@ -325,5 +467,136 @@ mod tests {
         let e = s.excluded.iter().find(|x| x.track_id == "e").unwrap();
         assert_eq!(e.reason, "spectral_flux_mean unavailable");
         assert!(dimension_names().contains(&"flux"));
+    }
+
+    fn ids(pairs: &[(&str, &str)]) -> BTreeMap<String, String> {
+        pairs
+            .iter()
+            .map(|(t, a)| ((*t).to_owned(), (*a).to_owned()))
+            .collect()
+    }
+
+    /// Save the current catalog's map as the stored snapshot would hold it.
+    fn saved(
+        c: &[(TrackRecord, Option<Vec<AudioFeature>>)],
+        analysis: &BTreeMap<String, String>,
+    ) -> StoredAtlasSnapshot {
+        let map = snapshot(c);
+        let track_ids: Vec<&str> = c.iter().map(|(t, _)| t.id.as_str()).collect();
+        let points = snapshot_points(&map, analysis);
+        StoredAtlasSnapshot {
+            id: "s1".into(),
+            feature_schema_version: VECTOR_VERSION.into(),
+            algorithm_version: PROJECTION_VERSION.into(),
+            input_digest: input_digest(analysis, &track_ids),
+            model_json: model_json(&map),
+            eligible_count: points.len(),
+            excluded_count: map.excluded.len(),
+            created_at_ms: 42,
+            points,
+        }
+    }
+
+    const ANALYSES: [(&str, &str); 4] = [("a", "r1"), ("a2", "r2"), ("b", "r3"), ("c", "r4")];
+
+    #[test]
+    fn digest_tracks_every_input_but_not_order() {
+        let a = ids(&ANALYSES);
+        let base = input_digest(&a, &["a", "b", "c", "d"]);
+        assert_eq!(base, input_digest(&a, &["d", "c", "b", "a"]));
+        assert_eq!(base.len(), 64);
+        let mut reanalyzed = a.clone();
+        reanalyzed.insert("b".into(), "r9".into());
+        assert_ne!(base, input_digest(&reanalyzed, &["a", "b", "c", "d"]));
+        assert_ne!(base, input_digest(&a, &["a", "b", "c", "d", "e"]));
+        assert_ne!(base, input_digest(&a, &["a", "b", "c"]));
+    }
+
+    #[test]
+    fn an_unchanged_catalog_reads_back_the_same_fresh_map() {
+        let c = catalog();
+        let a = ids(&ANALYSES);
+        let s = saved(&c, &a);
+        let fresh = snapshot(&c);
+        let back = from_saved(&s, &c, &a, &s.input_digest).unwrap();
+        assert!(!back.stale);
+        assert_eq!(back.changes, AtlasChanges::default());
+        assert_eq!(back.snapshot_id.as_deref(), Some("s1"));
+        assert_eq!(back.created_at_ms, Some(42));
+        assert_eq!(back.axes, fresh.axes);
+        let mut want = fresh.points;
+        want.sort_by(|x, y| x.track_id.cmp(&y.track_id));
+        let mut got = back.points;
+        got.sort_by(|x, y| x.track_id.cmp(&y.track_id));
+        assert_eq!(got, want);
+    }
+
+    #[test]
+    fn later_changes_mark_the_map_stale_without_moving_points() {
+        let c = catalog();
+        let a = ids(&ANALYSES);
+        let s = saved(&c, &a);
+        let frozen: HashMap<String, (f64, f64)> = s
+            .points
+            .iter()
+            .map(|p| (p.track_id.clone(), (p.x, p.y)))
+            .collect();
+
+        // "b" reanalyzed, "c" deleted (its point cascades away), "e" added and analyzable.
+        let mut now: Vec<_> = c.into_iter().filter(|(t, _)| t.id != "c").collect();
+        now.push((track("e"), Some(features(0.9, 0.9))));
+        let mut s = s;
+        s.points.retain(|p| p.track_id != "c");
+        let mut a2 = ids(&[("a", "r1"), ("a2", "r2"), ("b", "r9"), ("e", "r5")]);
+        a2.remove("c");
+        let track_ids: Vec<&str> = now.iter().map(|(t, _)| t.id.as_str()).collect();
+        let digest = input_digest(&a2, &track_ids);
+
+        let back = from_saved(&s, &now, &a2, &digest).unwrap();
+        assert!(back.stale);
+        assert_eq!(
+            back.changes,
+            AtlasChanges {
+                added: 1,
+                changed: 1,
+                removed: 1
+            }
+        );
+        let placed: Vec<&str> = back.points.iter().map(|p| p.track_id.as_str()).collect();
+        assert_eq!(placed, ["a", "a2"]);
+        for p in &back.points {
+            assert_eq!((p.x, p.y), frozen[&p.track_id]);
+        }
+        let reason = |id: &str| {
+            back.excluded
+                .iter()
+                .find(|e| e.track_id == id)
+                .map(|e| e.reason.as_str())
+        };
+        assert_eq!(reason("b"), Some("reanalyzed since this map"));
+        assert_eq!(reason("e"), Some("added since this map"));
+        assert_eq!(reason("d"), Some("not analyzed"));
+    }
+
+    #[test]
+    fn an_older_engine_snapshot_is_stale() {
+        let c = catalog();
+        let a = ids(&ANALYSES);
+        let mut s = saved(&c, &a);
+        s.feature_schema_version = "vector/0.9.0".into();
+        let digest = s.input_digest.clone();
+        let back = from_saved(&s, &c, &a, &digest).unwrap();
+        assert!(back.stale);
+        assert_eq!(back.vector_version, "vector/0.9.0");
+    }
+
+    #[test]
+    fn an_unreadable_model_is_not_shown() {
+        let c = catalog();
+        let a = ids(&ANALYSES);
+        let mut s = saved(&c, &a);
+        s.model_json = "not json".into();
+        let digest = s.input_digest.clone();
+        assert_eq!(from_saved(&s, &c, &a, &digest), None);
     }
 }
