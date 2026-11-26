@@ -7,6 +7,7 @@ import type {
   ImportOutcome,
   SpectrogramView,
   StoredAnalysis,
+  TrackComparison,
   TrackRecord,
   WaveformView,
 } from "./types";
@@ -59,6 +60,8 @@ export const ipc = {
     call<SpectrogramView>("analysis_get_spectrogram", { trackId, columns, bands }),
   getAtlas: () => call<AtlasSnapshot>("atlas_get_snapshot"),
   refreshAtlas: () => call<AtlasSnapshot>("atlas_refresh"),
+  compare: (leftTrackId: string, rightTrackId: string) =>
+    call<TrackComparison>("comparison_get", { leftTrackId, rightTrackId }),
   getNeighbours: (trackId: string, k: number) =>
     call<AtlasNeighbour[]>("atlas_get_neighbors", { trackId, k }),
 };

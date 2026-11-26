@@ -131,3 +131,45 @@ export interface AtlasNeighbour {
   /** Share of squared distance per feature group, summing to 1. */
   contributions: Record<string, number>;
 }
+
+/** One side of a comparison (SAD §46). */
+export interface ComparisonSide {
+  trackId: string;
+  title: string;
+  artist: string | null;
+  analyzed: boolean;
+  engineVersion: string | null;
+  featureSchemaVersion: string | null;
+}
+
+export type ComparisonStatus = FeatureStatus | "missing";
+
+export interface ComparisonMeasurement {
+  featureKey: string;
+  unit: string | null;
+  leftValue: number | number[] | null;
+  rightValue: number | number[] | null;
+  /** `right − left`; null when either side is invalid or they are not comparable. */
+  difference: number | number[] | null;
+  leftStatus: ComparisonStatus;
+  rightStatus: ComparisonStatus;
+  leftDiagnostic: string | null;
+  rightDiagnostic: string | null;
+  incompatible: string | null;
+}
+
+export interface SimilarityContext {
+  vectorVersion: string;
+  normalization: string;
+  referenceTracks: number;
+}
+
+export interface TrackComparison {
+  left: ComparisonSide;
+  right: ComparisonSide;
+  measurements: ComparisonMeasurement[];
+  distance: number | null;
+  contributions: Record<string, number>;
+  modelContext: SimilarityContext | null;
+  limitations: string[];
+}
