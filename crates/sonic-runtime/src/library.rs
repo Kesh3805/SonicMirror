@@ -10,7 +10,8 @@ use std::time::UNIX_EPOCH;
 use serde::Serialize;
 use sonic_catalog::artifacts::{ArtifactKind, ArtifactStore};
 use sonic_catalog::{
-    Catalog, CatalogError, NewAnalysis, NewAtlasSnapshot, NewTrack, StoredAnalysis, TrackRecord,
+    Catalog, CatalogError, CollectionSummary, MembershipChange, NewAnalysis, NewAtlasSnapshot,
+    NewTrack, StoredAnalysis, TrackRecord,
 };
 use sonic_core::analysis::{self, AnalysisError, ENGINE_VERSION, FEATURE_SCHEMA_VERSION};
 use sonic_core::domain::{ContentDigest, cache_key};
@@ -416,6 +417,72 @@ impl LibraryService {
             (&right, right_analysis.as_ref()),
             &space,
         ))
+    }
+
+    /// All collections with their sizes.
+    ///
+    /// # Errors
+    ///
+    /// Fails on a catalog error.
+    pub fn collections(&self) -> Result<Vec<CollectionSummary>> {
+        Ok(self.catalog().collections()?)
+    }
+
+    /// # Errors
+    ///
+    /// Fails for an unknown id or on a catalog error.
+    pub fn collection(&self, id: &str) -> Result<CollectionSummary> {
+        Ok(self.catalog().collection(id)?)
+    }
+
+    /// Member tracks, by title.
+    ///
+    /// # Errors
+    ///
+    /// Fails for an unknown id or on a catalog error.
+    pub fn collection_tracks(&self, id: &str) -> Result<Vec<TrackRecord>> {
+        Ok(self.catalog().collection_tracks(id)?)
+    }
+
+    /// # Errors
+    ///
+    /// Fails on an invalid name, an unknown track or a catalog error.
+    pub fn create_collection(&self, name: &str, track_ids: &[String]) -> Result<CollectionSummary> {
+        Ok(self.catalog().create_collection(name, track_ids)?)
+    }
+
+    /// # Errors
+    ///
+    /// Fails on an invalid name, an unknown id or a catalog error.
+    pub fn rename_collection(&self, id: &str, name: &str) -> Result<CollectionSummary> {
+        Ok(self.catalog().rename_collection(id, name)?)
+    }
+
+    /// Delete the collection only; its tracks and files are untouched.
+    ///
+    /// # Errors
+    ///
+    /// Fails for an unknown id or on a catalog error.
+    pub fn delete_collection(&self, id: &str) -> Result<()> {
+        Ok(self.catalog().delete_collection(id)?)
+    }
+
+    /// # Errors
+    ///
+    /// Fails for an unknown collection or track, or on a catalog error.
+    pub fn add_to_collection(&self, id: &str, track_ids: &[String]) -> Result<MembershipChange> {
+        Ok(self.catalog().add_to_collection(id, track_ids)?)
+    }
+
+    /// # Errors
+    ///
+    /// Fails for an unknown collection or on a catalog error.
+    pub fn remove_from_collection(
+        &self,
+        id: &str,
+        track_ids: &[String],
+    ) -> Result<MembershipChange> {
+        Ok(self.catalog().remove_from_collection(id, track_ids)?)
     }
 
     /// Nearest tracks to `track_id` in the original feature space.
