@@ -104,3 +104,24 @@ export function hitTest(
   }
   return best;
 }
+
+/** Normalized rectangle from two drag corners. */
+export function rectFrom(a: Point, b: Point) {
+  return {
+    left: Math.min(a.x, b.x),
+    top: Math.min(a.y, b.y),
+    right: Math.max(a.x, b.x),
+    bottom: Math.max(a.y, b.y),
+  };
+}
+
+/** Indices of screen points inside the rectangle spanned by `a` and `b`, edges included. */
+export function pointsInRect(screen: readonly Point[], a: Point, b: Point): number[] {
+  const r = rectFrom(a, b);
+  const out: number[] = [];
+  for (let i = 0; i < screen.length; i++) {
+    const p = screen[i]!;
+    if (p.x >= r.left && p.x <= r.right && p.y >= r.top && p.y <= r.bottom) out.push(i);
+  }
+  return out;
+}

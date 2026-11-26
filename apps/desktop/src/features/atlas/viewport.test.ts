@@ -1,5 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { FIT_PADDING, MAX_ZOOM, MIN_ZOOM, RESET, fit, hitTest, toScreen, zoomAt } from "./viewport";
+import {
+  FIT_PADDING,
+  MAX_ZOOM,
+  MIN_ZOOM,
+  RESET,
+  fit,
+  hitTest,
+  pointsInRect,
+  toScreen,
+  zoomAt,
+} from "./viewport";
 
 const size = { width: 400, height: 300 };
 const points = [
@@ -67,5 +77,23 @@ describe("hitTest", () => {
   it("breaks exact ties by id", () => {
     expect(hitTest(screen, ["z", "b", "c"], { x: 12, y: 10 })).toBe(1);
     expect(hitTest(screen, ["a", "b", "c"], { x: 12, y: 10 })).toBe(0);
+  });
+});
+
+describe("pointsInRect", () => {
+  const screen = [
+    { x: 10, y: 10 },
+    { x: 50, y: 50 },
+    { x: 100, y: 20 },
+  ];
+
+  it("selects points inside the rectangle whichever way it was dragged", () => {
+    expect(pointsInRect(screen, { x: 0, y: 0 }, { x: 60, y: 60 })).toEqual([0, 1]);
+    expect(pointsInRect(screen, { x: 60, y: 60 }, { x: 0, y: 0 })).toEqual([0, 1]);
+  });
+
+  it("includes points on the edge and returns nothing for an empty area", () => {
+    expect(pointsInRect(screen, { x: 100, y: 20 }, { x: 120, y: 40 })).toEqual([2]);
+    expect(pointsInRect(screen, { x: 200, y: 200 }, { x: 220, y: 220 })).toEqual([]);
   });
 });
