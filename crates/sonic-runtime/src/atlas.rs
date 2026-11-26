@@ -238,6 +238,54 @@ pub fn neighbours(
     )
 }
 
+/// Original-space distance between two tracks and what drives it.
+#[derive(Debug, Clone, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PairDistance {
+    pub distance: f64,
+    /// Share of squared distance per feature group, summing to 1.
+    pub contributions: BTreeMap<&'static str, f64>,
+    /// Tracks whose spread defines the normalization.
+    pub reference_tracks: usize,
+}
+
+/// Why two tracks have no shared distance.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PairUnavailable {
+    /// One side lacks a measurement the vector needs.
+    Ineligible,
+    /// Too few eligible tracks to define a normalization.
+    TooFewTracks,
+}
+
+/// Weighted distance between two tracks in the same normalized space the
+/// Atlas neighbours use, fitted on every eligible track in the catalog.
+///
+/// # Errors
+///
+/// Returns why no distance can be stated.
+pub fn pair(
+    catalog: &[(TrackRecord, Option<Vec<AudioFeature>>)],
+    left: &str,
+    right: &str,
+) -> Result<PairDistance, PairUnavailable> {
+    let space = build_space(catalog);
+    let index = |id: &str| space.tracks.iter().position(|(t, _)| t.id == id);
+    let (Some(li), Some(ri)) = (index(left), index(right)) else {
+        return Err(PairUnavailable::Ineligible);
+    };
+    if space.tracks.len() < MIN_POINTS {
+        return Err(PairUnavailable::TooFewTracks);
+    }
+    let weights = &space.weights;
+    let (lv, rv) = (&space.normalized[li], &space.normalized[ri]);
+    Ok(PairDistance {
+        distance: similarity::distance(lv, rv, weights),
+        contributions: contributions(lv, rv, weights),
+        reference_tracks: space.tracks.len(),
+    })
+}
+
 /// Fingerprint of everything a projection depends on: the engine versions
 /// and, for every track, the analysis attached to it (or none). Any import,
 /// deletion or reanalysis changes it.
