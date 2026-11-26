@@ -98,9 +98,22 @@ export interface AtlasAxis {
   top: [string, number][];
 }
 
+/** How the catalog has moved on since a saved map was made. */
+export interface AtlasChanges {
+  added: number;
+  changed: number;
+  removed: number;
+}
+
 export interface AtlasSnapshot {
   status: "ready" | "unavailable";
   reason: "too_few_tracks" | "insufficient_variance" | null;
+  /** Saved snapshot id and time; null for a map that was not saved. */
+  snapshotId: string | null;
+  createdAtMs: number | null;
+  /** Coordinates predate the current catalog or engine. */
+  stale: boolean;
+  changes: AtlasChanges;
   vectorVersion: string;
   projectionVersion: string;
   minTracks: number;

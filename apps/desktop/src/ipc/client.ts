@@ -58,6 +58,7 @@ export const ipc = {
   getSpectrogram: (trackId: string, columns: number, bands: number) =>
     call<SpectrogramView>("analysis_get_spectrogram", { trackId, columns, bands }),
   getAtlas: () => call<AtlasSnapshot>("atlas_get_snapshot"),
+  refreshAtlas: () => call<AtlasSnapshot>("atlas_refresh"),
   getNeighbours: (trackId: string, k: number) =>
     call<AtlasNeighbour[]>("atlas_get_neighbors", { trackId, k }),
 };
