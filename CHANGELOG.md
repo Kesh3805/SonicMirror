@@ -24,6 +24,12 @@ All notable changes to this project are documented here. The format follows
   reanalysis or an engine change mark the map stale with a banner that says what changed;
   reanalyzed and new tracks are left off the old map instead of being placed from other
   measurements. Catalog schema version 2.
+- Track comparison: choose two recordings and see every measurement side by side with
+  B − A in its own unit (loudness differences in LU), unavailable values with their
+  reason, MFCC coefficients in full, and the original-space distance with each feature
+  group's share. No difference is shown across algorithm versions, and no distance across
+  feature schemas. Open it from the Observatory, the Atlas inspector, or a two-track
+  Atlas selection.
 - Codec fixtures generated from a synthetic signal (WAV, AIFF, FLAC, ALAC, MP3, Vorbis,
   AAC) with integration tests; lossless codecs are verified bit-exact.
 - Spectrograms: 256 linear bands with bounded memory for any track length, stored as a

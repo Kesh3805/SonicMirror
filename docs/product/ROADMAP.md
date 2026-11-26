@@ -62,5 +62,5 @@ the core is validated. See [PRD §48](PRD.md#48-post-core-roadmap).
 - [x] Atlas canvas: pan, anchored zoom, selection, colour by descriptor, legend, track list
 - [x] Filters and region selection
 - [x] Persisted Atlas snapshots with stale detection
-- [ ] Comparison view
+- [x] Comparison view
 - [ ] Collections
