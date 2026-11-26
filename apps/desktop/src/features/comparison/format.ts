@@ -44,7 +44,8 @@ const DECIMALS: Record<FeatureInfo["format"], number> = {
 function unitFor(info: FeatureInfo, unit: string | null, difference: boolean): string {
   switch (info.format) {
     case "decibels":
-      if (difference) return unit === "LUFS" ? "LU" : "dB";
+      // Loudness and loudness-range differences are both stated in LU.
+      if (difference) return unit === "LUFS" || unit === "LU" ? "LU" : "dB";
       return unit ?? "dB";
     case "frequency":
     case "sampleRate":

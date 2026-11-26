@@ -37,6 +37,8 @@ describe("comparison formatting", () => {
     expect(joinUnit(formatDifference(lufs)!)).toBe(t("+2.5 LU"));
     const rms = m({ featureKey: "rms_dbfs", unit: "dBFS", difference: -3 });
     expect(joinUnit(formatDifference(rms)!)).toBe(t("−3.0 dB"));
+    const lra = m({ featureKey: "loudness_range", unit: "LU", difference: 0.4 });
+    expect(joinUnit(formatDifference(lra)!)).toBe(t("+0.4 LU"));
   });
 
   it("has no scalar difference for vectors or missing values", () => {
