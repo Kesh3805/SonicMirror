@@ -4,22 +4,33 @@ import { parseHex, rampColor, type Rgb } from "../../visualizations/spectrogram/
 import { useThemeKey } from "../../visualizations/useThemeKey";
 import { type Descriptor, type Domain, positionIn } from "./colorBy";
 import {
+  type Point,
   type Size,
   type Viewport,
   RESET,
   ZOOM_STEP,
   fit,
   hitTest,
+  pointsInRect,
+  rectFrom,
   toScreen,
   zoomAt,
 } from "./viewport";
 
 interface AtlasCanvasProps {
+  /** Every placed point; the view is fitted to all of them so filtering never refits. */
   points: readonly AtlasPoint[];
+  /** Ids that pass the current filter; others are neither drawn nor hit. */
+  visible: ReadonlySet<string>;
   descriptor: Descriptor;
   domain: Domain | null;
-  selectedId: string | null;
-  onSelect: (trackId: string | null) => void;
+  selected: ReadonlySet<string>;
+  /** Click: replace the selection, or toggle one id with Ctrl/⌘. `null` clears. */
+  onPick: (trackId: string | null, toggle: boolean) => void;
+  /** Region drag finished: these ids, added to the selection when `add`. */
+  onRegion: (trackIds: string[], add: boolean) => void;
+  regionMode: boolean;
+  onRegionMode: (on: boolean) => void;
   viewport: Viewport;
   onViewport: (v: Viewport) => void;
   onSize: (size: Size) => void;
@@ -45,9 +56,13 @@ const css = ([r, g, b]: Rgb, alpha = 1) => `rgb(${r} ${g} ${b} / ${alpha})`;
 export function AtlasCanvas({
   points,
   descriptor,
+  visible,
   domain,
-  selectedId,
-  onSelect,
+  selected,
+  onPick,
+  onRegion,
+  regionMode,
+  onRegionMode,
   viewport,
   onViewport,
   onSize,
@@ -59,6 +74,7 @@ export function AtlasCanvas({
   const drag = useRef<{ x: number; y: number; panX: number; panY: number; moved: boolean } | null>(
     null,
   );
+  const [region, setRegion] = useState<{ a: Point; b: Point; add: boolean } | null>(null);
   const theme = useThemeKey();
 
   const fitted = useMemo(() => fit(points, size), [points, size]);
@@ -66,7 +82,17 @@ export function AtlasCanvas({
     () => points.map((p) => toScreen(p, fitted, viewport, size)),
     [points, fitted, viewport, size],
   );
-  const ids = useMemo(() => points.map((p) => p.trackId), [points]);
+  // Hit testing only considers points that are drawn.
+  const shown = useMemo(
+    () => points.flatMap((p, i) => (visible.has(p.trackId) ? [i] : [])),
+    [points, visible],
+  );
+  const shownScreen = useMemo(() => shown.map((i) => screen[i]!), [shown, screen]);
+  const shownIds = useMemo(() => shown.map((i) => points[i]!.trackId), [shown, points]);
+  const hit = (at: Point) => {
+    const j = hitTest(shownScreen, shownIds, at);
+    return j >= 0 ? shown[j]! : -1;
+  };
 
   useEffect(() => {
     const el = wrapRef.current;
@@ -129,10 +155,12 @@ export function AtlasCanvas({
       ctx.arc(s.x, s.y, r, 0, Math.PI * 2);
     };
 
-    let selected = -1;
+    const picked: number[] = [];
     for (let i = 0; i < points.length; i++) {
-      if (points[i]!.trackId === selectedId) {
-        selected = i;
+      const id = points[i]!.trackId;
+      if (!visible.has(id)) continue;
+      if (selected.has(id)) {
+        picked.push(i);
         continue;
       }
       if (i === hover) continue;
@@ -157,7 +185,7 @@ export function AtlasCanvas({
     }
 
     // Hover and selection are drawn last so they are never hidden.
-    if (hover >= 0 && hover !== selected) {
+    if (hover >= 0 && !selected.has(points[hover]!.trackId)) {
       dot(hover, 4);
       ctx.fillStyle = outline;
       ctx.fill();
@@ -166,26 +194,27 @@ export function AtlasCanvas({
       ctx.lineWidth = 1;
       ctx.stroke();
     }
-    if (selected >= 0) {
-      dot(selected, 8);
+    for (const i of picked) {
+      dot(i, 8);
       ctx.strokeStyle = accent;
       ctx.lineWidth = 2;
       ctx.stroke();
-      dot(selected, 5);
+      dot(i, 5);
       ctx.fillStyle = paper;
       ctx.fill();
-      dot(selected, 5);
+      dot(i, 5);
       ctx.fillStyle = accent;
       ctx.fill();
     }
-  }, [points, screen, size, descriptor, domain, selectedId, hover, theme]);
+  }, [points, visible, screen, size, descriptor, domain, selected, hover, theme]);
 
   const local = (e: PointerEvent) => {
     const rect = e.currentTarget.getBoundingClientRect();
     return { x: e.clientX - rect.left, y: e.clientY - rect.top };
   };
 
-  const hovered = hover >= 0 ? points[hover] : undefined;
+  const hovered = hover >= 0 && !region ? points[hover] : undefined;
+  const box = region ? rectFrom(region.a, region.b) : null;
   const hoveredValue = hovered ? descriptor.read(hovered) : null;
   const tip = hover >= 0 ? screen[hover] : undefined;
 
@@ -197,14 +226,24 @@ export function AtlasCanvas({
       role="application"
       aria-roledescription="map"
       aria-label="Sonic Atlas map. Arrow keys pan, plus and minus zoom, Home resets the view. Use the track list to reach every track."
+      data-mode={regionMode ? "region" : undefined}
       onPointerDown={(e) => {
         if (e.button !== 0) return;
         e.currentTarget.setPointerCapture(e.pointerId);
         const at = local(e);
+        if (regionMode) {
+          setHover(-1);
+          setRegion({ a: at, b: at, add: e.ctrlKey || e.metaKey || e.shiftKey });
+          return;
+        }
         drag.current = { ...at, panX: viewport.panX, panY: viewport.panY, moved: false };
       }}
       onPointerMove={(e) => {
         const at = local(e);
+        if (region) {
+          setRegion({ ...region, b: at });
+          return;
+        }
         const d = drag.current;
         if (d) {
           const dx = at.x - d.x;
@@ -216,14 +255,24 @@ export function AtlasCanvas({
             return;
           }
         }
-        setHover(hitTest(screen, ids, at));
+        setHover(hit(at));
       }}
       onPointerUp={(e) => {
+        if (region) {
+          const inside = pointsInRect(shownScreen, region.a, local(e)).map((j) => shownIds[j]!);
+          setRegion(null);
+          onRegion(inside, region.add);
+          return;
+        }
         const d = drag.current;
         drag.current = null;
         if (!d || d.moved) return;
-        const i = hitTest(screen, ids, local(e));
-        onSelect(i >= 0 ? points[i]!.trackId : null);
+        const i = hit(local(e));
+        onPick(i >= 0 ? points[i]!.trackId : null, e.ctrlKey || e.metaKey);
+      }}
+      onPointerCancel={() => {
+        drag.current = null;
+        setRegion(null);
       }}
       onPointerLeave={() => {
         if (!drag.current) setHover(-1);
@@ -241,7 +290,11 @@ export function AtlasCanvas({
           "=": () => onViewport(zoomAt(viewport, ZOOM_STEP ** 3, centre, size)),
           "-": () => onViewport(zoomAt(viewport, ZOOM_STEP ** -3, centre, size)),
           Home: () => onViewport(RESET),
-          Escape: () => onSelect(null),
+          Escape: () => {
+            if (region) setRegion(null);
+            else if (regionMode) onRegionMode(false);
+            else onPick(null, false);
+          },
         };
         const action = actions[e.key];
         if (!action) return;
@@ -250,6 +303,18 @@ export function AtlasCanvas({
       }}
     >
       <canvas ref={canvasRef} aria-hidden="true" />
+      {box && (
+        <div
+          className="sm-atlas-region"
+          style={{
+            left: box.left,
+            top: box.top,
+            width: box.right - box.left,
+            height: box.bottom - box.top,
+          }}
+          aria-hidden="true"
+        />
+      )}
       {hovered && tip && (
         <div
           className="sm-atlas-tip"

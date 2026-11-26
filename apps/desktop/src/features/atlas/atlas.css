@@ -427,3 +427,117 @@
   list-style: none;
   font-size: var(--sm-type-num-sm);
 }
+
+/* Filters popover (PDS §7): 320px, anchored under the toolbar button. */
+.sm-atlas-filters-anchor {
+  position: relative;
+}
+
+.sm-atlas-badge {
+  min-width: 18px;
+  padding-inline: var(--sm-space-1);
+  border-radius: var(--sm-radius-small);
+  background: var(--sm-accent);
+  color: var(--sm-accent-ink);
+  font-size: var(--sm-type-num-sm);
+  line-height: 18px;
+  text-align: center;
+}
+
+.sm-atlas-filters {
+  position: absolute;
+  top: calc(100% + var(--sm-space-2));
+  left: 0;
+  z-index: 40;
+  width: min(320px, calc(100vw - 2 * var(--sm-space-4)));
+  display: flex;
+  flex-direction: column;
+  gap: var(--sm-space-3);
+  padding: var(--sm-space-3) var(--sm-space-4) var(--sm-space-4);
+  background: var(--sm-raised);
+  border: var(--sm-line) solid var(--sm-rule);
+  box-shadow: var(--sm-shadow-float);
+  font-size: var(--sm-type-small);
+}
+
+.sm-atlas-filters .sm-button-secondary {
+  align-self: flex-start;
+}
+
+.sm-atlas-filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sm-space-1);
+  color: var(--sm-muted);
+}
+
+.sm-atlas-filter-range {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--sm-space-1) var(--sm-space-2);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.sm-atlas-filter-range legend {
+  padding: 0 0 var(--sm-space-1);
+  color: var(--sm-muted);
+}
+
+.sm-atlas-unit {
+  font-size: var(--sm-type-num-sm);
+}
+
+.sm-atlas-filter-error {
+  grid-column: 1 / -1;
+  color: var(--sm-danger);
+  font-size: var(--sm-type-label);
+}
+
+.sm-atlas-filter-check {
+  display: flex;
+  align-items: center;
+  gap: var(--sm-space-2);
+  min-height: 32px;
+}
+
+/* Region selection: dashed accent border, translucent fill. */
+.sm-atlas-canvas[data-mode="region"] {
+  cursor: crosshair;
+}
+
+.sm-atlas-region {
+  position: absolute;
+  border: var(--sm-line) dashed var(--sm-accent);
+  background: color-mix(in srgb, var(--sm-accent) 10%, transparent);
+  pointer-events: none;
+}
+
+/* Empty, the live region stays in the tree but out of the flow. */
+.sm-atlas-status:empty {
+  position: absolute;
+}
+
+.sm-atlas-status {
+  font-size: var(--sm-type-small);
+  color: var(--sm-muted);
+}
+
+/* No filter matches: the map and legend stay; this sits over the canvas. */
+.sm-atlas-nomatch {
+  position: absolute;
+  top: var(--sm-space-6);
+  left: 50%;
+  z-index: 10;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: var(--sm-space-4);
+  padding: var(--sm-space-3) var(--sm-space-4);
+  background: var(--sm-raised);
+  border: var(--sm-line) solid var(--sm-rule);
+  box-shadow: var(--sm-shadow-float);
+  font-size: var(--sm-type-small);
+}
