@@ -10,6 +10,7 @@ const getAtlas = vi.fn<() => Promise<AtlasSnapshot>>();
 const listTracks = vi.fn<() => Promise<TrackRecord[]>>();
 const getNeighbours = vi.fn();
 const refreshAtlas = vi.fn<() => Promise<AtlasSnapshot>>();
+const createCollection = vi.fn();
 
 vi.mock("../../ipc/client", async (original) => ({
   ...(await original<typeof import("../../ipc/client")>()),
@@ -18,6 +19,7 @@ vi.mock("../../ipc/client", async (original) => ({
     listTracks: () => listTracks(),
     getNeighbours: (id: string, k: number) => getNeighbours(id, k),
     refreshAtlas: () => refreshAtlas(),
+    createCollection: (name: string, ids: string[]) => createCollection(name, ids),
     importFiles: vi.fn(),
   },
 }));
@@ -276,6 +278,29 @@ describe("AtlasPage", () => {
 
     fireEvent.click(within(panel).getByRole("button", { name: /Gamma/ }));
     expect(await screen.findByLabelText("Selected: Gamma")).toBeInTheDocument();
+  });
+
+  it("saves a multi-selection as a new collection", async () => {
+    getAtlas.mockResolvedValue(snapshot({ total: 3, points: placed() }));
+    createCollection.mockResolvedValue({
+      id: "c9",
+      name: "Pair",
+      trackCount: 2,
+      createdAtMs: 0,
+      updatedAtMs: 0,
+    });
+    renderPage();
+    await screen.findByRole("application");
+    fireEvent.click(screen.getByLabelText("Track list"));
+    fireEvent.click(screen.getByRole("button", { name: "Gamma" }));
+    fireEvent.click(screen.getByRole("button", { name: "Alpha" }), { ctrlKey: true });
+
+    fireEvent.click(await screen.findByRole("button", { name: "Save as collection" }));
+    const dialog = screen.getByRole("dialog", { name: "Save as collection" });
+    expect(within(dialog).getByText("2 selected tracks will be added.")).toBeInTheDocument();
+    fireEvent.change(within(dialog).getByLabelText("Name"), { target: { value: "Pair" } });
+    fireEvent.click(within(dialog).getByRole("button", { name: "Create" }));
+    await waitFor(() => expect(createCollection).toHaveBeenCalledWith("Pair", ["a", "ccc"]));
   });
 
   it("toggles region mode and leaves it with Escape", async () => {
