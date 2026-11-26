@@ -9,7 +9,7 @@ committed; each phase ends on its exit criteria, not on a deadline.
 | 01 | Audio vertical slice | One recording imported, decoded, analyzed, stored and displayed with validated numbers | In progress |
 | 02 | Library and runtime | 10,000-track library indexed and analyzed incrementally without blocking the UI | Planned |
 | 03 | Observatory | Waveform, spectrogram, explained measurements and integrated playback | Planned |
-| 04 | Sonic Atlas | Feature vectors, exact neighbors, PCA map, filters, comparison, collections | In progress |
+| 04 | Sonic Atlas | Feature vectors, exact neighbors, PCA map, filters, comparison, collections | Done |
 | 05 | Hardening | Demo collection, all interface states, accessibility, recovery, benchmarks, packaging | Planned |
 | 06 | Core release | A new user installs SonicMirror and completes the primary workflow unaided | Planned |
 
@@ -63,4 +63,4 @@ the core is validated. See [PRD §48](PRD.md#48-post-core-roadmap).
 - [x] Filters and region selection
 - [x] Persisted Atlas snapshots with stale detection
 - [x] Comparison view
-- [ ] Collections
+- [x] Collections

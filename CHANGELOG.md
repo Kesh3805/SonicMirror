@@ -30,6 +30,11 @@ All notable changes to this project are documented here. The format follows
   group's share. No difference is shown across algorithm versions, and no distance across
   feature schemas. Open it from the Observatory, the Atlas inspector, or a two-track
   Atlas selection.
+- Collections: create, rename and delete named collections, add tracks from a searchable
+  multi-select picker, and remove them one at a time. Save an Atlas selection as a
+  collection, or add a track from the Observatory. Collections hold membership only:
+  deleting one, or removing a track from it, never touches the track or its file. Names
+  are 1–100 characters. Catalog schema version 3.
 - Codec fixtures generated from a synthetic signal (WAV, AIFF, FLAC, ALAC, MP3, Vorbis,
   AAC) with integration tests; lossless codecs are verified bit-exact.
 - Spectrograms: 256 linear bands with bounded memory for any track length, stored as a
