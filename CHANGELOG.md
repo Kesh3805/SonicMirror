@@ -19,6 +19,11 @@ All notable changes to this project are documented here. The format follows
   the map, and say how many tracks a missing measurement hides. Drag a rectangle in
   Select region mode or Ctrl+click to build a multi-track selection; selections hidden by
   a filter are dropped with a notice.
+- Saved Atlas snapshots: the map is stored on first use with each point tied to the
+  analysis it came from, and coordinates only change on Refresh map. Imports, deletions,
+  reanalysis or an engine change mark the map stale with a banner that says what changed;
+  reanalyzed and new tracks are left off the old map instead of being placed from other
+  measurements. Catalog schema version 2.
 - Codec fixtures generated from a synthetic signal (WAV, AIFF, FLAC, ALAC, MP3, Vorbis,
   AAC) with integration tests; lossless codecs are verified bit-exact.
 - Spectrograms: 256 linear bands with bounded memory for any track length, stored as a
