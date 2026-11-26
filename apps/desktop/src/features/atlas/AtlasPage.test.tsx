@@ -1,13 +1,15 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { AtlasPoint, AtlasSnapshot, TrackRecord } from "../../ipc/types";
+import { formatDate } from "../../lib/format";
 import { AtlasPage } from "./AtlasPage";
 
 const getAtlas = vi.fn<() => Promise<AtlasSnapshot>>();
 const listTracks = vi.fn<() => Promise<TrackRecord[]>>();
 const getNeighbours = vi.fn();
+const refreshAtlas = vi.fn<() => Promise<AtlasSnapshot>>();
 
 vi.mock("../../ipc/client", async (original) => ({
   ...(await original<typeof import("../../ipc/client")>()),
@@ -15,6 +17,7 @@ vi.mock("../../ipc/client", async (original) => ({
     getAtlas: () => getAtlas(),
     listTracks: () => listTracks(),
     getNeighbours: (id: string, k: number) => getNeighbours(id, k),
+    refreshAtlas: () => refreshAtlas(),
     importFiles: vi.fn(),
   },
 }));
@@ -42,6 +45,10 @@ const point = (id: string, title: string, tempoBpm: number | null): AtlasPoint =
 const snapshot = (over: Partial<AtlasSnapshot>): AtlasSnapshot => ({
   status: "ready",
   reason: null,
+  snapshotId: "s1",
+  createdAtMs: Date.UTC(2026, 10, 23, 14, 2),
+  stale: false,
+  changes: { added: 0, changed: 0, removed: 0 },
   vectorVersion: "vector/1.0.0",
   projectionVersion: "pca/1.0.0",
   minTracks: 3,
@@ -69,6 +76,68 @@ beforeEach(() => {
 });
 
 describe("AtlasPage", () => {
+  const placed = () => [point("a", "Alpha", 120), point("bb", "Beta", null), point("ccc", "Gamma", 90)];
+
+  it("shows when the map was made and no banner while it is current", async () => {
+    getAtlas.mockResolvedValue(snapshot({ total: 3, points: placed() }));
+    renderPage();
+    expect(await screen.findByText(/mapped/)).toBeInTheDocument();
+    const when = formatDate(Date.UTC(2026, 10, 23, 14, 2), { time: true });
+    expect(screen.getByText(when, { selector: "time" })).toBeInTheDocument();
+    expect(screen.queryByText("New or changed analysis available")).toBeNull();
+  });
+
+  it("keeps a stale map, says what changed and refreshes on request", async () => {
+    getAtlas.mockResolvedValue(
+      snapshot({
+        total: 5,
+        points: placed(),
+        stale: true,
+        changes: { added: 1, changed: 1, removed: 0 },
+        excluded: [
+          { trackId: "d", title: "Delta", reason: "added since this map" },
+          { trackId: "e", title: "Echo", reason: "reanalyzed since this map" },
+        ],
+      }),
+    );
+    refreshAtlas.mockResolvedValue(
+      snapshot({ snapshotId: "s2", total: 5, points: [...placed(), point("dddd", "Delta", 100)] }),
+    );
+    renderPage();
+
+    expect(await screen.findByText("New or changed analysis available")).toBeInTheDocument();
+    expect(
+      screen.getByText(/Tracks: 1 added and 1 reanalyzed since this map was made\./),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("application")).toBeInTheDocument();
+
+    const banner = screen.getByRole("status", { name: "Map is out of date" });
+    fireEvent.click(within(banner).getByRole("button", { name: "Refresh map" }));
+    await waitFor(() => expect(refreshAtlas).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(screen.queryByText("New or changed analysis available")).toBeNull());
+    expect(screen.getByText(/4/, { selector: ".sm-atlas-coverage .sm-data" })).toBeInTheDocument();
+  });
+
+  it("links a neighbour that is not on this map to its Observatory page", async () => {
+    getAtlas.mockResolvedValue(snapshot({ total: 4, points: placed(), stale: true }));
+    getNeighbours.mockResolvedValue([
+      {
+        trackId: "zz",
+        title: "Zulu",
+        artist: null,
+        distance: 0.3,
+        contributions: { Timbre: 1 },
+      },
+    ]);
+    renderPage();
+    await screen.findByRole("application");
+    fireEvent.click(screen.getByLabelText("Track list"));
+    fireEvent.click(screen.getByRole("button", { name: "Alpha" }));
+    const link = await screen.findByRole("link", { name: /Zulu/ });
+    expect(link).toHaveAttribute("href", "/tracks/zz");
+    expect(within(link).getByText(/not on this map/)).toBeInTheDocument();
+  });
+
   it("asks for music when the catalog is empty, with no map", async () => {
     getAtlas.mockResolvedValue(
       snapshot({ status: "unavailable", reason: "too_few_tracks", total: 0 }),
