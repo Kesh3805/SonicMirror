@@ -14,6 +14,8 @@ export const NEIGHBOUR_COUNT = 5;
 interface AtlasInspectorProps {
   point: AtlasPoint;
   descriptor: Descriptor;
+  /** Tracks drawn on this map; neighbours off the map open in the Observatory instead. */
+  onMap: ReadonlySet<string>;
   onSelect: (trackId: string) => void;
   onClose: () => void;
 }
@@ -22,7 +24,13 @@ interface AtlasInspectorProps {
  * The selected track and its nearest neighbours, measured in the original
  * normalized feature space rather than read off the map.
  */
-export function AtlasInspector({ point, descriptor, onSelect, onClose }: AtlasInspectorProps) {
+export function AtlasInspector({
+  point,
+  descriptor,
+  onMap,
+  onSelect,
+  onClose,
+}: AtlasInspectorProps) {
   const neighbours = useQuery({
     queryKey: ["atlas-neighbours", point.trackId, NEIGHBOUR_COUNT],
     queryFn: () => ipc.getNeighbours(point.trackId, NEIGHBOUR_COUNT),
@@ -62,7 +70,7 @@ export function AtlasInspector({ point, descriptor, onSelect, onClose }: AtlasIn
         {neighbours.isError && (
           <ErrorNotice error={neighbours.error} onRetry={() => void neighbours.refetch()} />
         )}
-        {neighbours.data && <NeighbourList items={neighbours.data} onSelect={onSelect} />}
+        {neighbours.data && <NeighbourList items={neighbours.data} onMap={onMap} onSelect={onSelect} />}
         <p className="sm-atlas-note">
           Distance is weighted Euclidean over normalized timbre, spectral balance, texture and
           dynamics, each group weighted equally. Smaller is more similar; it is not a percentage.
@@ -74,9 +82,11 @@ export function AtlasInspector({ point, descriptor, onSelect, onClose }: AtlasIn
 
 function NeighbourList({
   items,
+  onMap,
   onSelect,
 }: {
   items: AtlasNeighbour[];
+  onMap: ReadonlySet<string>;
   onSelect: (trackId: string) => void;
 }) {
   if (items.length === 0) return <p className="sm-atlas-note">No other tracks are on the map.</p>;
@@ -84,18 +94,26 @@ function NeighbourList({
     <ol className="sm-atlas-neighbour-list">
       {items.map((n) => {
         const group = dominantGroup(n.contributions);
+        const meta = group
+          ? `differs most in ${group.label.toLowerCase()}`
+          : "identical measurements";
         return (
           <li key={n.trackId} className="sm-atlas-neighbour">
-            <button
-              type="button"
-              className="sm-atlas-neighbour-button"
-              onClick={() => onSelect(n.trackId)}
-            >
-              <span className="sm-atlas-neighbour-title">{n.title}</span>
-              <span className="sm-atlas-neighbour-meta">
-                {group ? `differs most in ${group.label.toLowerCase()}` : "identical measurements"}
-              </span>
-            </button>
+            {onMap.has(n.trackId) ? (
+              <button
+                type="button"
+                className="sm-atlas-neighbour-button"
+                onClick={() => onSelect(n.trackId)}
+              >
+                <span className="sm-atlas-neighbour-title">{n.title}</span>
+                <span className="sm-atlas-neighbour-meta">{meta}</span>
+              </button>
+            ) : (
+              <Link className="sm-atlas-neighbour-button" to={`/tracks/${n.trackId}`}>
+                <span className="sm-atlas-neighbour-title">{n.title}</span>
+                <span className="sm-atlas-neighbour-meta">{meta} · not on this map</span>
+              </Link>
+            )}
             <span className="sm-data sm-atlas-neighbour-distance" aria-label={`distance ${formatDistance(n.distance)}`}>
               {formatDistance(n.distance)}
             </span>
