@@ -42,6 +42,8 @@ pub enum RuntimeError {
     ArtifactUnavailable,
     #[error("this track is not on the Atlas")]
     NotOnMap,
+    #[error("a track cannot be compared with itself")]
+    SameTrack,
 }
 
 impl RuntimeError {
@@ -55,6 +57,7 @@ impl RuntimeError {
             Self::NotAnalyzed => "analysis.not_analyzed",
             Self::ArtifactUnavailable => "analysis.artifact_unavailable",
             Self::NotOnMap => "atlas.not_on_map",
+            Self::SameTrack => "comparison.same_track",
         }
     }
 
@@ -381,6 +384,38 @@ impl LibraryService {
             .ok_or(CatalogError::NotFound)?;
         drop(catalog);
         Ok(crate::atlas::from_saved(&saved, entries, ids, digest).unwrap_or(map))
+    }
+
+    /// Compare two tracks: raw measurements, `B − A` differences and the
+    /// original-space distance by feature group.
+    ///
+    /// # Errors
+    ///
+    /// Fails if the ids are equal, either track does not exist, or on a
+    /// catalog error.
+    pub fn compare(
+        &self,
+        left_id: &str,
+        right_id: &str,
+    ) -> Result<crate::comparison::TrackComparison> {
+        if left_id == right_id {
+            return Err(RuntimeError::SameTrack);
+        }
+        let (left, left_analysis, right, right_analysis) = {
+            let catalog = self.catalog();
+            (
+                catalog.track(left_id)?,
+                catalog.analysis_for_track(left_id)?,
+                catalog.track(right_id)?,
+                catalog.analysis_for_track(right_id)?,
+            )
+        };
+        let space = self.catalog_features()?;
+        Ok(crate::comparison::compare(
+            (&left, left_analysis.as_ref()),
+            (&right, right_analysis.as_ref()),
+            &space,
+        ))
     }
 
     /// Nearest tracks to `track_id` in the original feature space.
