@@ -48,10 +48,20 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             Some((p.track_id.clone(), serde_json::to_value(n).ok()?))
         })
         .collect();
+    // Every ordered pair, keyed "left|right", as the Compare page requests them.
+    let ids: Vec<String> = library.tracks()?.into_iter().map(|t| t.id).collect();
+    let mut comparisons = serde_json::Map::new();
+    for left in &ids {
+        for right in ids.iter().filter(|r| *r != left) {
+            let c = library.compare(left, right)?;
+            comparisons.insert(format!("{left}|{right}"), serde_json::to_value(c)?);
+        }
+    }
     let output = serde_json::json!({
         "tracks": results,
         "atlas": atlas,
         "neighbours": neighbours,
+        "comparisons": comparisons,
     });
     println!("{}", serde_json::to_string_pretty(&output)?);
     Ok(())
