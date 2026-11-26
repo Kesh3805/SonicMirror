@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { AtlasPoint, AtlasSnapshot, TrackRecord } from "../../ipc/types";
@@ -138,6 +138,87 @@ describe("AtlasPage", () => {
     expect(screen.getByText("differs most in timbre")).toBeInTheDocument();
     expect(getNeighbours).toHaveBeenCalledWith("a", 5);
     expect(screen.queryByText(/%/)).toBeNull();
+  });
+
+  const three = () =>
+    snapshot({
+      total: 3,
+      points: [point("a", "Alpha", 120), point("bb", "Beta", null), point("ccc", "Gamma", 90)],
+    });
+
+  it("filters by tempo, explains unmeasured tracks and drops hidden selections", async () => {
+    getAtlas.mockResolvedValue(three());
+    getNeighbours.mockResolvedValue([]);
+    renderPage();
+    await screen.findByRole("application");
+
+    fireEvent.click(screen.getByLabelText("Track list"));
+    fireEvent.click(screen.getByRole("button", { name: "Gamma" }));
+    expect(await screen.findByLabelText("Selected: Gamma")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /Filters/ }));
+    fireEvent.change(screen.getByLabelText("Tempo (estimated) minimum, BPM"), {
+      target: { value: "100" },
+    });
+
+    expect(screen.getByText(/shown by filters/)).toBeInTheDocument();
+    expect(screen.getByText(/hidden for a missing/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Alpha" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Beta" })).toBeNull();
+    expect(screen.queryByLabelText("Selected: Gamma")).toBeNull();
+    expect(screen.getByRole("status", { name: "Atlas status" })).toHaveTextContent(
+      "1 selected track hidden by the filter was deselected",
+    );
+  });
+
+  it("marks an unparseable bound and keeps the map when nothing matches", async () => {
+    getAtlas.mockResolvedValue(three());
+    renderPage();
+    await screen.findByRole("application");
+
+    fireEvent.click(screen.getByRole("button", { name: /Filters/ }));
+    const max = screen.getByLabelText("Tempo (estimated) maximum, BPM");
+    fireEvent.change(max, { target: { value: "fast" } });
+    expect(max).toHaveAttribute("aria-invalid", "true");
+    expect(screen.getByText("Enter a number")).toBeInTheDocument();
+
+    fireEvent.change(screen.getByRole("searchbox"), { target: { value: "zzz" } });
+    expect(screen.getByText("No tracks match these filters.")).toBeInTheDocument();
+    expect(screen.getByRole("application")).toBeInTheDocument();
+    expect(screen.getByText("Map proximity is approximate")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Clear filters" }));
+    expect(screen.queryByText("No tracks match these filters.")).toBeNull();
+  });
+
+  it("builds a multi-selection with Ctrl and narrows it from the list", async () => {
+    getAtlas.mockResolvedValue(three());
+    getNeighbours.mockResolvedValue([]);
+    renderPage();
+    await screen.findByRole("application");
+
+    fireEvent.click(screen.getByLabelText("Track list"));
+    fireEvent.click(screen.getByRole("button", { name: "Alpha" }));
+    fireEvent.click(screen.getByRole("button", { name: "Gamma" }), { ctrlKey: true });
+
+    const panel = await screen.findByLabelText("2 tracks selected");
+    expect(panel).toBeInTheDocument();
+    expect(screen.getByRole("status", { name: "Atlas status" })).toHaveTextContent("2 tracks selected");
+
+    fireEvent.click(within(panel).getByRole("button", { name: /Gamma/ }));
+    expect(await screen.findByLabelText("Selected: Gamma")).toBeInTheDocument();
+  });
+
+  it("toggles region mode and leaves it with Escape", async () => {
+    getAtlas.mockResolvedValue(three());
+    renderPage();
+    const map = await screen.findByRole("application");
+    const toggle = screen.getByRole("button", { name: "Select region" });
+    fireEvent.click(toggle);
+    expect(toggle).toHaveAttribute("aria-pressed", "true");
+    expect(map).toHaveAttribute("data-mode", "region");
+    fireEvent.keyDown(map, { key: "Escape" });
+    expect(toggle).toHaveAttribute("aria-pressed", "false");
   });
 
   it("offers only descriptors that were measured and counts unknowns", async () => {
