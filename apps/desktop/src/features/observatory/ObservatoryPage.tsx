@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useParams } from "react-router";
+import { Link, useParams } from "react-router";
 import { EmptyState } from "../../components/EmptyState";
 import { ErrorNotice } from "../../components/ErrorNotice";
 import { Skeleton } from "../../components/Skeleton";
@@ -96,6 +96,11 @@ export function ObservatoryPage() {
         <p className="sm-kicker-data">{kickerFor(t)}</p>
         <h1 className="sm-obs-title">{t.title}</h1>
         <Credits track={t} />
+        <div className="sm-obs-actions">
+          <Link className="sm-button sm-button-secondary" to={`/compare?a=${t.id}`}>
+            Compare
+          </Link>
+        </div>
       </header>
 
       <div className="sm-obs-lead">

@@ -1,4 +1,5 @@
 import { X } from "lucide-react";
+import { Link } from "react-router";
 import type { AtlasPoint } from "../../ipc/types";
 import { formatCount } from "../../lib/format";
 import { type Descriptor, domainOf } from "./colorBy";
@@ -68,9 +69,19 @@ export function AtlasSelection({ points, descriptor: d, onFocus, onClose }: Atla
           </li>
         ))}
       </ul>
-      <button type="button" className="sm-button sm-button-secondary" onClick={onClose}>
-        Clear selection
-      </button>
+      <div className="sm-atlas-actions">
+        {sorted.length === 2 && (
+          <Link
+            className="sm-button sm-button-primary"
+            to={`/compare?a=${sorted[0]!.trackId}&b=${sorted[1]!.trackId}`}
+          >
+            Compare these two
+          </Link>
+        )}
+        <button type="button" className="sm-button sm-button-secondary" onClick={onClose}>
+          Clear selection
+        </button>
+      </div>
     </aside>
   );
 }

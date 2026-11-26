@@ -9,6 +9,13 @@
   min-width: 0;
 }
 
+.sm-obs-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sm-space-2);
+  margin-top: var(--sm-space-2);
+}
+
 .sm-obs-title {
   font-family: var(--sm-font-display);
   font-size: var(--sm-type-page);

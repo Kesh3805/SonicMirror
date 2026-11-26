@@ -572,3 +572,9 @@
 a.sm-atlas-neighbour-button {
   text-decoration: none;
 }
+
+.sm-atlas-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sm-space-2);
+}

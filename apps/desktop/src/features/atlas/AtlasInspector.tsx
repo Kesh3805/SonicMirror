@@ -58,9 +58,14 @@ export function AtlasInspector({
           <span className="sm-data">{value === null ? "not measured" : descriptor.format(value)}</span>
         </p>
       )}
-      <Link className="sm-button sm-button-secondary" to={`/tracks/${point.trackId}`}>
-        Open in Observatory
-      </Link>
+      <div className="sm-atlas-actions">
+        <Link className="sm-button sm-button-secondary" to={`/tracks/${point.trackId}`}>
+          Open in Observatory
+        </Link>
+        <Link className="sm-button sm-button-quiet" to={`/compare?a=${point.trackId}`}>
+          Compare
+        </Link>
+      </div>
 
       <section className="sm-atlas-neighbours" aria-labelledby="atlas-neighbours-title">
         <h3 id="atlas-neighbours-title" className="sm-atlas-section-title">
